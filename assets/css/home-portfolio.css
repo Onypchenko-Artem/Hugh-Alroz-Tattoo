@@ -1,0 +1,25 @@
+.hat-portfolio__grid {
+	display: grid;
+	grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+	gap: var(--hat-gap);
+	margin: 0;
+	padding: 0;
+	list-style: none;
+}
+
+.hat-portfolio__item {
+	display: flex;
+	flex-direction: column;
+	gap: 0.5rem;
+}
+
+.hat-portfolio__placeholder {
+	aspect-ratio: 1;
+	background: rgba(31, 31, 31, 0.08);
+	border-radius: 8px;
+}
+
+.hat-portfolio__label {
+	font-size: 0.875rem;
+	color: var(--hat-color-text);
+}

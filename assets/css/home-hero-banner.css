@@ -1,0 +1,181 @@
+.hat-hero {
+	position: relative;
+	display: flex;
+	flex-direction: column;
+	min-height: 100vh;
+	min-height: 100dvh;
+	padding-top: clamp(5rem, 14vh, 7.5rem);
+	color: #fff;
+	--hat-hero-bg-image: none;
+}
+
+.hat-hero__media {
+	position: absolute;
+	inset: 0;
+	z-index: 0;
+	background-color: #000;
+	background-image: var(--hat-hero-bg-image);
+	background-size: cover;
+	background-position: center;
+	filter: grayscale(100%);
+}
+
+.hat-hero__media::after {
+	content: "";
+	position: absolute;
+	inset: 0;
+	background: linear-gradient(
+		180deg,
+		rgba(0, 0, 0, 0.45) 0%,
+		rgba(0, 0, 0, 0.35) 40%,
+		rgba(0, 0, 0, 0.6) 100%
+	);
+}
+
+.hat-hero__body {
+	position: relative;
+	z-index: 1;
+	flex: 1;
+	display: flex;
+	flex-direction: column;
+	justify-content: center;
+	width: 100%;
+	padding-bottom: clamp(1.5rem, 4vh, 3rem);
+}
+
+.hat-hero__heading-block {
+	margin: 0 0 clamp(1.75rem, 4vh, 2.75rem);
+	font-weight: 700;
+	text-transform: uppercase;
+	line-height: 0.92;
+	letter-spacing: 0.02em;
+	color: #fff;
+}
+
+.hat-hero__heading-top {
+	display: flex;
+	flex-wrap: wrap;
+	align-items: flex-end;
+	justify-content: space-between;
+	gap: 1rem 2rem;
+}
+
+.hat-hero__heading-bottom {
+	display: block;
+	margin-top: 0.15em;
+}
+
+.hat-hero__name-line {
+	display: inline-block;
+	font-size: clamp(3rem, 12.5vw, 9.5rem);
+}
+
+.hat-hero__name-line--alroz {
+	margin-left: clamp(1rem, 16vw, 12rem);
+}
+
+.hat-hero__studio-tag {
+	display: block;
+	max-width: 11rem;
+	font-size: clamp(0.625rem, 1.4vw, 0.75rem);
+	font-weight: 600;
+	line-height: 1.35;
+	letter-spacing: 0.16em;
+	text-transform: uppercase;
+	text-align: right;
+	color: rgba(255, 255, 255, 0.95);
+}
+
+.hat-hero__lede {
+	margin: 0 auto clamp(1.5rem, 3vh, 2rem);
+	max-width: 38rem;
+	text-align: center;
+	font-size: clamp(0.8125rem, 1.35vw, 0.9375rem);
+	line-height: 1.6;
+	letter-spacing: 0.03em;
+	color: rgba(255, 255, 255, 0.92);
+}
+
+.hat-hero__cta {
+	display: inline-flex;
+	align-items: stretch;
+	align-self: center;
+	margin: 0 auto;
+	background: #fff;
+	color: #000;
+	text-decoration: none;
+	text-transform: uppercase;
+	font-weight: 700;
+	font-size: clamp(0.6875rem, 1.1vw, 0.8125rem);
+	letter-spacing: 0.1em;
+}
+
+.hat-hero__cta:hover,
+.hat-hero__cta:focus {
+	opacity: 0.94;
+}
+
+.hat-hero__cta-label {
+	display: flex;
+	align-items: center;
+	padding: 1rem 1.25rem 1rem 1.5rem;
+}
+
+.hat-hero__cta-arrow {
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	min-width: 3.25rem;
+	background: #000;
+	color: #fff;
+	font-size: 1.2rem;
+	line-height: 1;
+}
+
+.hat-hero__strip {
+	position: relative;
+	z-index: 1;
+	margin-top: auto;
+	padding: 1rem 0 1.5rem;
+	font-size: 0.6875rem;
+	font-weight: 600;
+	letter-spacing: 0.16em;
+	text-transform: uppercase;
+	color: rgba(255, 255, 255, 0.85);
+}
+
+.hat-hero__strip-inner {
+	display: grid;
+	grid-template-columns: 1fr auto 1fr;
+	align-items: center;
+	gap: 1rem;
+}
+
+.hat-hero__strip-item:first-child {
+	justify-self: start;
+}
+
+.hat-hero__strip-item:last-child {
+	justify-self: end;
+}
+
+.hat-hero__strip-item--center {
+	justify-self: center;
+	text-align: center;
+}
+
+@media (max-width: 640px) {
+	.hat-hero__heading-top {
+		flex-direction: column;
+		align-items: flex-start;
+	}
+
+	.hat-hero__studio-tag {
+		text-align: left;
+		max-width: none;
+	}
+
+	.hat-hero__name-line--alroz {
+		margin-left: clamp(2rem, 12vw, 4rem);
+	}
+}

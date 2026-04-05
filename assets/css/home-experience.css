@@ -1,0 +1,50 @@
+.hat-experience__inner {
+	display: grid;
+	gap: calc(var(--hat-gap) * 1.5);
+	align-items: start;
+}
+
+@media (min-width: 768px) {
+	.hat-experience__inner {
+		grid-template-columns: 1fr 1fr;
+	}
+}
+
+.hat-experience__title {
+	text-align: left;
+}
+
+.hat-experience__text {
+	margin: 0;
+	max-width: 36rem;
+}
+
+.hat-experience__stats {
+	display: flex;
+	flex-wrap: wrap;
+	gap: var(--hat-gap);
+	margin: 0;
+	padding: 0;
+	list-style: none;
+	justify-content: flex-start;
+}
+
+.hat-experience__stat {
+	display: flex;
+	flex-direction: column;
+	align-items: flex-start;
+	min-width: 5rem;
+	padding: 1rem 1.25rem;
+	background: var(--hat-color-muted);
+	border-radius: 8px;
+}
+
+.hat-experience__stat-value {
+	font-size: 1.5rem;
+	color: var(--hat-color-primary);
+}
+
+.hat-experience__stat-label {
+	font-size: 0.85rem;
+	opacity: 0.85;
+}

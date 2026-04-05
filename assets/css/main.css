@@ -1,0 +1,141 @@
+:root {
+	--hat-font-family: "Inter Tight", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+	--hat-color-primary: #1f1f1f;
+	--hat-color-accent: #b58b4b;
+	--hat-color-bg: #ffffff;
+	--hat-color-muted: #f5f2ed;
+	--hat-color-text: #303030;
+	--hat-container: 1920px;
+	--hat-gap: 24px;
+	--hat-gutter-x: 70px;
+}
+
+*,
+*::before,
+*::after {
+	box-sizing: border-box;
+}
+
+body {
+	margin: 0;
+	font-family: var(--hat-font-family);
+	color: var(--hat-color-text);
+	background: var(--hat-color-bg);
+	line-height: 1.6;
+}
+
+a {
+	color: var(--hat-color-accent);
+}
+
+img {
+	max-width: 100%;
+	height: auto;
+	display: block;
+}
+
+.hat-container {
+	max-width: var(--hat-container);
+	margin: 0 auto;
+	padding: 0 var(--hat-gutter-x);
+}
+
+.hat-section {
+	padding: 56px 0;
+}
+
+.hat-section--alt {
+	background: var(--hat-color-muted);
+}
+
+.hat-section__title {
+	margin: 0 0 24px;
+	text-align: center;
+	color: var(--hat-color-primary);
+}
+
+.hat-header,
+.hat-footer {
+	background: var(--hat-color-primary);
+	color: #fff;
+}
+
+.hat-header a,
+.hat-footer a {
+	color: #fff;
+	text-decoration: none;
+}
+
+.hat-header__inner,
+.hat-footer__inner {
+	display: flex;
+	gap: var(--hat-gap);
+	align-items: center;
+	justify-content: space-between;
+	padding-block: 20px;
+	flex-wrap: wrap;
+}
+
+.hat-header__nav ul,
+.hat-footer__nav ul {
+	margin: 0;
+	padding: 0;
+	list-style: none;
+	display: flex;
+	gap: 16px;
+	flex-wrap: wrap;
+}
+
+.hat-footer__copy {
+	opacity: 0.8;
+	font-size: 14px;
+}
+
+/* Front page: header over full-bleed hero */
+.hat-header--hero {
+	position: absolute;
+	top: 0;
+	left: 0;
+	right: 0;
+	z-index: 30;
+	background: transparent;
+}
+
+.hat-header--hero .hat-header__inner {
+	padding: 29px 70px;
+}
+
+.hat-header--hero .hat-header__logo .custom-logo-link img {
+	max-height: 48px;
+	width: auto;
+}
+
+.hat-header__brand {
+	display: inline-flex;
+	align-items: center;
+	gap: 0.35rem;
+	color: inherit;
+	text-decoration: none;
+	text-transform: uppercase;
+	letter-spacing: 0.06em;
+}
+
+.hat-header__brand-mark {
+	font-size: 2.25rem;
+	line-height: 1;
+	font-weight: 700;
+}
+
+.hat-header__brand-text {
+	display: flex;
+	flex-direction: column;
+	line-height: 1.05;
+	font-size: 0.625rem;
+	font-weight: 600;
+}
+
+.hat-header--hero .hat-header__nav {
+	font-size: 0.75rem;
+	letter-spacing: 0.12em;
+	text-transform: uppercase;
+}
