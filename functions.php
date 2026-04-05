@@ -73,7 +73,7 @@ function hughalroztatoo_assets() {
 
 	wp_enqueue_style(
 		'hughalroztatoo-font-inter-tight',
-		'https://fonts.googleapis.com/css2?family=Inter+Tight:ital,wght@0,400..700;1,400..700&display=swap',
+		'https://fonts.googleapis.com/css2?family=Inter+Tight:ital,wght@0,300..700;1,300..700&display=swap',
 		array(),
 		null
 	);

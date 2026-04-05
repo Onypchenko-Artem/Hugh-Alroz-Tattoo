@@ -43,7 +43,7 @@ $hat_is_hero = is_front_page();
 					'menu_class'     => '',
 					'fallback_cb'    => function () use ( $hat_is_hero ) {
 						if ( $hat_is_hero ) {
-							echo '<ul><li><a href="#">' . esc_html__( '+ MENU', 'hughalroztatoo' ) . '</a></li></ul>';
+							echo '<ul><li><a href="#"><span class="hat-header__nav-plus" aria-hidden="true">+</span> ' . esc_html__( 'MENU', 'hughalroztatoo' ) . '</a></li></ul>';
 						} else {
 							echo '<ul><li><a href="' . esc_url( home_url( '/' ) ) . '">' . esc_html__( 'Home', 'hughalroztatoo' ) . '</a></li></ul>';
 						}
