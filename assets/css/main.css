@@ -6,8 +6,8 @@
 	--hat-color-muted: #f5f2ed;
 	--hat-color-text: #303030;
 	--hat-container: 1920px;
-	--hat-gap: 24px;
-	--hat-gutter-x: 70px;
+	--hat-gap: clamp(16px, 1.25vw, 24px);
+	--hat-gutter-x: clamp(47px, 3.646vw, 70px);
 }
 
 *,
@@ -41,7 +41,7 @@ img {
 }
 
 .hat-section {
-	padding: 56px 0;
+	padding: clamp(37px, 2.917vw, 56px) 0;
 }
 
 .hat-section--alt {
@@ -49,7 +49,7 @@ img {
 }
 
 .hat-section__title {
-	margin: 0 0 24px;
+	margin: 0 0 clamp(16px, 1.25vw, 24px);
 	text-align: center;
 	color: var(--hat-color-primary);
 }
@@ -72,7 +72,7 @@ img {
 	gap: var(--hat-gap);
 	align-items: center;
 	justify-content: space-between;
-	padding-block: 20px;
+	padding-block: clamp(13px, 1.042vw, 20px);
 	flex-wrap: wrap;
 }
 
@@ -82,13 +82,13 @@ img {
 	padding: 0;
 	list-style: none;
 	display: flex;
-	gap: 16px;
+	gap: clamp(11px, 0.833vw, 16px);
 	flex-wrap: wrap;
 }
 
 .hat-footer__copy {
 	opacity: 0.8;
-	font-size: 14px;
+	font-size: clamp(12px, 0.729vw, 14px);
 }
 
 /* Front page: header over full-bleed hero */
@@ -102,11 +102,11 @@ img {
 }
 
 .hat-header--hero .hat-header__inner {
-	padding: 29px 70px;
+	padding: clamp(19px, 1.51vw, 29px) clamp(47px, 3.646vw, 70px);
 }
 
 .hat-header--hero .hat-header__logo .custom-logo-link img {
-	max-height: 48px;
+	max-height: clamp(32px, 2.5vw, 48px);
 	width: auto;
 }
 
@@ -136,8 +136,8 @@ img {
 
 .hat-header--hero .hat-header__nav {
 	font-weight: 400;
-	font-size: 20px;
-	line-height: 24px;
+	font-size: clamp(13px, 1.042vw, 20px);
+	line-height: clamp(16px, 1.25vw, 24px);
 	letter-spacing: 0.01em;
 	text-transform: uppercase;
 	color: #FFFFFF;
@@ -145,10 +145,10 @@ img {
 
 .hat-header__nav-plus {
 	display: inline-block;
-	width: 24px;
-	height: 24px;
-	font-size: 24px;
-	line-height: 24px;
+	width: clamp(16px, 1.25vw, 24px);
+	height: clamp(16px, 1.25vw, 24px);
+	font-size: clamp(16px, 1.25vw, 24px);
+	line-height: clamp(16px, 1.25vw, 24px);
 	text-align: center;
 }
 

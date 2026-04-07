@@ -102,6 +102,7 @@ function hughalroztatoo_assets() {
 	if ( is_front_page() ) {
 		$home_styles = array(
 			'hero-banner' => 'home-hero-banner.css',
+			'pricing'     => 'home-pricing.css',
 			'services'    => 'home-services.css',
 			'portfolio'   => 'home-portfolio.css',
 			'experience'  => 'home-experience.css',
