@@ -1,31 +1,195 @@
+.hat-idea {
+	background: #000;
+	color: #fff;
+	min-height: 100vh;
+	min-height: 100dvh;
+	padding: clamp(40px, 3.125vw, 60px) 0 clamp(35px, 2.813vw, 54px);
+}
+
 .hat-idea__inner {
-	text-align: center;
-	max-width: 40rem;
-	margin: 0 auto;
+	position: relative;
+	display: flex;
+	flex-direction: column;
+	min-height: calc(100vh - clamp(75px, 5.938vw, 114px));
+	min-height: calc(100dvh - clamp(75px, 5.938vw, 114px));
+}
+
+.hat-idea__eyebrow {
+	position: absolute;
+	top: clamp(16px, 1.25vw, 24px);
+	left: var(--hat-gutter-x);
+	display: inline-flex;
+	align-items: center;
+	gap: 16px;
+	margin: 0;
+	font-size: 18px;
+	letter-spacing: 0.14em;
+	text-transform: uppercase;
+}
+
+.hat-idea__title-row {
+	position: relative;
+	display: flex;
+	justify-content: center;
+	width: max-content;
+	margin: 0 auto 0;
 }
 
 .hat-idea__title {
-	margin: 0 0 0.75rem;
-	font-size: clamp(1.5rem, 3vw, 2rem);
-	color: var(--hat-color-primary);
+	margin: 0;
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+	font-weight: 500;
+	font-size: 172px;
+	line-height: 1;
+	letter-spacing: -0.03em;
+	text-transform: uppercase;
+	text-align: center;
+	background: linear-gradient(115deg, #FFFFFF 0%, #CDCDCD 70%);
+	-webkit-background-clip: text;
+	-webkit-text-fill-color: transparent;
+	background-clip: text;
+	text-fill-color: transparent;
+}
+
+.hat-idea__title-line {
+	display: block;
+}
+
+.hat-idea__ornament {
+	position: absolute;
+	left: calc(100% + 65px);
+	transform: translateY(100%);
+	width: 98px;
+	height: 55px;
+}
+
+.hat-idea__ornament img {
+	width: 100%;
+	height: 100%;
+}
+
+.hat-idea__action-group {
+	display: flex;
+	flex-direction: column;
+	align-items: flex-start;
+	margin: 105px auto 0;
 }
 
 .hat-idea__text {
-	margin: 0 0 1.5rem;
-	opacity: 0.9;
+	margin: 0 0 80px;
+	max-width: clamp(250px, 19.167vw, 368px);
+	text-align: justify;
+	font-weight: 300;
+	font-size: clamp(13px, 1.042vw, 20px);
+	line-height: clamp(16px, 1.25vw, 24px);
+	letter-spacing: 0.02em;
+	text-indent: clamp(48px, 3.646vw, 70px);
 }
 
 .hat-idea__cta {
-	display: inline-block;
-	padding: 0.65rem 1.35rem;
-	background: var(--hat-color-primary);
-	color: #fff;
-	font-weight: 600;
+	display: inline-flex;
+	align-items: stretch;
+	background: #fff;
+	color: #000;
 	text-decoration: none;
-	border-radius: 4px;
+	font-weight: 600;
+	font-size: clamp(16px, 1.25vw, 24px);
+	line-height: clamp(19px, 1.51vw, 29px);
+	letter-spacing: 0.01em;
+	text-transform: uppercase;
+	padding: clamp(9px, 0.729vw, 14px) clamp(12px, 0.938vw, 18px) clamp(9px, 0.729vw, 14px) clamp(23px, 1.823vw, 35px);
+	gap: clamp(17px, 1.354vw, 26px);
 }
 
-.hat-idea__cta:hover,
-.hat-idea__cta:focus {
-	opacity: 0.9;
+.hat-idea__cta-label {
+	display: flex;
+	align-items: center;
+}
+
+.hat-idea__cta-arrow {
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	width: clamp(38px, 2.969vw, 57px);
+	height: clamp(38px, 2.969vw, 57px);
+	background: #000;
+}
+
+.hat-idea__cta-arrow img {
+	display: block;
+}
+
+.hat-idea__strip {
+	margin-top: 150px;
+	padding-right: 300px;
+	display: flex;
+	align-items: center;
+	justify-content: space-between;
+	font-weight: 300;
+	font-size: clamp(13px, 1.042vw, 20px);
+	line-height: clamp(16px, 1.25vw, 24px);
+	letter-spacing: 0.01em;
+	text-transform: uppercase;
+}
+
+@media (max-width: 1200px) {
+	.hat-idea__title-row {
+		padding-top: clamp(70px, 9vw, 100px);
+	}
+
+	.hat-idea__ornament {
+		top: 0;
+		left: 50%;
+		right: auto;
+		transform: translateX(-50%);
+	}
+}
+
+@media (max-width: 767px) {
+	.hat-idea {
+		padding-top: 32px;
+		padding-bottom: 28px;
+		min-height: auto;
+	}
+
+	.hat-idea__inner {
+		min-height: auto;
+	}
+
+	.hat-idea__title {
+		font-size: clamp(46px, 14vw, 72px);
+		line-height: 0.95;
+	}
+
+	.hat-idea__action-group {
+		margin-top: 38px;
+		width: 100%;
+	}
+
+	.hat-idea__text {
+		max-width: 100%;
+		text-indent: 0;
+		text-align: left;
+	}
+
+	.hat-idea__cta {
+		font-size: 14px;
+		line-height: 1.2;
+		padding-left: 16px;
+		padding-right: 10px;
+		gap: 12px;
+	}
+
+	.hat-idea__cta-arrow {
+		width: 40px;
+		height: 40px;
+	}
+
+	.hat-idea__strip {
+		margin-top: 44px;
+		font-size: 12px;
+		line-height: 1.2;
+	}
 }
