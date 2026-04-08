@@ -124,6 +124,25 @@ function hughalroztatoo_assets() {
 				(string) filemtime( $home_css_path )
 			);
 		}
+
+		$home_scripts = array(
+			'experience' => 'home-experience.js',
+			'faq'        => 'home-faq.js',
+		);
+
+		foreach ( $home_scripts as $suffix => $filename ) {
+			$home_js_path = get_template_directory() . '/assets/js/' . $filename;
+			if ( ! file_exists( $home_js_path ) ) {
+				continue;
+			}
+			wp_enqueue_script(
+				'hughalroztatoo-home-' . $suffix,
+				get_template_directory_uri() . '/assets/js/' . $filename,
+				array( 'hughalroztatoo-main' ),
+				(string) filemtime( $home_js_path ),
+				true
+			);
+		}
 	}
 }
 add_action( 'wp_enqueue_scripts', 'hughalroztatoo_assets' );

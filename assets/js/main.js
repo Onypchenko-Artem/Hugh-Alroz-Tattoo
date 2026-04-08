@@ -1,3 +1,3 @@
 "use strict";
 
-// Theme entry point. Keep lightweight for now.
+// Global theme entry point.
