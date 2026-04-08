@@ -9,7 +9,6 @@ get_header();
 
 get_template_part( 'template-parts/home/hero-banner' );
 get_template_part( 'template-parts/home/pricing' );
-get_template_part( 'template-parts/home/services' );
 get_template_part( 'template-parts/home/portfolio' );
 get_template_part( 'template-parts/home/experience' );
 get_template_part( 'template-parts/home/faq' );

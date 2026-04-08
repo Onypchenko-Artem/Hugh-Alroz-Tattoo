@@ -127,3 +127,9 @@ function hughalroztatoo_assets() {
 	}
 }
 add_action( 'wp_enqueue_scripts', 'hughalroztatoo_assets' );
+
+/**
+ * Disable Gutenberg editor, use Classic Editor instead
+ */
+add_filter( 'use_block_editor_for_post', '__return_false' );
+add_filter( 'use_block_editor_for_post_type', '__return_false' );
