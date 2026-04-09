@@ -177,6 +177,29 @@ img {
 	line-height: 1.45;
 	letter-spacing: 0.01em;
 	color: rgba(255, 255, 255, 0.95);
+	position: relative;
+	text-decoration: none;
+}
+
+.hat-footer__link::after,
+.hat-footer__legal a::after {
+	content: "";
+	position: absolute;
+	left: 0;
+	bottom: 0.08em;
+	width: 100%;
+	height: 1px;
+	background: currentColor;
+	transform: scaleX(0);
+	transform-origin: left center;
+	transition: transform 0.5s cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.hat-footer__link:hover::after,
+.hat-footer__link:focus-visible::after,
+.hat-footer__legal a:hover::after,
+.hat-footer__legal a:focus-visible::after {
+	transform: scaleX(1);
 }
 
 .hat-footer__social-icon {
@@ -192,8 +215,26 @@ img {
 }
 
 .hat-footer__social--instagram span:last-child {
-	text-decoration: underline;
-	text-underline-offset: 3px;
+	position: relative;
+	display: inline-block;
+}
+
+.hat-footer__social--instagram span:last-child::after {
+	content: "";
+	position: absolute;
+	left: 0;
+	bottom: 0;
+	width: 100%;
+	height: 1px;
+	background: currentColor;
+	transform: scaleX(0);
+	transform-origin: left center;
+	transition: transform 0.35s cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.hat-footer__social--instagram:hover span:last-child::after,
+.hat-footer__social--instagram:focus-visible span:last-child::after {
+	transform: scaleX(1);
 }
 
 .hat-footer__to-top-wrap {
@@ -202,14 +243,30 @@ img {
 }
 
 .hat-footer a.hat-footer__to-top {
+	position: relative;
 	font-size: clamp(14px, 1.25vw, 24px);
 	line-height: 1.2;
 	text-transform: uppercase;
-	text-decoration: underline;
-	text-decoration-thickness: 2px;
-	text-underline-offset: 6px;
-	text-decoration-skip-ink: none;
+	text-decoration: none;
 	white-space: nowrap;
+}
+
+.hat-footer a.hat-footer__to-top::after {
+	content: "";
+	position: absolute;
+	left: 0;
+	bottom: 0;
+	width: 100%;
+	height: 2px;
+	background: currentColor;
+	transform: scaleX(0);
+	transform-origin: left center;
+	transition: transform 0.35s cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.hat-footer a.hat-footer__to-top:hover::after,
+.hat-footer a.hat-footer__to-top:focus-visible::after {
+	transform: scaleX(1);
 }
 
 .hat-footer__bottom {
@@ -240,9 +297,11 @@ img {
 }
 
 .hat-footer__legal a {
+	position: relative;
 	font-size: clamp(9px, 0.78vw, 15px);
 	line-height: 1.2;
 	color: #949494;
+	text-decoration: none;
 }
 
 @media (max-width: 1024px) {
@@ -355,9 +414,15 @@ img {
 
 body.hat-menu-open {
 	overflow: hidden;
+	padding-right: var(--hat-scrollbar-gap, 0px);
+}
+
+body.hat-menu-open .hat-header__nav {
+	margin-right: var(--hat-scrollbar-gap, 0px);
 }
 
 .hat-desktop-menu {
+	box-sizing: border-box;
 	position: fixed;
 	inset: 0;
 	z-index: 40;
@@ -379,6 +444,7 @@ body.hat-menu-open {
 	opacity: 1;
 	visibility: visible;
 	pointer-events: auto;
+	padding-right: var(--hat-scrollbar-gap, 0px);
 }
 
 .hat-desktop-menu[hidden] {
@@ -391,18 +457,6 @@ body.hat-menu-open {
 	flex-direction: column;
 	height: 100%;
 	padding: clamp(19px, 1.51vw, 29px) clamp(47px, 3.646vw, 70px) clamp(24px, 2.08vw, 40px);
-	transform: translate3d(0, 14px, 0);
-	opacity: 0;
-	transition:
-		transform 0.5s cubic-bezier(0.22, 1, 0.36, 1),
-		opacity 0.4s cubic-bezier(0.22, 1, 0.36, 1);
-	transition-delay: 0s;
-}
-
-.hat-desktop-menu.is-open .hat-desktop-menu__inner {
-	transform: translate3d(0, 0, 0);
-	opacity: 1;
-	transition-delay: 0.06s;
 }
 
 .hat-desktop-menu__mark {
@@ -430,6 +484,16 @@ body.hat-menu-open {
 	margin-bottom: 45px;
 }
 
+.hat-desktop-menu__logo {
+	opacity: 0;
+	transition: opacity 0.4s cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.hat-desktop-menu.is-open .hat-desktop-menu__logo {
+	opacity: 1;
+	transition-delay: 0.08s;
+}
+
 .hat-desktop-menu__logo .custom-logo-link img {
 	max-height: clamp(32px, 2.5vw, 48px);
 	width: auto;
@@ -438,6 +502,17 @@ body.hat-menu-open {
 .hat-desktop-menu__controls {
 	display: inline-flex;
 	align-items: center;
+	opacity: 0;
+	transform: translate3d(14px, 0, 0);
+	transition:
+		opacity 0.45s cubic-bezier(0.22, 1, 0.36, 1),
+		transform 0.52s cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.hat-desktop-menu.is-open .hat-desktop-menu__controls {
+	opacity: 1;
+	transform: translate3d(0, 0, 0);
+	transition-delay: 0.14s;
 }
 
 .hat-desktop-menu__close {
@@ -481,6 +556,17 @@ body.hat-menu-open {
 	align-items: flex-start;
 	gap: clamp(81px, 7.03vw, 135px);
 	padding-left: 0;
+	opacity: 0;
+	transform: translate3d(0, 18px, 0);
+	transition:
+		opacity 0.48s cubic-bezier(0.22, 1, 0.36, 1),
+		transform 0.55s cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.hat-desktop-menu.is-open .hat-desktop-menu__nav {
+	opacity: 1;
+	transform: translate3d(0, 0, 0);
+	transition-delay: 0.06s;
 }
 
 .hat-desktop-menu__nav .hat-desktop-menu__mode {
@@ -548,6 +634,7 @@ body.hat-menu-open {
 }
 
 .hat-desktop-menu__list > li > a {
+	position: relative;
 	display: inline-flex;
 	align-items: flex-start;
 	gap: 0.65em;
@@ -557,6 +644,25 @@ body.hat-menu-open {
 	text-transform: uppercase;
 	color: rgba(255, 255, 255, 0.96);
 	text-decoration: none;
+}
+
+.hat-desktop-menu__list > li > a::before {
+	content: "";
+	position: absolute;
+	left: 0;
+	bottom: 0.04em;
+	width: 100%;
+	height: 1px;
+	background: currentColor;
+	transform: scaleX(0);
+	transform-origin: left center;
+	transition: transform 0.8s cubic-bezier(0.22, 1, 0.36, 1);
+	pointer-events: none;
+}
+
+.hat-desktop-menu__list > li > a:hover::before,
+.hat-desktop-menu__list > li > a:focus-visible::before {
+	transform: scaleX(1);
 }
 
 .hat-desktop-menu__list > li > a::after {
@@ -571,6 +677,17 @@ body.hat-menu-open {
 	justify-content: space-between;
 	align-items: flex-end;
 	gap: 20px;
+	opacity: 0;
+	transform: translate3d(0, 12px, 0);
+	transition:
+		opacity 0.42s cubic-bezier(0.22, 1, 0.36, 1),
+		transform 0.48s cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.hat-desktop-menu.is-open .hat-desktop-menu__bottom {
+	opacity: 1;
+	transform: translate3d(0, 0, 0);
+	transition-delay: 0.12s;
 }
 
 .hat-desktop-menu__langs,
@@ -609,7 +726,12 @@ body.hat-menu-open {
 @media (prefers-reduced-motion: reduce) {
 	.hat-desktop-menu,
 	.hat-desktop-menu__inner,
-	.hat-desktop-menu__list > li {
+	.hat-desktop-menu__logo,
+	.hat-desktop-menu__controls,
+	.hat-desktop-menu__nav,
+	.hat-desktop-menu__bottom,
+	.hat-desktop-menu__list > li,
+	.hat-desktop-menu__list > li > a::before {
 		transition-duration: 0.01ms !important;
 		transition-delay: 0s !important;
 	}

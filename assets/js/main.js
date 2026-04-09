@@ -30,12 +30,17 @@
 		}
 	};
 
+	const getScrollbarGap = () =>
+		Math.max(0, window.innerWidth - document.documentElement.clientWidth);
+
 	const openMenu = () => {
 		if (!desktopMedia.matches || isMenuOpen()) {
 			return;
 		}
 
 		clearCloseAnimation();
+
+		document.documentElement.style.setProperty("--hat-scrollbar-gap", `${getScrollbarGap()}px`);
 
 		desktopMenu.hidden = false;
 		desktopMenu.setAttribute("aria-hidden", "false");
@@ -51,6 +56,8 @@
 
 	const finishClose = () => {
 		clearCloseAnimation();
+		document.body.classList.remove("hat-menu-open");
+		document.documentElement.style.removeProperty("--hat-scrollbar-gap");
 		desktopMenu.hidden = true;
 		desktopMenu.setAttribute("aria-hidden", "true");
 	};
@@ -64,7 +71,6 @@
 
 		desktopMenu.classList.remove("is-open");
 		toggle.setAttribute("aria-expanded", "false");
-		document.body.classList.remove("hat-menu-open");
 		desktopMenu.setAttribute("aria-hidden", "true");
 
 		if (prefersReducedMotion.matches) {
@@ -110,6 +116,7 @@
 			clearCloseAnimation();
 			desktopMenu.classList.remove("is-open");
 			document.body.classList.remove("hat-menu-open");
+			document.documentElement.style.removeProperty("--hat-scrollbar-gap");
 			toggle.setAttribute("aria-expanded", "false");
 			desktopMenu.hidden = true;
 			desktopMenu.setAttribute("aria-hidden", "true");
