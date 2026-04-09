@@ -1,6 +1,6 @@
 .hat-services__grid {
 	display: grid;
-	grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+	grid-template-columns: repeat(auto-fit, minmax(clamp(220px, 18.75vw, 360px), 1fr));
 	gap: var(--hat-gap);
 	margin: 0;
 	padding: 0;
@@ -8,21 +8,21 @@
 }
 
 .hat-services__item {
-	padding: 1.25rem;
+	padding: clamp(16px, 1.042vw, 20px);
 	border: 1px solid rgba(48, 48, 48, 0.12);
-	border-radius: 8px;
+	border-radius: clamp(6px, 0.417vw, 8px);
 	background: #fff;
 }
 
 .hat-services__name {
-	margin: 0 0 0.5rem;
-	font-size: 1.125rem;
+	margin: 0 0 clamp(6px, 0.417vw, 8px);
+	font-size: clamp(16px, 0.938vw, 18px);
 	color: var(--hat-color-primary);
 }
 
 .hat-services__text {
 	margin: 0;
-	font-size: 0.95rem;
+	font-size: clamp(14px, 0.781vw, 15px);
 	color: var(--hat-color-text);
 	opacity: 0.9;
 }

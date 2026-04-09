@@ -1,9 +1,8 @@
 .hat-idea {
-	background: #000;
 	color: #fff;
 	min-height: 100vh;
 	min-height: 100dvh;
-	padding: clamp(40px, 3.125vw, 60px) 0 clamp(35px, 2.813vw, 54px);
+	padding: clamp(207px, 17.96vw, 345px) 0;
 }
 
 .hat-idea__inner {
@@ -20,9 +19,9 @@
 	left: var(--hat-gutter-x);
 	display: inline-flex;
 	align-items: center;
-	gap: 16px;
+	gap: clamp(10px, 0.833vw, 16px);
 	margin: 0;
-	font-size: 18px;
+	font-size: clamp(14px, 0.938vw, 18px);
 	letter-spacing: 0.14em;
 	text-transform: uppercase;
 }
@@ -41,7 +40,7 @@
 	flex-direction: column;
 	align-items: center;
 	font-weight: 500;
-	font-size: 172px;
+	font-size: clamp(56px, 8.958vw, 172px);
 	line-height: 1;
 	letter-spacing: -0.03em;
 	text-transform: uppercase;
@@ -59,10 +58,10 @@
 
 .hat-idea__ornament {
 	position: absolute;
-	left: calc(100% + 65px);
+	left: calc(100% + clamp(20px, 3.385vw, 65px));
 	transform: translateY(100%);
-	width: 98px;
-	height: 55px;
+	width: clamp(52px, 5.104vw, 98px);
+	height: clamp(30px, 2.865vw, 55px);
 }
 
 .hat-idea__ornament img {
@@ -74,11 +73,11 @@
 	display: flex;
 	flex-direction: column;
 	align-items: flex-start;
-	margin: 105px auto 0;
+	margin: clamp(40px, 5.469vw, 105px) auto 0;
 }
 
 .hat-idea__text {
-	margin: 0 0 80px;
+	margin: 0 0 clamp(28px, 4.167vw, 80px);
 	max-width: clamp(250px, 19.167vw, 368px);
 	text-align: justify;
 	font-weight: 300;
@@ -122,8 +121,8 @@
 }
 
 .hat-idea__strip {
-	margin-top: 150px;
-	padding-right: 300px;
+	margin-top: clamp(48px, 7.813vw, 150px);
+	padding-right: clamp(24px, 15.625vw, 300px);
 	display: flex;
 	align-items: center;
 	justify-content: space-between;
@@ -149,8 +148,8 @@
 
 @media (max-width: 767px) {
 	.hat-idea {
-		padding-top: 32px;
-		padding-bottom: 28px;
+		padding-top: clamp(24px, 4.172vw, 32px);
+		padding-bottom: clamp(20px, 3.651vw, 28px);
 		min-height: auto;
 	}
 
@@ -164,7 +163,7 @@
 	}
 
 	.hat-idea__action-group {
-		margin-top: 38px;
+		margin-top: clamp(28px, 4.955vw, 38px);
 		width: 100%;
 	}
 
@@ -175,21 +174,21 @@
 	}
 
 	.hat-idea__cta {
-		font-size: 14px;
+		font-size: clamp(13px, 1.825vw, 14px);
 		line-height: 1.2;
-		padding-left: 16px;
-		padding-right: 10px;
-		gap: 12px;
+		padding-left: clamp(12px, 2.086vw, 16px);
+		padding-right: clamp(8px, 1.304vw, 10px);
+		gap: clamp(10px, 1.565vw, 12px);
 	}
 
 	.hat-idea__cta-arrow {
-		width: 40px;
-		height: 40px;
+		width: clamp(34px, 5.215vw, 40px);
+		height: clamp(34px, 5.215vw, 40px);
 	}
 
 	.hat-idea__strip {
-		margin-top: 44px;
-		font-size: 12px;
+		margin-top: clamp(32px, 5.736vw, 44px);
+		font-size: clamp(11px, 1.565vw, 12px);
 		line-height: 1.2;
 	}
 }

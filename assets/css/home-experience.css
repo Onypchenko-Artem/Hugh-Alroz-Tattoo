@@ -8,7 +8,7 @@
 .hat-experience__grid {
 	display: grid;
 	grid-template-columns: minmax(80px, 180px) minmax(0, 1fr);
-	column-gap: 420px;
+	column-gap: clamp(24px, 21.875vw, 420px);
 	align-items: start;
 }
 
@@ -17,9 +17,9 @@
 	grid-column: 1;
 	display: inline-flex;
 	align-items: center;
-	gap: 16px;
+	gap: clamp(10px, 0.833vw, 16px);
 	margin: 0;
-	font-size: 18px;
+	font-size: clamp(14px, 0.938vw, 18px);
 	letter-spacing: 0.14em;
 	text-transform: uppercase;
 }
@@ -92,21 +92,21 @@
 	position: absolute;
 	top: 50%;
 	transform: translateY(-50%);
-	width: 125px;
-	height: 130px;
+	width: clamp(72px, 6.51vw, 125px);
+	height: clamp(76px, 6.771vw, 130px);
 	pointer-events: none;
 	-webkit-backdrop-filter: blur(3px);
 	backdrop-filter: blur(3px);
 }
 
 .hat-experience__title-blur:not(.hat-experience__title-blur--start) {
-	right: -10px;
+	right: clamp(-20px, -1.042vw, -10px);
 	-webkit-mask-image: linear-gradient(to right, transparent, black 70%);
 	mask-image: linear-gradient(to right, transparent, black 70%);
 }
 
 .hat-experience__title-blur--start {
-	left: -20px;
+	left: clamp(-20px, -1.042vw, -10px);
 	-webkit-mask-image: linear-gradient(to left, transparent, black 70%);
 	mask-image: linear-gradient(to left, transparent, black 70%);
 }
@@ -114,15 +114,15 @@
 .hat-experience__wire {
 	width: auto;
 	height: auto;
-	max-height: 114px;
+	max-height: clamp(56px, 5.938vw, 114px);
 	flex-shrink: 0;
-	margin: 0 47px;
+	margin: 0 clamp(12px, 2.448vw, 47px);
 }
 
 .hat-experience__title-tag {
 	display: inline-flex;
 	align-items: center;
-	font-size: 20px;
+	font-size: clamp(14px, 1.042vw, 20px);
 	font-weight: 300;
 	letter-spacing: 0.04em;
 	text-transform: uppercase;
@@ -130,11 +130,11 @@
 	white-space: nowrap;
 	line-height: 1;
 	padding-top: 0.06em;
-	padding-left: 54px;
+	padding-left: clamp(16px, 2.813vw, 54px);
 }
 
 .hat-experience__subtitle {
-	margin: 30px 0 0;
+	margin: clamp(16px, 1.563vw, 30px) 0 0;
 	font-size: clamp(16px, 1.146vw, 22px);
 	font-weight: 300;
 	letter-spacing: 0.02em;
@@ -170,7 +170,7 @@
 .hat-experience__accordion.is-open {
 	background: #ffffff;
 	color: #000;
-	padding: 30px 35px 0;
+	padding: clamp(20px, 1.563vw, 30px) clamp(20px, 1.823vw, 35px) 0;
 }
 
 .hat-experience__summary {
@@ -222,7 +222,7 @@
 }
 
 .hat-experience__panel-inner {
-	max-width: 500px;
+	max-width: clamp(280px, 26.042vw, 500px);
 	padding-top: clamp(2px, 0.208vw, 4px);
 	padding-bottom: clamp(20px, 1.563vw, 30px);
 }
@@ -245,8 +245,8 @@
 /* ---- Responsive ---- */
 @media (max-width: 900px) {
 	.hat-experience__grid {
-		grid-template-columns: 50px minmax(0, 1fr);
-		column-gap: 12px;
+		grid-template-columns: clamp(36px, 5.556vw, 50px) minmax(0, 1fr);
+		column-gap: clamp(8px, 1.333vw, 12px);
 	}
 
 	.hat-experience__index {

@@ -4,20 +4,15 @@
 	flex-direction: column;
 	min-height: 100vh;
 	min-height: 100dvh;
-	padding: clamp(60px, 4.688vw, 90px) 0 clamp(53px, 4.167vw, 80px);
+	padding: clamp(60px, 4.688vw, 90px) 0 clamp(198px, 17.1875vw, 330px);
 	color: #fff;
-	--hat-hero-bg-image: none;
 }
 
 .hat-hero__media {
 	position: absolute;
 	inset: 0;
 	z-index: 0;
-	background-color: #000;
-	background-image: var(--hat-hero-bg-image);
-	background-size: cover;
-	background-position: center;
-	filter: grayscale(100%);
+	background: transparent;
 }
 
 .hat-hero__media::after {
@@ -196,7 +191,7 @@
 	display: grid;
 	grid-template-columns: 1fr auto 1fr;
 	align-items: center;
-	gap: 1rem;
+	gap: clamp(12px, 0.833vw, 16px);
 }
 
 .hat-hero__strip-item:first-child {
@@ -237,13 +232,13 @@
 	.hat-hero__studio-tag {
 		position: static;
 		transform: none;
-		margin-top: 1rem;
+		margin-top: clamp(12px, 0.833vw, 16px);
 	}
 }
 
 @media (max-width: 640px) {
 	.hat-hero__name-line--hugh {
-		padding-left: 1rem;
+		padding-left: clamp(12px, 2.5vw, 16px);
 	}
 
 	.hat-hero__name-line--alroz {

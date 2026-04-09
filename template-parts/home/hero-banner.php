@@ -9,15 +9,12 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
 
-$hero_bg_url = esc_url_raw( get_template_directory_uri() . '/assets/images/video-hero.jpg' );
-$hero_style    = sprintf( "--hat-hero-bg-image: url('%s');", $hero_bg_url );
 ?>
 
 <section
 	class="hat-hero"
 	id="hero"
 	aria-labelledby="hat-hero-heading"
-	style="<?php echo esc_attr( $hero_style ); ?>"
 >
 	<div class="hat-hero__media" aria-hidden="true"></div>
 
