@@ -9,24 +9,51 @@
 
 <footer class="hat-footer" id="contact">
 	<div class="hat-container hat-footer__inner">
-		<div class="hat-footer__brand">
-			<?php if ( has_custom_logo() ) : ?>
-				<?php the_custom_logo(); ?>
-			<?php else : ?>
-				<strong><?php bloginfo( 'name' ); ?></strong>
-			<?php endif; ?>
+		<div class="hat-footer__top">
+			<section class="hat-footer__column" aria-labelledby="hat-footer-contact-title">
+				<h2 class="hat-footer__title" id="hat-footer-contact-title"><?php esc_html_e( 'CONTACT', 'hughalroztatoo' ); ?></h2>
+				<ul class="hat-footer__list">
+					<li>
+						<a href="tel:+18195986128" class="hat-footer__link">+1 (819) 598-6128</a>
+					</li>
+					<li>
+						<a href="mailto:alroztattoos@gmail.com" class="hat-footer__link">alroztattoos@gmail.com</a>
+					</li>
+				</ul>
+			</section>
+
+			<section class="hat-footer__column" aria-labelledby="hat-footer-social-title">
+				<h2 class="hat-footer__title hat-footer__title--mirror" id="hat-footer-social-title"><?php esc_html_e( 'RÉSEAUX SOCIAUX', 'hughalroztatoo' ); ?></h2>
+				<ul class="hat-footer__list">
+					<li>
+						<a class="hat-footer__social hat-footer__social--instagram" href="#">
+							<span class="hat-footer__social-icon" aria-hidden="true">
+								<img src="<?php echo esc_url( get_template_directory_uri() . '/assets/images/instagram.svg' ); ?>" alt="" width="18" height="18">
+							</span>
+							<span><?php esc_html_e( 'INSTAGRAM', 'hughalroztatoo' ); ?></span>
+						</a>
+					</li>
+					<li>
+						<a class="hat-footer__link" href="#"><?php esc_html_e( 'FACEBOOK', 'hughalroztatoo' ); ?></a>
+					</li>
+				</ul>
+			</section>
+
+			<div class="hat-footer__to-top-wrap">
+				<a class="hat-footer__to-top" href="#"><?php esc_html_e( 'RETOUR EN HAUT', 'hughalroztatoo' ); ?></a>
+			</div>
 		</div>
-		<?php
-		wp_nav_menu( array(
-			'theme_location' => 'footer',
-			'container'      => 'nav',
-			'container_class' => 'hat-footer__nav',
-			'menu_class'     => '',
-			'depth'          => 1,
-		) );
-		?>
-		<div class="hat-footer__copy">
-			&copy; <?php echo esc_html( date( 'Y' ) ); ?> <?php bloginfo( 'name' ); ?>. <?php esc_html_e( 'All rights reserved.', 'hughalroztatoo' ); ?>
+
+		<div class="hat-footer__bottom">
+			<p class="hat-footer__copy">&copy; <?php echo esc_html( date( 'Y' ) ); ?> HughAlrozTattoo - <?php esc_html_e( 'Tous Droits Réservés', 'hughalroztatoo' ); ?></p>
+			<nav class="hat-footer__legal" aria-label="<?php esc_attr_e( 'Informations légales', 'hughalroztatoo' ); ?>">
+				<ul>
+					<li><a href="#"><?php esc_html_e( 'Confidentialité', 'hughalroztatoo' ); ?></a></li>
+					<li><a href="#"><?php esc_html_e( 'Conditions', 'hughalroztatoo' ); ?></a></li>
+					<li><a href="#"><?php esc_html_e( 'Remboursement', 'hughalroztatoo' ); ?></a></li>
+					<li><a href="#"><?php esc_html_e( 'Données Personnelles', 'hughalroztatoo' ); ?></a></li>
+				</ul>
+			</nav>
 		</div>
 	</div>
 </footer>

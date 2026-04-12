@@ -4,20 +4,15 @@
 	flex-direction: column;
 	min-height: 100vh;
 	min-height: 100dvh;
-	padding-top: clamp(5rem, 14vh, 7.5rem);
+	padding: clamp(60px, 4.688vw, 90px) 0 clamp(198px, 17.1875vw, 330px);
 	color: #fff;
-	--hat-hero-bg-image: none;
 }
 
 .hat-hero__media {
 	position: absolute;
 	inset: 0;
 	z-index: 0;
-	background-color: #000;
-	background-image: var(--hat-hero-bg-image);
-	background-size: cover;
-	background-position: center;
-	filter: grayscale(100%);
+	background: transparent;
 }
 
 .hat-hero__media::after {
@@ -38,117 +33,165 @@
 	flex: 1;
 	display: flex;
 	flex-direction: column;
-	justify-content: center;
 	width: 100%;
-	padding-bottom: clamp(1.5rem, 4vh, 3rem);
+	padding-bottom: clamp(45px, 3.542vw, 68px);
+}
+
+/* --- Title area: staggered layout per Figma --- */
+.hat-hero__heading-top {
+	position: relative;
+	margin-top: clamp(13px, 0.99vw, 19px);
+	margin-bottom: auto;
 }
 
 .hat-hero__heading-block {
-	margin: 0 0 clamp(1.75rem, 4vh, 2.75rem);
-	font-weight: 700;
+	margin: 0;
+	display: flex;
+	flex-direction: column;
 	text-transform: uppercase;
-	line-height: 0.92;
-	letter-spacing: 0.02em;
 	color: #fff;
+	gap: clamp(47px, 3.646vw, 70px);
 }
 
-.hat-hero__heading-top {
-	display: flex;
-	flex-wrap: wrap;
-	align-items: flex-end;
-	justify-content: space-between;
-	gap: 1rem 2rem;
+.hat-hero__name-line {
+	display: block;
+	font-style: normal;
+	font-weight: 500;
+	font-size: clamp(205px, 16.042vw, 308px);
+	line-height: 0.75;
+	letter-spacing: -0.03em;
+	text-transform: uppercase;
+	color: #fff;
+	mix-blend-mode: hard-light;
+	opacity: 0.84;
+}
+
+.hat-hero__name-line--hugh {
+	padding-left: clamp(191px, 14.948vw, 287px);
 }
 
 .hat-hero__heading-bottom {
 	display: block;
-	margin-top: 0.15em;
-}
-
-.hat-hero__name-line {
-	display: inline-block;
-	font-size: clamp(3rem, 12.5vw, 9.5rem);
+	margin-top: clamp(-48px, -2.5vw, -32px);
 }
 
 .hat-hero__name-line--alroz {
-	margin-left: clamp(1rem, 16vw, 12rem);
+	position: relative;
+	display: inline-block;
+	width: max-content;
+	margin-left: clamp(475px, 37.135vw, 713px);
+	padding-left: 0;
+	background: linear-gradient(105.38deg, #ffffff 39.21%, #434343 80.17%);
+	-webkit-background-clip: text;
+	background-clip: text;
+	-webkit-text-fill-color: transparent;
+	color: transparent;
+	mix-blend-mode: hard-light;
+	opacity: 1;
 }
 
 .hat-hero__studio-tag {
-	display: block;
-	max-width: 11rem;
-	font-size: clamp(0.625rem, 1.4vw, 0.75rem);
-	font-weight: 600;
-	line-height: 1.35;
-	letter-spacing: 0.16em;
+	position: absolute;
+	right: 0;
+	bottom: 100%;
+	margin: 0 0 clamp(14px, 1.094vw, 21px) 0;
+	display: flex;
+	flex-direction: column;
+	align-items: flex-end;
+	font-weight: 400;
+	font-size: clamp(16px, 1.25vw, 24px);
+	line-height: clamp(19px, 1.51vw, 29px);
+	letter-spacing: -0.02em;
 	text-transform: uppercase;
 	text-align: right;
-	color: rgba(255, 255, 255, 0.95);
+	-webkit-text-fill-color: #fff;
+	color: #fff;
+	background: none;
+	-webkit-background-clip: unset;
+	background-clip: unset;
+	mix-blend-mode: normal;
+	opacity: 1;
 }
 
+.hat-hero__studio-tag-line {
+	display: block;
+}
+
+/* --- Lede + CTA group --- */
+.hat-hero__action-group {
+	display: flex;
+	flex-direction: column;
+	align-items: flex-start;
+	align-self: center;
+	margin: 0 auto;
+}
+
+/* --- Description text --- */
 .hat-hero__lede {
-	margin: 0 auto clamp(1.5rem, 3vh, 2rem);
-	max-width: 38rem;
-	text-align: center;
-	font-size: clamp(0.8125rem, 1.35vw, 0.9375rem);
-	line-height: 1.6;
-	letter-spacing: 0.03em;
-	color: rgba(255, 255, 255, 0.92);
+	margin: clamp(67px, 5.208vw, 100px) 0 clamp(51px, 4.01vw, 77px);
+	max-width: clamp(254px, 19.844vw, 381px);
+	text-align: justify;
+	text-indent: clamp(50px, 3.906vw, 75px);
+	font-size: clamp(13px, 1.042vw, 20px);
+	line-height: clamp(16px, 1.25vw, 24px);
+	font-weight: 300;
+	letter-spacing: 0.02em;
+	color: #fff;
 }
 
+/* --- CTA button --- */
 .hat-hero__cta {
 	display: inline-flex;
 	align-items: stretch;
-	align-self: center;
-	margin: 0 auto;
 	background: #fff;
 	color: #000;
 	text-decoration: none;
+	font-weight: 600;
+	font-size: clamp(16px, 1.25vw, 24px);
+	line-height: clamp(19px, 1.51vw, 29px);
+	letter-spacing: 0.01em;
 	text-transform: uppercase;
-	font-weight: 700;
-	font-size: clamp(0.6875rem, 1.1vw, 0.8125rem);
-	letter-spacing: 0.1em;
-}
-
-.hat-hero__cta:hover,
-.hat-hero__cta:focus {
-	opacity: 0.94;
+	padding: clamp(9px, 0.729vw, 14px) clamp(12px, 0.938vw, 18px) clamp(9px, 0.729vw, 14px) clamp(23px, 1.823vw, 35px);
+	gap: clamp(17px, 1.354vw, 26px);
 }
 
 .hat-hero__cta-label {
 	display: flex;
 	align-items: center;
-	padding: 1rem 1.25rem 1rem 1.5rem;
 }
 
 .hat-hero__cta-arrow {
 	display: flex;
 	align-items: center;
 	justify-content: center;
-	min-width: 3.25rem;
+	width: clamp(38px, 2.969vw, 57px);
+	height: clamp(38px, 2.969vw, 57px);
 	background: #000;
-	color: #fff;
-	font-size: 1.2rem;
-	line-height: 1;
 }
 
+.hat-hero__cta-arrow img {
+	display: block;
+}
+
+/* --- Bottom strip --- */
 .hat-hero__strip {
 	position: relative;
 	z-index: 1;
 	margin-top: auto;
-	padding: 1rem 0 1.5rem;
-	font-size: 0.6875rem;
-	font-weight: 600;
-	letter-spacing: 0.16em;
+	padding: 0;
+	font-weight: 400;
+	font-size: clamp(13px, 1.042vw, 20px);
+	line-height: clamp(16px, 1.25vw, 24px);
+	letter-spacing: 0.01em;
 	text-transform: uppercase;
-	color: rgba(255, 255, 255, 0.85);
+	color: #fff;
 }
 
 .hat-hero__strip-inner {
 	display: grid;
 	grid-template-columns: 1fr auto 1fr;
 	align-items: center;
-	gap: 1rem;
+	gap: clamp(12px, 0.833vw, 16px);
 }
 
 .hat-hero__strip-item:first-child {
@@ -162,17 +205,40 @@
 .hat-hero__strip-item--center {
 	justify-self: center;
 	text-align: center;
+	font-size: clamp(16px, 1.25vw, 24px);
+	line-height: clamp(19px, 1.51vw, 29px);
+	letter-spacing: 0.5em;
 }
 
-@media (max-width: 640px) {
-	.hat-hero__heading-top {
-		flex-direction: column;
-		align-items: flex-start;
+/* --- Responsive: below fluid range (< 1280px) --- */
+@media (max-width: 1279px) {
+	.hat-hero__name-line {
+		font-size: clamp(4rem, 16vw, 205px);
+		line-height: 0.85;
+	}
+
+	.hat-hero__name-line--hugh {
+		padding-left: clamp(2rem, 10vw, 191px);
+	}
+
+	.hat-hero__name-line--alroz {
+		margin-left: clamp(4rem, 25vw, 475px);
+	}
+
+	.hat-hero__heading-bottom {
+		margin-top: -0.08em;
 	}
 
 	.hat-hero__studio-tag {
-		text-align: left;
-		max-width: none;
+		position: static;
+		transform: none;
+		margin-top: clamp(12px, 0.833vw, 16px);
+	}
+}
+
+@media (max-width: 640px) {
+	.hat-hero__name-line--hugh {
+		padding-left: clamp(12px, 2.5vw, 16px);
 	}
 
 	.hat-hero__name-line--alroz {

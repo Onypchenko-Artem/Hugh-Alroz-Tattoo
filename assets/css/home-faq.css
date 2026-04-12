@@ -1,31 +1,352 @@
-.hat-faq__list {
-	max-width: 42rem;
-	margin: 0 auto;
+.hat-faq {
+	color: #fff;
+	padding: clamp(168px, 14.58vw, 280px) 0 0;
+	margin-bottom: clamp(207px, 17.96vw, 345px);
+	overflow: hidden;
+}
+
+/* ---- Header ---- */
+.hat-faq__header {
+	display: flex;
+	justify-content: space-between;
+	align-items: stretch;
+	margin-bottom: clamp(48px, 4.167vw, 80px);
+}
+
+.hat-faq__header-left {
+	flex: 1;
+}
+
+.hat-faq__header-right {
 	display: flex;
 	flex-direction: column;
-	gap: 0.75rem;
+	align-items: flex-end;
+	justify-content: space-between;
 }
 
-.hat-faq__item {
-	border: 1px solid rgba(48, 48, 48, 0.12);
-	border-radius: 8px;
-	padding: 0 1rem;
-	background: #fff;
+/* ---- Eyebrow ---- */
+.hat-faq__eyebrow {
+	display: inline-flex;
+	align-items: center;
+	gap: clamp(10px, 0.833vw, 16px);
+	margin: 0 0 clamp(16px, 1.25vw, 24px);
+	font-size: clamp(14px, 0.938vw, 18px);
+	font-weight: 400;
+	letter-spacing: 0.14em;
+	text-transform: uppercase;
 }
 
-.hat-faq__question {
-	padding: 1rem 0;
+.hat-faq__eyebrow-bracket {
+	opacity: 0.5;
+}
+
+/* ---- Title ---- */
+.hat-faq__title {
+	margin: 0;
+	font-size: clamp(44px, 5.208vw, 100px);
+	line-height: 1;
+	font-weight: 500;
+	letter-spacing: -0.03em;
+	text-transform: uppercase;
+}
+
+.hat-faq__title-line {
+	display: block;
+	width: fit-content;
+	background: linear-gradient(277.44deg, #9D9D9D 0%, #FFFFFF 40%);
+	-webkit-background-clip: text;
+	-webkit-text-fill-color: transparent;
+	background-clip: text;
+}
+
+.hat-faq__title-line--indent {
+	padding-left: clamp(80px, 10.417vw, 200px);
+	background: linear-gradient(277.44deg, #9D9D9D 0%, #FFFFFF 78.65%);
+	-webkit-background-clip: text;
+	-webkit-text-fill-color: transparent;
+	background-clip: text;
+}
+
+/* ---- Ampersand decoration ---- */
+.hat-faq__ampersand {
+	font-size: clamp(18px, 1.354vw, 26px);
+	font-weight: 300;
+	letter-spacing: 0.06em;
+	color: white;
+	margin: clamp(16px, 2.604vw, 50px) clamp(80px, 23.438vw, 450px) 0 0;
+}
+
+/* ---- Navigation arrows ---- */
+.hat-faq__nav {
+	display: flex;
+	gap: clamp(6px, 0.417vw, 8px);
+}
+
+.hat-faq__nav-btn {
+	display: inline-flex;
+	align-items: center;
+	justify-content: center;
+	width: clamp(40px, 2.604vw, 50px);
+	height: clamp(40px, 2.604vw, 50px);
+	border: 1px solid rgba(255, 255, 255, 0.4);
+	background: white;
+	color: #fff;
 	cursor: pointer;
-	font-weight: 600;
-	color: var(--hat-color-primary);
+	transition: background-color 0.3s ease, border-color 0.3s ease;
 }
 
-.hat-faq__answer {
-	margin: 0 0 1rem;
-	padding-top: 0;
-	font-size: 0.95rem;
+.hat-faq__nav-btn:hover {
+	background: rgba(255, 255, 255, 0.1);
+	border-color: white;
+	color: white;
 }
 
-.hat-faq__item[open] .hat-faq__question {
-	padding-bottom: 0.5rem;
+.hat-faq__nav-btn svg {
+	width: clamp(16px, 1.042vw, 20px);
+	height: clamp(16px, 1.042vw, 20px);
+	color: black;
+	transition: color 0.3s ease;
+}
+
+.hat-faq__nav-btn:hover svg {
+	color: white;
+}
+
+/* ---- Slider (stacked carousel) ---- */
+.hat-faq__slider {
+	position: relative;
+	width: 100%;
+	height: clamp(320px, 25vw, 480px);
+}
+
+.hat-faq__track {
+	position: relative;
+	width: 100%;
+	height: 100%;
+}
+
+/* ---- Cards ---- */
+.hat-faq__card {
+	position: absolute;
+	top: 50%;
+	left: 50%;
+	width: clamp(320px, 53.75vw, 1032px);
+	height: clamp(360px, 29.844vw, 573px);
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+	justify-content: flex-start;
+	padding: clamp(56px, 6.615vw, 127px) clamp(24px, 2.604vw, 50px) clamp(32px, 3.646vw, 70px);
+	text-align: center;
+	transform: translate(-50%, -50%) scale(0.96);
+	opacity: 0;
+	visibility: hidden;
+	transition:
+		transform 0.56s cubic-bezier(0.22, 1, 0.36, 1),
+		opacity 0.42s ease,
+		background-color 0.42s ease,
+		color 0.42s ease;
+	will-change: transform, opacity;
+	z-index: 1;
+	background: rgba(255, 255, 255, 0.06);
+	color: rgba(255, 255, 255, 0.5);
+	filter: none;
+	cursor: pointer;
+}
+
+.hat-faq__card[data-pos="0"] {
+	opacity: 1;
+	visibility: visible;
+	z-index: 3;
+	transform: translate(-50%, -50%) scale(1);
+	background: #fff;
+	color: #000;
+	filter: none;
+}
+
+.hat-faq__card[data-pos="-1"] {
+	width: clamp(420px, 44.635vw, 857px);
+	height: clamp(260px, 24.792vw, 476px);
+	opacity: 0.95;
+	visibility: visible;
+	z-index: 2;
+	transform: translate(calc(-50% - clamp(200px, 30vw, 580px)), -55%) scale(0.96);
+	border: 2px solid white;
+	filter: blur(8px);
+}
+
+.hat-faq__card[data-pos="1"] {
+	width: clamp(420px, 44.635vw, 857px);
+	height: clamp(260px, 24.792vw, 476px);
+	opacity: 0.95;
+	visibility: visible;
+	z-index: 2;
+	transform: translate(calc(-50% + clamp(200px, 30vw, 580px)), -55%) scale(0.96);
+	border: 2px solid white;
+	filter: blur(8px);
+}
+
+.hat-faq__card[data-pos="-2"] {
+	opacity: 0;
+	visibility: visible;
+	z-index: 1;
+	transform: translate(calc(-50% - clamp(420px, 58vw, 1100px)), -50%) scale(0.92);
+	border: 2px solid white;
+	filter: blur(8px);
+}
+
+.hat-faq__card[data-pos="2"] {
+	opacity: 0;
+	visibility: visible;
+	z-index: 1;
+	transform: translate(calc(-50% + clamp(420px, 58vw, 1100px)), -50%) scale(0.92);
+	border: 2px solid white;
+	filter: blur(8px);
+}
+
+.hat-faq__card-question {
+	margin: 0 0 clamp(24px, 3.385vw, 65px);
+	font-size: clamp(20px, 2.344vw, 45px);
+	line-height: 1.25;
+	font-weight: 700;
+	letter-spacing: 0.02em;
+	text-transform: uppercase;
+	max-width: clamp(260px, 37.5vw, 720px);
+	transition: transform 0.4s cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.hat-faq__card-icon {
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	transition: transform 0.4s cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.hat-faq__card-icon svg {
+	width: clamp(56px, 6.146vw, 118px);
+	height: clamp(56px, 6.146vw, 118px);
+}
+
+.hat-faq__card-icon img {
+	width: clamp(56px, 6.146vw, 118px);
+	height: clamp(56px, 6.146vw, 118px);
+	display: block;
+	transition: transform 0.35s cubic-bezier(0.22, 1, 0.36, 1);
+	transform-origin: 50% 50%;
+	filter: none;
+}
+
+.hat-faq__card:not([data-pos="0"]) .hat-faq__card-icon img {
+	filter: brightness(0) invert(1);
+}
+
+.hat-faq__card.is-open .hat-faq__card-icon img {
+	transform: rotate(45deg);
+}
+
+.hat-faq__card.is-open .hat-faq__card-question,
+.hat-faq__card.is-open .hat-faq__card-icon {
+	transform: translateY(clamp(-50px, -2.604vw, -24px));
+}
+
+.hat-faq__card-answer-wrap {
+	width: min(100%, clamp(280px, 32.292vw, 620px));
+	display: grid;
+	grid-template-rows: 0fr;
+	opacity: 0;
+	transition:
+		grid-template-rows 0.4s cubic-bezier(0.22, 1, 0.36, 1),
+		opacity 0.28s ease;
+}
+
+.hat-faq__card-answer-wrap > * {
+	min-height: 0;
+	overflow: hidden;
+}
+
+.hat-faq__card.is-open .hat-faq__card-answer-wrap {
+	grid-template-rows: 1fr;
+	opacity: 1;
+}
+
+.hat-faq__card-answer {
+	margin: 0;
+	font-size: clamp(16px, 1.25vw, 24px);
+	line-height: 1;
+	font-weight: 400;
+	letter-spacing: 2%;
+	color: rgba(69, 69, 69, 1);
+}
+
+
+
+
+
+
+/* ---- Responsive ---- */
+@media (max-width: 900px) {
+	.hat-faq__header {
+		flex-direction: column;
+		gap: clamp(16px, 2.667vw, 24px);
+	}
+
+	.hat-faq__header-right {
+		flex-direction: row;
+		align-items: center;
+		gap: clamp(16px, 2.667vw, 24px);
+		width: 100%;
+		justify-content: flex-end;
+	}
+
+	.hat-faq__ampersand {
+		margin: 0;
+	}
+
+	.hat-faq__title {
+		font-size: clamp(44px, 9vw, 70px);
+	}
+
+	.hat-faq__title-line--indent {
+		padding-left: clamp(40px, 8vw, 80px);
+	}
+
+	.hat-faq__slider {
+		height: clamp(280px, 50vw, 400px);
+	}
+
+	.hat-faq__card {
+		width: clamp(260px, 65vw, 420px);
+		height: auto;
+	}
+
+	.hat-faq__card[data-pos="-1"] {
+		width: clamp(260px, 65vw, 420px);
+		height: auto;
+		transform: translate(calc(-50% - clamp(160px, 40vw, 260px)), -50%) scale(0.96);
+	}
+
+	.hat-faq__card[data-pos="1"] {
+		width: clamp(260px, 65vw, 420px);
+		height: auto;
+		transform: translate(calc(-50% + clamp(160px, 40vw, 260px)), -50%) scale(0.96);
+	}
+
+	.hat-faq__card[data-pos="-2"] {
+		transform: translate(calc(-50% - clamp(300px, 75vw, 500px)), -50%) scale(0.92);
+	}
+
+	.hat-faq__card[data-pos="2"] {
+		transform: translate(calc(-50% + clamp(300px, 75vw, 500px)), -50%) scale(0.92);
+	}
+}
+
+@media (max-width: 640px) {
+	.hat-faq__title {
+		font-size: clamp(36px, 10vw, 52px);
+	}
+
+	.hat-faq__card {
+		width: clamp(240px, 70vw, 340px);
+		padding: clamp(28px, 5vw, 32px) clamp(16px, 3.75vw, 24px);
+	}
 }

@@ -73,7 +73,7 @@ function hughalroztatoo_assets() {
 
 	wp_enqueue_style(
 		'hughalroztatoo-font-inter-tight',
-		'https://fonts.googleapis.com/css2?family=Inter+Tight:ital,wght@0,400..700;1,400..700&display=swap',
+		'https://fonts.googleapis.com/css2?family=Inter+Tight:ital,wght@0,300..700;1,300..700&display=swap',
 		array(),
 		null
 	);
@@ -102,6 +102,7 @@ function hughalroztatoo_assets() {
 	if ( is_front_page() ) {
 		$home_styles = array(
 			'hero-banner' => 'home-hero-banner.css',
+			'pricing'     => 'home-pricing.css',
 			'services'    => 'home-services.css',
 			'portfolio'   => 'home-portfolio.css',
 			'experience'  => 'home-experience.css',
@@ -123,6 +124,31 @@ function hughalroztatoo_assets() {
 				(string) filemtime( $home_css_path )
 			);
 		}
+
+		$home_scripts = array(
+			'experience' => 'home-experience.js',
+			'faq'        => 'home-faq.js',
+		);
+
+		foreach ( $home_scripts as $suffix => $filename ) {
+			$home_js_path = get_template_directory() . '/assets/js/' . $filename;
+			if ( ! file_exists( $home_js_path ) ) {
+				continue;
+			}
+			wp_enqueue_script(
+				'hughalroztatoo-home-' . $suffix,
+				get_template_directory_uri() . '/assets/js/' . $filename,
+				array( 'hughalroztatoo-main' ),
+				(string) filemtime( $home_js_path ),
+				true
+			);
+		}
 	}
 }
 add_action( 'wp_enqueue_scripts', 'hughalroztatoo_assets' );
+
+/**
+ * Disable Gutenberg editor, use Classic Editor instead
+ */
+add_filter( 'use_block_editor_for_post', '__return_false' );
+add_filter( 'use_block_editor_for_post_type', '__return_false' );
