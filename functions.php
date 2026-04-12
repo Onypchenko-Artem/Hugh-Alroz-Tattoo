@@ -12,6 +12,8 @@ if ( ! defined( 'ABSPATH' ) ) {
 
 define( 'HUGHALROZTATOO_VERSION', '1.0' );
 
+require get_template_directory() . '/inc/booking-multistep.php';
+
 /**
  * Preconnect to Google Fonts (Inter Tight)
  *
