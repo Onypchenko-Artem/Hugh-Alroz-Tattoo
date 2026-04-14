@@ -4,7 +4,7 @@
 
 .hugh-ms-booking {
 	--hugh-ms-bg: rgba(0, 0, 0, 0.72);
-	--hugh-ms-border: rgba(181, 139, 75, 0.35);
+	--hugh-ms-border: rgba(255, 255, 255);
 	--hugh-ms-accent: #b58b4b;
 	--hugh-ms-text: #f5f2ed;
 	--hugh-ms-muted: rgba(245, 242, 237, 0.55);
@@ -12,9 +12,11 @@
 
 	position: relative;
 	z-index: 1;
-	max-width: 720px;
-	margin: clamp(24px, 4vw, 48px) auto;
-	padding: clamp(20px, 3vw, 32px);
+	width: min(1569px, calc(100vw - 40px));
+	max-width: 1569px;
+	min-height: 818px;
+	margin: 0 auto;
+	padding: clamp(15px, 1.3vw, 25px) clamp(18px, 1.56vw, 30px) ;
 	font-family: var(--hat-font-family, "Inter Tight", system-ui, sans-serif);
 	color: var(--hugh-ms-text);
 	background: var(--hugh-ms-bg);
@@ -403,4 +405,147 @@
 .hugh-ms-booking__notice {
 	padding: 16px;
 	color: var(--hat-color-text, #303030);
+}
+
+/* Step 1: "Type de visite" visual from Figma. */
+.hugh-ms__inner--step-1 .hugh-ms__crumbs {
+	position: relative;
+	display: block;
+	height: 15px;
+	border: 1px solid #fff;
+	border-radius: 56px;
+	overflow: hidden;
+	font-size: 0;
+	line-height: 0;
+}
+
+.hugh-ms__inner--step-1 .hugh-ms__crumb {
+	display: none;
+}
+
+.hugh-ms__inner--step-1 .hugh-ms__crumb.is-active {
+	display: block;
+	width: 9.6%;
+	height: 100%;
+	background: #fff;
+}
+
+.hugh-ms__inner--step-1 .hugh-ms__panel {
+	min-height: 0;
+	padding-left: clamp(66px, 5.72vw, 110px);
+}
+
+.hugh-ms__inner--step-1 .hugh-ms__title {
+	margin-bottom: 32px;
+	font-size: clamp(60px, 5.2vw, 100px);
+	font-weight: 500;
+	line-height: 1;
+	letter-spacing: 0.01em;
+	color: #fff;
+}
+
+.hugh-ms__lead {
+	margin: 0 0 40px;
+	font-size: clamp(1rem, 2vw, 2rem);
+	line-height: 1.2;
+	letter-spacing: 0.02em;
+	color: #fff;
+}
+
+.hugh-ms__inner--step-1 .hugh-ms__grid {
+	gap: 20px;
+	max-width: 670px;
+}
+
+.hugh-ms__inner--step-1 .hugh-ms__card {
+	min-height: 228px;
+	padding: 21px 25px;
+	justify-content: flex-start;
+	gap: 28px;
+	border: 1px solid #fff;
+	border-radius: 0;
+	background: transparent;
+	transition: background 0.2s ease, color 0.2s ease;
+}
+
+.hugh-ms__inner--step-1 .hugh-ms__card:hover {
+	border-color: #fff;
+	background: rgba(255, 255, 255, 0.06);
+}
+
+.hugh-ms__inner--step-1 .hugh-ms__card-title {
+	font-size: clamp(1.5rem, 3vw, 2rem);
+	font-weight: 500;
+	line-height: 1.2;
+	text-transform: uppercase;
+	color: inherit;
+}
+
+.hugh-ms__inner--step-1 .hugh-ms__card-meta {
+	max-width: 360px;
+	font-size: clamp(1rem, 1.4vw, 1.25rem);
+	line-height: 1.2;
+	letter-spacing: 0.01em;
+	color: inherit;
+}
+
+.hugh-ms__inner--step-1 .hugh-ms__card.is-selected {
+	background: #fbfbfb;
+	color: #000;
+	border-color: #fff;
+}
+
+.hugh-ms__inner--step-1 .hugh-ms__footer {
+	justify-content: flex-end;
+	border-top: 0;
+	margin-top: -70px;
+	padding-top: 0;
+	position: relative;
+	z-index: 2;
+}
+
+.hugh-ms__inner--step-1 .hugh-ms__footer > span {
+	display: none;
+}
+
+.hugh-ms__inner--step-1 .hugh-ms__btn--primary {
+	position: relative;
+	display: inline-flex;
+	align-items: center;
+	gap: 16px;
+	min-height: 85px;
+	padding: 14px 14px 13px 31px;
+	font-size: 24px;
+	font-weight: 600;
+	letter-spacing: 0.01em;
+	text-transform: uppercase;
+	color: #000;
+	background: #fff;
+	border: 2px solid #fff;
+	border-radius: 0;
+}
+
+.hugh-ms__inner--step-1 .hugh-ms__btn--primary::after {
+	content: "";
+	width: 57px;
+	height: 58px;
+	background: #000;
+	flex: 0 0 auto;
+}
+
+.hugh-ms__inner--step-1 .hugh-ms__btn--primary::before {
+	content: "";
+	position: absolute;
+	right: 25px;
+	top: 50%;
+	width: 35px;
+	height: 35px;
+	background: center / contain no-repeat url("../images/arrow-up-outline.svg");
+	transform: translateY(-50%);
+	z-index: 1;
+}
+
+.hugh-ms__inner--step-1 .hugh-ms__btn--primary:hover {
+	filter: none;
+	background: #f2f2f2;
 }

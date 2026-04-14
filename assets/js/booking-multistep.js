@@ -169,10 +169,11 @@
 			const o = JSON.parse(el.getAttribute('data-hugh-ms-config') || '{}');
 			return {
 				categoryIds: o.categoryIds || [],
+				categoryDescriptions: o.categoryDescriptions || {},
 				photoFieldId: o.photoFieldId != null && o.photoFieldId !== '' ? o.photoFieldId : null,
 			};
 		} catch (e) {
-			return { categoryIds: [], photoFieldId: null };
+			return { categoryIds: [], categoryDescriptions: {}, photoFieldId: null };
 		}
 	}
 
@@ -328,13 +329,14 @@
 		const state = {
 			step: 1,
 			categories: [],
+			categoryEntries: [],
 			flat: [],
+			selectedCategoryId: null,
 			serviceEntry: null,
 			service: null,
 			categoryName: '',
 			date: '',
 			slotsMonth: new Date(),
-			slotsPreview: {},
 			slotsFinal: {},
 			extras: [],
 			selectedExtra: null,
@@ -366,18 +368,19 @@
 
 		function stepsMeta() {
 			const steps = [
-				{ step: 1, label: S.stepType },
+				{ step: 1, label: S.stepCategory || S.stepType },
 				{ step: 2, label: S.stepDate },
+				{ step: 3, label: S.stepService || S.stepType },
 			];
 			if (needsFormatStep()) {
-				steps.push({ step: 3, label: S.stepFormat });
+				steps.push({ step: 4, label: S.stepFormat });
 			}
 			steps.push(
-				{ step: 4, label: S.stepTime },
-				{ step: 5, label: S.stepPhoto },
-				{ step: 6, label: S.stepInfo },
-				{ step: 7, label: S.stepPay },
-				{ step: 8, label: S.stepDone }
+				{ step: 5, label: S.stepTime },
+				{ step: 6, label: S.stepPhoto },
+				{ step: 7, label: S.stepInfo },
+				{ step: 8, label: S.stepPay },
+				{ step: 9, label: S.stepDone }
 			);
 			return steps;
 		}
@@ -385,13 +388,13 @@
 		async function goNext() {
 			setError('');
 			if (state.step === 1) {
-				if (!state.service) {
-					setError(S.pickService);
+				if (!state.selectedCategoryId) {
+					setError(S.pickCategory || S.errorGeneric);
 					render();
 					return;
 				}
 				state.step = 2;
-				await loadMonthPreview();
+				render();
 				return;
 			}
 			if (state.step === 2) {
@@ -400,36 +403,46 @@
 					render();
 					return;
 				}
-				if (needsFormatStep()) {
-					state.step = 3;
-					render();
-					return;
-				}
-				state.step = 4;
-				await afterDateNext();
+				state.step = 3;
+				render();
 				return;
 			}
 			if (state.step === 3) {
+				if (!state.service) {
+					setError(S.pickService);
+					render();
+					return;
+				}
+				if (needsFormatStep()) {
+					state.step = 4;
+					render();
+					return;
+				}
+				state.step = 5;
+				await afterDateNext();
+				return;
+			}
+			if (state.step === 4) {
 				if (state.selectedExtra == null) {
 					setError(S.pickFormat);
 					render();
 					return;
 				}
-				state.step = 4;
+				state.step = 5;
 				await afterDateNext();
 				return;
 			}
-			if (state.step === 4) {
+			if (state.step === 5) {
 				if (!state.time || !state.providerId) {
 					setError(S.pickTime);
 					render();
 					return;
 				}
-				state.step = 5;
+				state.step = 6;
 				render();
 				return;
 			}
-			if (state.step === 5) {
+			if (state.step === 6) {
 				const cf = photoFileCustomField(state.service.id, state.customFields, ui.photoFieldId);
 				if (cf && !state.photoFiles.length) {
 					setError(S.photoRequired || S.errorGeneric);
@@ -441,11 +454,11 @@
 					render();
 					return;
 				}
-				state.step = 6;
+				state.step = 7;
 				render();
 				return;
 			}
-			if (state.step === 6) {
+			if (state.step === 7) {
 				syncFieldsFromDom();
 				const c = state.customer;
 				if (!c.firstName || !c.lastName || !c.email) {
@@ -453,11 +466,11 @@
 					render();
 					return;
 				}
-				state.step = 7;
+				state.step = 8;
 				render();
 				return;
 			}
-			if (state.step === 7) {
+			if (state.step === 8) {
 				await submitBooking();
 			}
 		}
@@ -468,12 +481,8 @@
 				return;
 			}
 			state.step -= 1;
-			if (!needsFormatStep() && state.step === 3) {
-				state.step = 2;
-			}
-			if (state.step === 2 && state.service) {
-				loadMonthPreview();
-				return;
+			if (!needsFormatStep() && state.step === 4) {
+				state.step = 3;
 			}
 			render();
 		}
@@ -561,7 +570,7 @@
 				(d && (d.timeSlotUnavailable || d.recaptchaError || d.emailError || d.customerBlocked));
 			if (!failed && d) {
 				state.resultData = d;
-				state.step = 8;
+				state.step = 9;
 			} else {
 				const msg =
 					(d && d.message) ||
@@ -585,16 +594,52 @@
 			);
 		}
 
-		function renderType() {
-			const items = state.flat
+		function renderCategory() {
+			const items = state.categoryEntries
 				.map(function (entry, idx) {
+					const sel = state.selectedCategoryId === entry.id ? ' is-selected' : '';
+					const metaText = entry.description || ((S.stepService || S.stepType) + (entry.servicesCount > 0 ? ' — ' + String(entry.servicesCount) : ''));
+					return (
+						'<button type="button" class="hugh-ms__card' +
+						sel +
+						'" data-cat-idx="' +
+						idx +
+						'">' +
+						'<span class="hugh-ms__card-title">' +
+						esc(entry.name) +
+						'</span>' +
+						'<span class="hugh-ms__card-meta">' +
+						esc(metaText) +
+						'</span>' +
+						'</button>'
+					);
+				})
+				.join('');
+			return (
+				'<div class="hugh-ms__panel"><h2 class="hugh-ms__title">' +
+				esc(S.stepCategory || S.stepType) +
+				'</h2>' +
+				'<p class="hugh-ms__lead">' +
+				esc(S.stepCategoryHint || '') +
+				'</p><div class="hugh-ms__grid">' +
+				items +
+				'</div></div>'
+			);
+		}
+
+		function renderService() {
+			const items = state.flat
+				.filter(function (entry) {
+					return parseInt(entry.categoryId, 10) === parseInt(state.selectedCategoryId, 10);
+				})
+				.map(function (entry) {
 					const sel = state.service && state.service.id === entry.service.id ? ' is-selected' : '';
 					const price = entry.service.price != null ? ' — ' + esc(String(entry.service.price)) : '';
 					return (
 						'<button type="button" class="hugh-ms__card' +
 						sel +
-						'" data-svc-idx="' +
-						idx +
+						'" data-svc-id="' +
+						esc(String(entry.service.id)) +
 						'">' +
 						'<span class="hugh-ms__card-title">' +
 						esc(entry.service.name) +
@@ -609,7 +654,7 @@
 				.join('');
 			return (
 				'<div class="hugh-ms__panel"><h2 class="hugh-ms__title">' +
-				esc(S.stepType) +
+				esc(S.stepService || S.stepType) +
 				'</h2><div class="hugh-ms__grid">' +
 				items +
 				'</div></div>'
@@ -619,6 +664,7 @@
 		function renderDate() {
 			const y = state.slotsMonth.getFullYear();
 			const m = state.slotsMonth.getMonth();
+			const todayYmd = formatYmd(new Date());
 			const first = new Date(y, m, 1);
 			const startWeekday = (first.getDay() + 6) % 7;
 			const daysInMonth = new Date(y, m + 1, 0).getDate();
@@ -630,7 +676,7 @@
 			}
 			for (let d = 1; d <= daysInMonth; d++) {
 				const ymd = formatYmd(new Date(y, m, d));
-				const has = state.slotsPreview[ymd] && Object.keys(state.slotsPreview[ymd]).length;
+				const has = ymd >= todayYmd;
 				const sel = state.date === ymd ? ' is-selected' : '';
 				const dis = has ? '' : ' is-disabled';
 				cells +=
@@ -832,27 +878,30 @@
 			} else {
 				switch (state.step) {
 					case 1:
-						main = renderType();
+						main = renderCategory();
 						break;
 					case 2:
 						main = renderDate();
 						break;
 					case 3:
-						main = renderFormat();
+						main = renderService();
 						break;
 					case 4:
-						main = renderTime();
+						main = renderFormat();
 						break;
 					case 5:
-						main = renderPhoto();
+						main = renderTime();
 						break;
 					case 6:
-						main = renderInfo();
+						main = renderPhoto();
 						break;
 					case 7:
-						main = renderPay();
+						main = renderInfo();
 						break;
 					case 8:
+						main = renderPay();
+						break;
+					case 9:
 						main = renderDone();
 						break;
 					default:
@@ -860,11 +909,13 @@
 				}
 			}
 			const err = state.error ? '<p class="hugh-ms__error">' + esc(state.error) + '</p>' : '';
-			const showNext = state.step < 8 && !state.loading;
-			const showBack = state.step > 1 && state.step < 8 && !state.loading;
-			const nextLabel = state.step === 7 ? S.submit : S.next;
+			const showNext = state.step < 9 && !state.loading;
+			const showBack = state.step > 1 && state.step < 9 && !state.loading;
+			const nextLabel = state.step === 8 ? S.submit : S.next;
 			el.innerHTML =
-				'<div class="hugh-ms__inner">' +
+				'<div class="hugh-ms__inner hugh-ms__inner--step-' +
+				state.step +
+				'">' +
 				renderHeader() +
 				err +
 				main +
@@ -880,13 +931,36 @@
 				if (!(t instanceof Element)) {
 					return;
 				}
-				const svc = t.closest('[data-svc-idx]');
+				const cat = t.closest('[data-cat-idx]');
+				if (cat) {
+					const idx = parseInt(cat.getAttribute('data-cat-idx'), 10);
+					const picked = state.categoryEntries[idx];
+					if (picked) {
+						state.selectedCategoryId = parseInt(picked.id, 10);
+						state.serviceEntry = null;
+						state.service = null;
+						state.selectedExtra = null;
+						state.time = '';
+						state.providerId = null;
+						state.slotsFinal = {};
+						state.photoFiles = [];
+					}
+					render();
+					return;
+				}
+				const svc = t.closest('[data-svc-id]');
 				if (svc) {
-					const idx = parseInt(svc.getAttribute('data-svc-idx'), 10);
-					state.serviceEntry = state.flat[idx];
-					state.service = state.serviceEntry.service;
-					state.categoryName = state.serviceEntry.categoryName;
-					state.photoFiles = [];
+					const serviceId = parseInt(svc.getAttribute('data-svc-id'), 10);
+					const pickedServiceEntry = state.flat.find(function (entry) {
+						return parseInt(entry.service.id, 10) === serviceId;
+					});
+					if (pickedServiceEntry) {
+						state.serviceEntry = pickedServiceEntry;
+						state.service = pickedServiceEntry.service;
+						state.categoryName = pickedServiceEntry.categoryName;
+						state.photoFiles = [];
+						state.selectedExtra = null;
+					}
 					render();
 					return;
 				}
@@ -921,7 +995,7 @@
 				if (cal) {
 					const dir = cal.getAttribute('data-cal');
 					state.slotsMonth.setMonth(state.slotsMonth.getMonth() + (dir === 'next' ? 1 : -1));
-					loadMonthPreview();
+					render();
 					return;
 				}
 				if (t.matches('[data-act="next"]')) {
@@ -972,27 +1046,6 @@
 			});
 		}
 
-		async function loadMonthPreview() {
-			if (!state.service) {
-				return;
-			}
-			state.loading = true;
-			render();
-			try {
-				state.slotsPreview = await loadSlots({
-					serviceId: state.service.id,
-					startDateTime: monthStart(state.slotsMonth),
-					monthsLoad: 1,
-					extras: [],
-				});
-			} catch (err) {
-				setError(S.errorSlots);
-				state.slotsPreview = {};
-			}
-			state.loading = false;
-			render();
-		}
-
 		async function afterDateNext() {
 			state.loading = true;
 			render();
@@ -1023,9 +1076,27 @@
 			render();
 			try {
 				const data = await loadEntities();
-				state.categories = data.categories || [];
+				state.categories = valuesMap(data.categories || []);
 				state.customFields = valuesMap(data.customFields);
 				state.flat = flattenServices(state.categories, ui.categoryIds || []);
+				const allow = ui.categoryIds && ui.categoryIds.length ? new Set(ui.categoryIds.map(function (id) { return parseInt(id, 10); })) : null;
+				state.categoryEntries = state.categories
+					.map(function (cat) {
+						const cid = parseInt(cat.id, 10);
+						if (allow && !allow.has(cid)) {
+							return null;
+						}
+						const servicesCount = valuesMap(cat.serviceList || cat.services).length;
+						if (!servicesCount) {
+							return null;
+						}
+						const description = ui.categoryDescriptions && ui.categoryDescriptions[cid] ? String(ui.categoryDescriptions[cid]) : '';
+						return { id: cid, name: cat.name || '', description: description, servicesCount: servicesCount };
+					})
+					.filter(Boolean);
+				if (!state.selectedCategoryId && state.categoryEntries.length) {
+					state.selectedCategoryId = parseInt(state.categoryEntries[0].id, 10);
+				}
 				if (!state.flat.length) {
 					setError(S.errorNoServices);
 				}
