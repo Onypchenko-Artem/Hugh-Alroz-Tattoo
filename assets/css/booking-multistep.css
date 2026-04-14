@@ -9,14 +9,19 @@
 	--hugh-ms-text: #f5f2ed;
 	--hugh-ms-muted: rgba(245, 242, 237, 0.55);
 	--hugh-ms-danger: #e07070;
+	--hugh-ms-pad-y: clamp(15px, 1.3vw, 25px);
+	--hugh-ms-pad-x: clamp(18px, 1.56vw, 30px);
+	/* Reserve space so main content does not sit under the fixed footer row */
+	--hugh-ms-footer-slot: 110px;
 
 	position: relative;
 	z-index: 1;
 	width: min(1569px, calc(100vw - 40px));
 	max-width: 1569px;
 	min-height: 818px;
+	height: 818px;
 	margin: 0 auto;
-	padding: clamp(15px, 1.3vw, 25px) clamp(18px, 1.56vw, 30px) ;
+	padding: var(--hugh-ms-pad-y) var(--hugh-ms-pad-x);
 	font-family: var(--hat-font-family, "Inter Tight", system-ui, sans-serif);
 	color: var(--hugh-ms-text);
 	background: var(--hugh-ms-bg);
@@ -29,6 +34,7 @@
 	display: flex;
 	flex-direction: column;
 	gap: clamp(16px, 2vw, 24px);
+	padding-bottom: calc(var(--hugh-ms-footer-slot) + var(--hugh-ms-pad-y));
 }
 
 .hugh-ms__crumbs {
@@ -322,9 +328,13 @@
 	justify-content: space-between;
 	align-items: center;
 	gap: 12px;
-	margin-top: 8px;
-	padding-top: 16px;
-	border-top: 1px solid rgba(255, 255, 255, 0.08);
+	position: absolute;
+	left: var(--hugh-ms-pad-x);
+	right: var(--hugh-ms-pad-x);
+	bottom: var(--hugh-ms-pad-y);
+	padding: 0;
+	border-top: 0;
+	z-index: 3;
 }
 
 .hugh-ms__btn {
@@ -348,6 +358,19 @@
 
 .hugh-ms__btn--primary:hover {
 	filter: brightness(1.08);
+}
+
+.hugh-ms__btn--primary:disabled,
+.hugh-ms__btn--primary[aria-disabled="true"] {
+	opacity: 0.38;
+	cursor: not-allowed;
+	pointer-events: none;
+	filter: none;
+}
+
+.hugh-ms__btn--primary:disabled:hover,
+.hugh-ms__btn--primary[aria-disabled="true"]:hover {
+	filter: none;
 }
 
 .hugh-ms__btn--ghost {
@@ -497,10 +520,6 @@
 
 .hugh-ms__inner--step-1 .hugh-ms__footer {
 	justify-content: flex-end;
-	border-top: 0;
-	margin-top: -70px;
-	padding-top: 0;
-	position: relative;
 	z-index: 2;
 }
 
@@ -546,6 +565,345 @@
 }
 
 .hugh-ms__inner--step-1 .hugh-ms__btn--primary:hover {
+	filter: none;
+	background: #f2f2f2;
+}
+
+/* Step 2: date picker layout from design. */
+.hugh-ms__inner--step-2 .hugh-ms__crumbs {
+	position: relative;
+	display: block;
+	height: 15px;
+	border: 1px solid #fff;
+	border-radius: 56px;
+	overflow: hidden;
+	font-size: 0;
+	line-height: 0;
+}
+
+.hugh-ms__inner--step-2 .hugh-ms__crumb {
+	display: none;
+}
+
+.hugh-ms__inner--step-2 .hugh-ms__crumb.is-active {
+	display: block;
+	width: 23%;
+	height: 100%;
+	background: #fff;
+}
+
+.hugh-ms__inner--step-2 .hugh-ms__panel {
+	padding-left: clamp(66px, 5.72vw, 110px);
+}
+
+.hugh-ms__inner--step-2 .hugh-ms__step2-head {
+	display: flex;
+	align-items: baseline;
+	justify-content: space-between;
+	gap: 24px;
+	/*max-width: 760px;*/
+}
+
+.hugh-ms__inner--step-2 .hugh-ms__title {
+	margin-bottom: 24px;
+	font-size: clamp(60px, 5.2vw, 100px);
+	font-weight: 500;
+	line-height: 1;
+	letter-spacing: 0.01em;
+	color: #fff;
+}
+
+.hugh-ms__step2-back {
+	background: transparent;
+	border: 0;
+	padding: 0;
+	font: inherit;
+	font-size: 24px;
+	line-height: 1;
+	color: #c9c9c9;
+	cursor: pointer;
+}
+
+.hugh-ms__inner--step-2 .hugh-ms__cal-wrap {
+	width: min(100%, 857px);
+	height: 585px;
+	border: 1px solid #fff;
+	padding: 40px;
+	display: flex;
+	flex-direction: column;
+}
+
+.hugh-ms__inner--step-2 .hugh-ms__cal-nav {
+	display: flex;
+	justify-content: space-between;
+	align-items: center;
+	margin-bottom: 60px;
+}
+
+.hugh-ms__cal-month {
+	font-size: 32px;
+	font-weight: 500;
+	line-height: 1;
+	letter-spacing: 0.01em;
+	text-transform: uppercase;
+}
+
+.hugh-ms__cal-arrows {
+	display: inline-flex;
+	gap: 8px;
+}
+
+.hugh-ms__cal-arrow {
+	width: 28px;
+	height: 28px;
+	border: 0;
+	background: transparent;
+	color: #fff;
+	font-size: 35px;
+	line-height: 1;
+	cursor: pointer;
+}
+
+.hugh-ms__cal-weekdays {
+	display: grid;
+	grid-template-columns: repeat(7, minmax(0, 1fr));
+	margin-bottom: 10px;
+}
+
+.hugh-ms__cal-weekday {
+	text-align: center;
+	font-size: 30px;
+	font-weight: 400;
+	line-height: 1;
+	color: rgba(255, 255, 255, 0.86);
+}
+
+.hugh-ms__inner--step-2 .hugh-ms__cal-grid {
+	grid-template-columns: repeat(7, minmax(0, 1fr));
+	gap: 0;
+	justify-items: center;
+	align-items: center;
+	flex: 1 1 auto;
+}
+
+.hugh-ms__inner--step-2 .hugh-ms__cal-cell {
+	min-height: 49px;
+	font-size: 31px;
+	border-radius: 0;
+	background: transparent;
+}
+
+.hugh-ms__inner--step-2 .hugh-ms__cal-cell.is-selected {
+	background: #fff;
+	color: #000;
+	border-color: #fff;
+}
+
+.hugh-ms__inner--step-2 .hugh-ms__cal-cell.is-disabled,
+.hugh-ms__inner--step-2 .hugh-ms__cal-cell:disabled {
+	opacity: 0.38;
+}
+
+.hugh-ms__inner--step-2 .hugh-ms__cal-cell--outside {
+	opacity: 0.5;
+	color: rgba(255, 255, 255, 0.5);
+}
+
+.hugh-ms__inner--step-2 .hugh-ms__footer {
+	justify-content: flex-end;
+	z-index: 2;
+}
+
+.hugh-ms__inner--step-2 .hugh-ms__footer .hugh-ms__btn--ghost {
+	display: none;
+}
+
+.hugh-ms__inner--step-2 .hugh-ms__btn--primary {
+	position: relative;
+	display: inline-flex;
+	align-items: center;
+	gap: 16px;
+	min-height: 85px;
+	padding: 14px 14px 13px 31px;
+	font-size: 24px;
+	font-weight: 600;
+	letter-spacing: 0.01em;
+	text-transform: uppercase;
+	color: #000;
+	background: #fff;
+	border: 2px solid #fff;
+	border-radius: 0;
+}
+
+.hugh-ms__inner--step-2 .hugh-ms__btn--primary::after {
+	content: "";
+	width: 57px;
+	height: 58px;
+	background: #000;
+	flex: 0 0 auto;
+}
+
+.hugh-ms__inner--step-2 .hugh-ms__btn--primary::before {
+	content: "";
+	position: absolute;
+	right: 25px;
+	top: 50%;
+	width: 35px;
+	height: 35px;
+	background: center / contain no-repeat url("../images/arrow-up-outline.svg");
+	transform: translateY(-50%);
+	z-index: 1;
+}
+
+/* Step 3: choose service / format — black & white cards, progress ~40%, header + Retour. */
+.hugh-ms__inner--step-3 .hugh-ms__crumbs {
+	position: relative;
+	display: block;
+	height: 15px;
+	border: 1px solid #fff;
+	border-radius: 56px;
+	overflow: hidden;
+	font-size: 0;
+	line-height: 0;
+	background: #3a3a3a;
+}
+
+.hugh-ms__inner--step-3 .hugh-ms__crumb {
+	display: none;
+}
+
+.hugh-ms__inner--step-3 .hugh-ms__crumb.is-active {
+	display: block;
+	width: 40%;
+	height: 100%;
+	background: #fff;
+}
+
+.hugh-ms__inner--step-3 .hugh-ms__panel {
+	min-height: 0;
+	padding-left: clamp(66px, 5.72vw, 110px);
+}
+
+.hugh-ms__inner--step-3 .hugh-ms__step2-head {
+	display: flex;
+	align-items: baseline;
+	justify-content: space-between;
+	gap: 24px;
+}
+
+.hugh-ms__inner--step-3 .hugh-ms__title {
+	margin-bottom: 32px;
+	font-size: clamp(60px, 5.2vw, 100px);
+	font-weight: 500;
+	line-height: 1;
+	letter-spacing: 0.01em;
+	color: #fff;
+}
+
+.hugh-ms__inner--step-3 .hugh-ms__step2-back {
+	color: #fff;
+}
+
+.hugh-ms__inner--step-3 .hugh-ms__grid {
+	gap: 20px;
+	max-width: 670px;
+}
+
+.hugh-ms__inner--step-3 .hugh-ms__card {
+	min-height: 168px;
+	padding: 36px 44px;
+	justify-content: flex-start;
+	gap: 12px;
+	border: 1px solid #fff;
+	border-radius: 0;
+	background: transparent;
+	color: #fff;
+	transition: background 0.2s ease, color 0.2s ease, border-color 0.2s ease;
+}
+
+.hugh-ms__inner--step-3 .hugh-ms__card:hover {
+	border-color: #fff;
+	background: rgba(255, 255, 255, 0.06);
+	color: #fff;
+}
+
+.hugh-ms__inner--step-3 .hugh-ms__card.is-selected {
+	background: #fff;
+	color: #000;
+	border-color: #fff;
+}
+
+.hugh-ms__inner--step-3 .hugh-ms__card.is-selected:hover {
+	background: #fff;
+	color: #000;
+}
+
+.hugh-ms__inner--step-3 .hugh-ms__card-title {
+	font-size: 32px;
+	font-weight: 500;
+	line-height: 1.25;
+	text-transform: uppercase;
+	letter-spacing: 0.02em;
+	color: inherit;
+}
+
+.hugh-ms__inner--step-3 .hugh-ms__card-meta--price {
+	font-size: 36px;
+	font-weight: 600;
+	line-height: 1.2;
+	text-transform: uppercase;
+	letter-spacing: 0.02em;
+	color: inherit;
+	opacity: 1;
+}
+
+.hugh-ms__inner--step-3 .hugh-ms__footer {
+	justify-content: flex-end;
+	z-index: 2;
+}
+
+.hugh-ms__inner--step-3 .hugh-ms__footer .hugh-ms__btn--ghost {
+	display: none;
+}
+
+.hugh-ms__inner--step-3 .hugh-ms__btn--primary {
+	position: relative;
+	display: inline-flex;
+	align-items: center;
+	gap: 16px;
+	min-height: 85px;
+	padding: 14px 14px 13px 31px;
+	font-size: 24px;
+	font-weight: 600;
+	letter-spacing: 0.01em;
+	text-transform: uppercase;
+	color: #000;
+	background: #fff;
+	border: 2px solid #fff;
+	border-radius: 0;
+}
+
+.hugh-ms__inner--step-3 .hugh-ms__btn--primary::after {
+	content: "";
+	width: 57px;
+	height: 58px;
+	background: #000;
+	flex: 0 0 auto;
+}
+
+.hugh-ms__inner--step-3 .hugh-ms__btn--primary::before {
+	content: "";
+	position: absolute;
+	right: 25px;
+	top: 50%;
+	width: 35px;
+	height: 35px;
+	background: center / contain no-repeat url("../images/arrow-up-outline.svg");
+	transform: translateY(-50%);
+	z-index: 1;
+}
+
+.hugh-ms__inner--step-3 .hugh-ms__btn--primary:hover {
 	filter: none;
 	background: #f2f2f2;
 }

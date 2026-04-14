@@ -30,7 +30,7 @@
 		}
 	}
 
-	const intlLocale = intlLocaleTag(cfg.locale);
+	const calendarLocale = intlLocaleTag(cfg.calendarLocale) || 'fr-FR';
 
 	function apiUrl(path, query) {
 		// Amelia parses `call` from the raw query: the value must be a real path like /entities.
@@ -399,8 +399,6 @@
 			}
 			if (state.step === 2) {
 				if (!state.date) {
-					setError(S.pickDate);
-					render();
 					return;
 				}
 				state.step = 3;
@@ -634,7 +632,15 @@
 				})
 				.map(function (entry) {
 					const sel = state.service && state.service.id === entry.service.id ? ' is-selected' : '';
-					const price = entry.service.price != null ? ' — ' + esc(String(entry.service.price)) : '';
+					const rawPrice = entry.service.price;
+					let metaLine = '';
+					if (rawPrice != null && String(rawPrice).trim() !== '') {
+						const p = String(rawPrice).trim();
+						metaLine =
+							/[€$]|\bCAD\b|\bEUR\b/i.test(p) ? esc(p) : esc(p) + ' CAD';
+					} else {
+						metaLine = esc(entry.categoryName || '');
+					}
 					return (
 						'<button type="button" class="hugh-ms__card' +
 						sel +
@@ -644,18 +650,24 @@
 						'<span class="hugh-ms__card-title">' +
 						esc(entry.service.name) +
 						'</span>' +
-						'<span class="hugh-ms__card-meta">' +
-						esc(entry.categoryName) +
-						price +
+						'<span class="hugh-ms__card-meta hugh-ms__card-meta--price">' +
+						metaLine +
 						'</span>' +
 						'</button>'
 					);
 				})
 				.join('');
 			return (
-				'<div class="hugh-ms__panel"><h2 class="hugh-ms__title">' +
+				'<div class="hugh-ms__panel">' +
+				'<div class="hugh-ms__step2-head">' +
+				'<h2 class="hugh-ms__title">' +
 				esc(S.stepService || S.stepType) +
-				'</h2><div class="hugh-ms__grid">' +
+				'</h2>' +
+				'<button type="button" class="hugh-ms__step2-back" data-act="back">↶ ' +
+				esc(S.back) +
+				'</button>' +
+				'</div>' +
+				'<div class="hugh-ms__grid">' +
 				items +
 				'</div></div>'
 			);
@@ -665,15 +677,26 @@
 			const y = state.slotsMonth.getFullYear();
 			const m = state.slotsMonth.getMonth();
 			const todayYmd = formatYmd(new Date());
+			const monthLabel = new Date(y, m, 1)
+				.toLocaleString(calendarLocale, { month: 'long', year: 'numeric' })
+				.toUpperCase();
 			const first = new Date(y, m, 1);
 			const startWeekday = (first.getDay() + 6) % 7;
 			const daysInMonth = new Date(y, m + 1, 0).getDate();
-			const prev = new Date(y, m - 1, 1);
-			const next = new Date(y, m + 1, 1);
+			const daysInPrevMonth = new Date(y, m, 0).getDate();
+			const weekdays = ['L', 'M', 'M', 'J', 'V', 'S', 'D'];
 			let cells = '';
+
+			// Leading cells from previous month.
 			for (let i = 0; i < startWeekday; i++) {
-				cells += '<div class="hugh-ms__cal-cell hugh-ms__cal-cell--empty"></div>';
+				const d = daysInPrevMonth - startWeekday + i + 1;
+				cells +=
+					'<button type="button" class="hugh-ms__cal-cell hugh-ms__cal-cell--outside is-disabled" disabled>' +
+					d +
+					'</button>';
 			}
+
+			// Current month cells.
 			for (let d = 1; d <= daysInMonth; d++) {
 				const ymd = formatYmd(new Date(y, m, d));
 				const has = ymd >= todayYmd;
@@ -691,21 +714,47 @@
 					d +
 					'</button>';
 			}
+
+			// Trailing cells from next month up to 6 full weeks.
+			const totalCells = startWeekday + daysInMonth;
+			const trailing = (7 - (totalCells % 7)) % 7;
+			for (let nd = 1; nd <= trailing; nd++) {
+				cells +=
+					'<button type="button" class="hugh-ms__cal-cell hugh-ms__cal-cell--outside is-disabled" disabled>' +
+					nd +
+					'</button>';
+			}
+			const weekdaysHtml = weekdays
+				.map(function (day) {
+					return '<span class="hugh-ms__cal-weekday">' + esc(day) + '</span>';
+				})
+				.join('');
 			return (
-				'<div class="hugh-ms__panel"><h2 class="hugh-ms__title">' +
+				'<div class="hugh-ms__panel">' +
+				'<div class="hugh-ms__step2-head">' +
+				'<h2 class="hugh-ms__title">' +
 				esc(S.stepDate) +
 				'</h2>' +
-				'<div class="hugh-ms__cal-nav">' +
-				'<button type="button" class="hugh-ms__btn hugh-ms__btn--ghost" data-cal="prev">' +
-				'← ' +
-				esc(prev.toLocaleString(intlLocale, { month: 'long' })) +
+				'<button type="button" class="hugh-ms__step2-back" data-act="back">↶ ' +
+				esc(S.back) +
 				'</button>' +
-				'<button type="button" class="hugh-ms__btn hugh-ms__btn--ghost" data-cal="next">' +
-				esc(next.toLocaleString(intlLocale, { month: 'long' })) +
-				' →</button>' +
+				'</div>' +
+				'<div class="hugh-ms__cal-wrap">' +
+				'<div class="hugh-ms__cal-nav">' +
+				'<span class="hugh-ms__cal-month">' +
+				esc(monthLabel) +
+				'</span>' +
+				'<div class="hugh-ms__cal-arrows">' +
+				'<button type="button" class="hugh-ms__cal-arrow" data-cal="prev" aria-label="Previous month">‹</button>' +
+				'<button type="button" class="hugh-ms__cal-arrow" data-cal="next" aria-label="Next month">›</button>' +
+				'</div>' +
+				'</div>' +
+				'<div class="hugh-ms__cal-weekdays">' +
+				weekdaysHtml +
 				'</div>' +
 				'<div class="hugh-ms__cal-grid">' +
 				cells +
+				'</div>' +
 				'</div></div>'
 			);
 		}
@@ -912,6 +961,15 @@
 			const showNext = state.step < 9 && !state.loading;
 			const showBack = state.step > 1 && state.step < 9 && !state.loading;
 			const nextLabel = state.step === 8 ? S.submit : S.next;
+			const nextDisabled = state.step === 2 && !state.date;
+			const nextBtn =
+				showNext ?
+					'<button type="button" class="hugh-ms__btn hugh-ms__btn--primary" data-act="next"' +
+					(nextDisabled ? ' disabled aria-disabled="true"' : '') +
+					'>' +
+					esc(nextLabel) +
+					'</button>' :
+					'';
 			el.innerHTML =
 				'<div class="hugh-ms__inner hugh-ms__inner--step-' +
 				state.step +
@@ -921,7 +979,7 @@
 				main +
 				'<div class="hugh-ms__footer">' +
 				(showBack ? '<button type="button" class="hugh-ms__btn hugh-ms__btn--ghost" data-act="back">' + esc(S.back) + '</button>' : '<span></span>') +
-				(showNext ? '<button type="button" class="hugh-ms__btn hugh-ms__btn--primary" data-act="next">' + esc(nextLabel) + '</button>' : '') +
+				nextBtn +
 				'</div></div>';
 		}
 

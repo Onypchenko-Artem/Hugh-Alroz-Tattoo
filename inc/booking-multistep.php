@@ -219,6 +219,11 @@ function hughalroztatoo_localize_amelia_multistep_script() {
 			'nonce'            => wp_create_nonce( 'ajax-nonce' ),
 			'timeZone'         => $tz,
 			'locale'           => get_locale(),
+			/**
+			 * BCP 47 tag for calendar month names (independent of WP admin language).
+			 * Filter: hughalroztatoo_booking_calendar_locale
+			 */
+			'calendarLocale'   => apply_filters( 'hughalroztatoo_booking_calendar_locale', 'fr-FR' ),
 			'recaptchaSiteKey' => $recaptcha_on ? (string) $grecap['siteKey'] : '',
 			'recaptchaOn'      => $recaptcha_on,
 			'strings'          => array(
