@@ -329,6 +329,59 @@
 		return String(minutes) + ' min de tatouage';
 	}
 
+	function parsePriceNumber(raw) {
+		if (raw == null || raw === '') {
+			return null;
+		}
+		const s = String(raw).replace(/[^\d.,]/g, '').replace(',', '.');
+		const n = parseFloat(s);
+		return isNaN(n) ? null : n;
+	}
+
+	function cadMoneyLabel(raw) {
+		if (raw == null || raw === '') {
+			return '—';
+		}
+		const p = String(raw).trim();
+		if (/[€$]|\bCAD\b|\bEUR\b/i.test(p)) {
+			return p;
+		}
+		return p + ' CAD';
+	}
+
+	function bookingSessionPriceNumber(service, extra) {
+		if (!service) {
+			return null;
+		}
+		const sn = parsePriceNumber(service.price);
+		const en = extra != null ? parsePriceNumber(extra.price) : null;
+		if (sn != null && en != null) {
+			return sn + en;
+		}
+		if (sn != null) {
+			return sn;
+		}
+		return en;
+	}
+
+	function durationShortH(service) {
+		if (!service || service.duration == null) {
+			return '';
+		}
+		const raw = parseInt(service.duration, 10);
+		if (isNaN(raw) || raw <= 0) {
+			return '';
+		}
+		const minutes = raw > 480 ? Math.round(raw / 60) : raw;
+		if (minutes >= 60 && minutes % 60 === 0) {
+			return String(minutes / 60) + 'H';
+		}
+		if (minutes >= 60) {
+			return String(Math.floor(minutes / 60)) + 'H';
+		}
+		return String(minutes) + 'MIN';
+	}
+
 	function displayTimesForDate(allSlots, date) {
 		const daySlots = allSlots && allSlots[date] ? allSlots[date] : {};
 		const dayTimes = Object.keys(daySlots || {});
@@ -460,6 +513,7 @@
 			customFields: [],
 			customer: { firstName: '', lastName: '', email: '', phone: '', note: '' },
 			ageConfirmed: false,
+			payTermsAccepted: false,
 			loading: false,
 			error: '',
 			resultData: null,
@@ -619,6 +673,12 @@
 				return;
 			}
 			if (state.step === 8) {
+				syncFieldsFromDom();
+				if (!state.payTermsAccepted) {
+					setError(S.errorPayTerms || S.errorGeneric);
+					render();
+					return;
+				}
 				await submitBooking();
 			}
 		}
@@ -833,8 +893,11 @@
 				'<h2 class="hugh-ms__title">' +
 				esc(S.stepService || S.stepType) +
 				'</h2>' +
-				'<button type="button" class="hugh-ms__step2-back" data-act="back">↶ ' +
+				'<button type="button" class="hugh-ms__step2-back hugh-ms__step2-back--figma" data-act="back">' +
+				'<span class="hugh-ms__step2-back-ico" aria-hidden="true"></span>' +
+				'<span class="hugh-ms__step2-back-txt">' +
 				esc(S.back) +
+				'</span>' +
 				'</button>' +
 				'</div>' +
 				'<div class="hugh-ms__grid">' +
@@ -905,8 +968,11 @@
 				'<h2 class="hugh-ms__title">' +
 				esc(S.stepDate) +
 				'</h2>' +
-				'<button type="button" class="hugh-ms__step2-back" data-act="back">↶ ' +
+				'<button type="button" class="hugh-ms__step2-back hugh-ms__step2-back--figma" data-act="back">' +
+				'<span class="hugh-ms__step2-back-ico" aria-hidden="true"></span>' +
+				'<span class="hugh-ms__step2-back-txt">' +
 				esc(S.back) +
+				'</span>' +
 				'</button>' +
 				'</div>' +
 				'<div class="hugh-ms__cal-wrap">' +
@@ -993,8 +1059,11 @@
 				'<h2 class="hugh-ms__title">' +
 				esc(S.stepTime) +
 				'</h2>' +
-				'<button type="button" class="hugh-ms__step2-back" data-act="back">↶ ' +
+				'<button type="button" class="hugh-ms__step2-back hugh-ms__step2-back--figma" data-act="back">' +
+				'<span class="hugh-ms__step2-back-ico" aria-hidden="true"></span>' +
+				'<span class="hugh-ms__step2-back-txt">' +
 				esc(S.back) +
+				'</span>' +
 				'</button>' +
 				'</div>' +
 				(metaParts.length ? '<p class="hugh-ms__time-meta">' + esc(metaParts.join(' • ')) + '</p>' : '') +
@@ -1047,8 +1116,11 @@
 				'<h2 class="hugh-ms__title">' +
 				esc(S.stepPhoto) +
 				'</h2>' +
-				'<button type="button" class="hugh-ms__step2-back" data-act="back">↶ ' +
+				'<button type="button" class="hugh-ms__step2-back hugh-ms__step2-back--figma" data-act="back">' +
+				'<span class="hugh-ms__step2-back-ico" aria-hidden="true"></span>' +
+				'<span class="hugh-ms__step2-back-txt">' +
 				esc(S.back) +
+				'</span>' +
 				'</button>' +
 				'</div>' +
 				'<p class="hugh-ms__photo-guidelines">' +
@@ -1178,44 +1250,151 @@
 		}
 
 		function renderPay() {
-			const extraLine =
-				state.selectedExtra ?
-					'<li>' + esc(state.selectedExtra.name) + '</li>' :
-					'';
+			const svc = state.service;
+			const extra = state.selectedExtra;
+			const urls = cfg.payUrls || {};
+			function payUrl(key) {
+				const u = urls[key];
+				return u && String(u).trim() ? String(u).trim() : '#';
+			}
+			const formatName = extra ? extra.name : svc ? svc.name : '';
+			const dh = durationShortH(svc);
+			const formatVal =
+				formatName && dh ? formatName + ' — ' + dh : formatName || dh || '—';
+			const dateVal = formatDateLabel(state.date) || '—';
+			const slotVal = state.time ? state.time : '—';
+			const totalNum = bookingSessionPriceNumber(svc, extra);
+			const totalDisplay =
+				totalNum != null ? String(Math.round(totalNum)) + ' CAD' : svc ? cadMoneyLabel(svc.price) : '—';
+			const pctRaw = cfg.depositPercent != null ? parseInt(cfg.depositPercent, 10) : 30;
+			const pct = isNaN(pctRaw) ? 30 : pctRaw;
+			const depLabel = (S.payRowDepositFmt || 'Acompte %d%%').replace('%d', String(pct));
+			let depDisplay = '—';
+			if (totalNum != null) {
+				depDisplay = String(Math.round((totalNum * pct) / 100)) + ' CAD';
+			}
+			function payRow(label, value) {
+				return (
+					'<div class="hugh-ms__pay-row">' +
+					'<span class="hugh-ms__pay-k">' +
+					esc(label || '') +
+					'</span>' +
+					'<span class="hugh-ms__pay-v">' +
+					esc(value || '') +
+					'</span>' +
+					'</div>'
+				);
+			}
+			const consentHtml =
+				'<span class="hugh-ms__pay-terms-line">' +
+				esc(S.payConsentBefore || '') +
+				'<a href="' +
+				esc(payUrl('conditions')) +
+				'" class="hugh-ms__pay-link" target="_blank" rel="noopener noreferrer">' +
+				esc(S.payTermsConditions || '') +
+				'</a>' +
+				esc(S.payConsentMid || '') +
+				'<a href="' +
+				esc(payUrl('privacy')) +
+				'" class="hugh-ms__pay-link" target="_blank" rel="noopener noreferrer">' +
+				esc(S.payTermsPrivacy || '') +
+				'</a>' +
+				esc(S.payConsentAnd || '') +
+				'<a href="' +
+				esc(payUrl('refund')) +
+				'" class="hugh-ms__pay-link" target="_blank" rel="noopener noreferrer">' +
+				esc(S.payTermsRefund || '') +
+				'</a>' +
+				esc(S.payConsentAfter || '') +
+				'</span>';
 			return (
-				'<div class="hugh-ms__panel"><h2 class="hugh-ms__title">' +
+				'<div class="hugh-ms__panel hugh-ms__panel--pay">' +
+				'<div class="hugh-ms__step2-head">' +
+				'<h2 class="hugh-ms__title">' +
 				esc(S.stepPay) +
 				'</h2>' +
-				'<div class="hugh-ms__pay">' +
-				'<div><h3 class="hugh-ms__sub">' +
-				esc(S.paySummary) +
-				'</h3><ul class="hugh-ms__summary">' +
-				'<li><strong>' +
-				esc(state.service.name) +
-				'</strong></li>' +
-				extraLine +
-				'<li>' +
-				esc(state.date) +
-				' ' +
-				esc(state.time) +
-				'</li>' +
-				'</ul></div>' +
-				'<div class="hugh-ms__pay-aside"><p class="hugh-ms__muted">' +
-				esc(S.payOnSite) +
-				'</p></div>' +
-				'</div></div>'
+				'<button type="button" class="hugh-ms__step2-back hugh-ms__step2-back--figma" data-act="back">' +
+				'<span class="hugh-ms__step2-back-ico" aria-hidden="true"></span>' +
+				'<span class="hugh-ms__step2-back-txt">' +
+				esc(S.back) +
+				'</span>' +
+				'</button>' +
+				'</div>' +
+				'<div class="hugh-ms__pay-layout">' +
+				'<div class="hugh-ms__pay-sheet">' +
+				payRow(S.payRowFormat, formatVal) +
+				payRow(S.payRowDate, dateVal) +
+				payRow(S.payRowSlot, slotVal) +
+				payRow(S.payRowTotal, totalDisplay) +
+				'<div class="hugh-ms__pay-sep" role="presentation"></div>' +
+				payRow(depLabel, depDisplay) +
+				'</div>' +
+				'<p class="hugh-ms__pay-disclaimer">' +
+				esc(S.payDisclaimer || '') +
+				'</p>' +
+				'<label class="hugh-ms__pay-terms">' +
+				'<input type="checkbox" class="hugh-ms__cb-outline hugh-ms__pay-terms-input" name="payTerms" value="1"' +
+				(state.payTermsAccepted ? ' checked' : '') +
+				'>' +
+				'<span class="hugh-ms__pay-terms-text">' +
+				consentHtml +
+				'</span>' +
+				'</label>' +
+				'</div>' +
+				'</div>'
 			);
 		}
 
 		function renderDone() {
-			const d = state.resultData || {};
+			const svc = state.service;
+			const extra = state.selectedExtra;
+			const formatName = extra ? extra.name : svc ? svc.name : '';
+			const dh = durationShortH(svc);
+			const formatVal = formatName && dh ? formatName + '- ' + dh : formatName || dh || '—';
+			const dateVal = formatDateLabel(state.date) || '—';
+			const slotVal = state.time || '—';
+			const totalNum = bookingSessionPriceNumber(svc, extra);
+			const pctRaw = cfg.depositPercent != null ? parseInt(cfg.depositPercent, 10) : 30;
+			const pct = isNaN(pctRaw) ? 30 : pctRaw;
+			let paidVal = '—';
+			if (totalNum != null) {
+				paidVal = String(Math.round((totalNum * pct) / 100)) + ' CAD';
+			}
+			function doneRow(label, value, strong) {
+				return (
+					'<div class="hugh-ms__done-row' +
+					(strong ? ' is-strong' : '') +
+					'">' +
+					'<span class="hugh-ms__done-k">' +
+					esc(label || '') +
+					'</span>' +
+					'<span class="hugh-ms__done-v">' +
+					esc(value || '') +
+					'</span>' +
+					'</div>'
+				);
+			}
 			return (
-				'<div class="hugh-ms__panel hugh-ms__panel--center"><div class="hugh-ms__ok">✓</div><h2 class="hugh-ms__title">' +
-				esc(S.stepDone) +
+				'<div class="hugh-ms__panel hugh-ms__panel--done">' +
+				'<div class="hugh-ms__done-wrap">' +
+				'<div class="hugh-ms__done-icon" aria-hidden="true"></div>' +
+				'<h2 class="hugh-ms__title">' +
+				esc(S.stepDone || '') +
 				'</h2>' +
-				'<p class="hugh-ms__muted">' +
-				esc(d.bookingStart || state.date + ' ' + state.time) +
-				'</p></div>'
+				'<div class="hugh-ms__done-sheet">' +
+				doneRow(S.doneRowFormat, formatVal, false) +
+				doneRow(S.doneRowDate, dateVal, false) +
+				doneRow(S.doneRowSlot, slotVal, false) +
+				doneRow(S.doneRowPaid, paidVal, true) +
+				'</div>' +
+				'<p class="hugh-ms__done-note">' +
+				esc(S.doneMessage || '') +
+				'</p>' +
+				'<button type="button" class="hugh-ms__done-close" data-act="close">' +
+				esc(S.doneClose || 'Fermer') +
+				'</button>' +
+				'</div>' +
+				'</div>'
 			);
 		}
 
@@ -1259,7 +1438,18 @@
 			const err = state.error ? '<p class="hugh-ms__error">' + esc(state.error) + '</p>' : '';
 			const showNext = state.step < 9 && !state.loading;
 			const showBack = state.step > 1 && state.step < 9 && !state.loading;
-			const nextLabel = state.step === 8 ? S.submit : S.next;
+			let nextLabel = S.next;
+			if (state.step === 8) {
+				const totalNum = bookingSessionPriceNumber(state.service, state.selectedExtra);
+				const pctRaw = cfg.depositPercent != null ? parseInt(cfg.depositPercent, 10) : 30;
+				const pct = isNaN(pctRaw) ? 30 : pctRaw;
+				let depStr = '—';
+				if (totalNum != null) {
+					depStr = String(Math.round((totalNum * pct) / 100)) + ' CAD';
+				}
+				const tmpl = S.payViaStripe || 'Payer %s via Stripe';
+				nextLabel = tmpl.indexOf('%s') !== -1 ? tmpl.replace('%s', depStr) : tmpl + ' ' + depStr;
+			}
 			const nextDisabled = state.step === 2 && !state.date;
 			const nextBtn =
 				showNext ?
@@ -1270,23 +1460,45 @@
 					'</button>' :
 					'';
 			const step7 = state.step === 7;
+			const step8 = state.step === 8;
+			const step9 = state.step === 9;
 			const footerBack =
-				showBack && !step7 ?
+				showBack && !step7 && !step8 ?
 					'<button type="button" class="hugh-ms__btn hugh-ms__btn--ghost" data-act="back">' + esc(S.back) + '</button>' :
 					'';
 			const footerLeft =
 				step7 ?
 					'<label class="hugh-ms__age-row">' +
-					'<input type="checkbox" class="hugh-ms__age-input" name="ageConfirm" value="1"' +
+					'<input type="checkbox" class="hugh-ms__cb-outline hugh-ms__age-input" name="ageConfirm" value="1"' +
 					(state.ageConfirmed ? ' checked' : '') +
 					'>' +
 					'<span class="hugh-ms__age-text">' +
 					esc(S.ageCheckbox || '') +
 					'</span>' +
 					'</label>' :
+					step8 ?
+						'<span class="hugh-ms__footer-spacer"></span>' :
 					footerBack ?
 						footerBack :
 						'<span></span>';
+			const footerPrimary =
+				step8 && nextBtn ?
+					'<div class="hugh-ms__pay-footer-stack">' +
+					'<p class="hugh-ms__pay-secure">' +
+					esc(S.paySecureLine || '') +
+					'</p>' +
+					nextBtn +
+					'</div>' :
+					nextBtn;
+			const footerClass =
+				(step7 ? ' hugh-ms__footer--info-step' : '') + (step8 ? ' hugh-ms__footer--pay-step' : '');
+			const footerHtml = step9 ? '' :
+				'<div class="hugh-ms__footer' +
+				footerClass +
+				'">' +
+				footerLeft +
+				footerPrimary +
+				'</div>';
 			el.innerHTML =
 				'<div class="hugh-ms__inner hugh-ms__inner--step-' +
 				state.step +
@@ -1294,18 +1506,21 @@
 				renderHeader() +
 				err +
 				main +
-				'<div class="hugh-ms__footer' +
-				(step7 ? ' hugh-ms__footer--info-step' : '') +
-				'">' +
-				footerLeft +
-				nextBtn +
-				'</div></div>';
+				footerHtml +
+				'</div>';
 		}
 
 		function bind() {
 			el.addEventListener('click', function (e) {
 				const t = e.target;
 				if (!(t instanceof Element)) {
+					return;
+				}
+				if (t instanceof HTMLAnchorElement && t.classList.contains('hugh-ms__pay-link') && t.getAttribute('href') === '#') {
+					e.preventDefault();
+				}
+				if (t.closest('[data-act="close"]')) {
+					window.location.reload();
 					return;
 				}
 				if (state.step === 6 && state.tattooZoneOpen && !t.closest('.hugh-ms__photo-zone-field')) {
@@ -1439,6 +1654,9 @@
 					if (t.matches('.hugh-ms__age-input')) {
 						state.ageConfirmed = !!t.checked;
 					}
+					if (t.matches('.hugh-ms__pay-terms-input')) {
+						state.payTermsAccepted = !!t.checked;
+					}
 				},
 				true
 			);
@@ -1470,6 +1688,10 @@
 			const ageIn = el.querySelector('.hugh-ms__age-input');
 			if (ageIn) {
 				state.ageConfirmed = !!ageIn.checked;
+			}
+			const payTermsIn = el.querySelector('.hugh-ms__pay-terms-input');
+			if (payTermsIn) {
+				state.payTermsAccepted = !!payTermsIn.checked;
 			}
 		}
 
