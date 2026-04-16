@@ -164,6 +164,65 @@
 		return null;
 	}
 
+	function customFieldById(customFieldsList, id) {
+		const wanted = parseInt(id, 10);
+		if (isNaN(wanted) || wanted <= 0) {
+			return null;
+		}
+		const list = customFieldsList || [];
+		for (let i = 0; i < list.length; i++) {
+			const f = list[i];
+			if (f && parseInt(f.id, 10) === wanted) {
+				return f;
+			}
+		}
+		return null;
+	}
+
+	function customFieldOptions(field) {
+		if (!field) {
+			return [];
+		}
+		let source =
+			field.options != null ? field.options :
+			field.selectOptions != null ? field.selectOptions :
+			field.items != null ? field.items :
+			field.valueOptions != null ? field.valueOptions :
+			null;
+		// Amelia may return options as JSON-encoded string.
+		if (typeof source === 'string') {
+			try {
+				source = JSON.parse(source);
+			} catch (e) {
+				source = [];
+			}
+		}
+		const raw = valuesMap(source);
+		return raw
+			.map(function (opt) {
+				if (opt == null) {
+					return null;
+				}
+				if (typeof opt === 'string') {
+					return { value: opt, label: opt };
+				}
+				const val =
+					opt.value != null ? String(opt.value) :
+					opt.label != null ? String(opt.label) :
+					opt.name != null ? String(opt.name) :
+					'';
+				const label =
+					opt.label != null ? String(opt.label) :
+					opt.name != null ? String(opt.name) :
+					val;
+				if (!val && !label) {
+					return null;
+				}
+				return { value: val || label, label: label || val };
+			})
+			.filter(Boolean);
+	}
+
 	function parseConfig(el) {
 		try {
 			const o = JSON.parse(el.getAttribute('data-hugh-ms-config') || '{}');
@@ -230,6 +289,58 @@
 		const m = String(d.getMonth() + 1).padStart(2, '0');
 		const day = String(d.getDate()).padStart(2, '0');
 		return y + '-' + m + '-' + day;
+	}
+
+	function formatDateLabel(ymd) {
+		if (!ymd) {
+			return '';
+		}
+		const parts = ymd.split('-');
+		if (parts.length !== 3) {
+			return ymd;
+		}
+		const y = parseInt(parts[0], 10);
+		const m = parseInt(parts[1], 10) - 1;
+		const d = parseInt(parts[2], 10);
+		if (isNaN(y) || isNaN(m) || isNaN(d)) {
+			return ymd;
+		}
+		return new Date(y, m, d).toLocaleDateString(calendarLocale, {
+			day: 'numeric',
+			month: 'short',
+		});
+	}
+
+	function serviceDurationLabel(service) {
+		if (!service || service.duration == null) {
+			return '';
+		}
+		const raw = parseInt(service.duration, 10);
+		if (isNaN(raw) || raw <= 0) {
+			return '';
+		}
+		const minutes = raw > 480 ? Math.round(raw / 60) : raw;
+		if (minutes <= 0) {
+			return '';
+		}
+		if (minutes >= 60 && minutes % 60 === 0) {
+			return String(minutes / 60) + 'h de tatouage';
+		}
+		return String(minutes) + ' min de tatouage';
+	}
+
+	function displayTimesForDate(allSlots, date) {
+		const daySlots = allSlots && allSlots[date] ? allSlots[date] : {};
+		const dayTimes = Object.keys(daySlots || {});
+		const monthTimesMap = {};
+		Object.keys(allSlots || {}).forEach(function (ymd) {
+			const slots = allSlots[ymd];
+			Object.keys(slots || {}).forEach(function (time) {
+				monthTimesMap[time] = true;
+			});
+		});
+		const monthTimes = Object.keys(monthTimesMap);
+		return (monthTimes.length ? monthTimes : dayTimes).sort();
 	}
 
 	function pickProviderFromSlot(cell, depth) {
@@ -342,7 +453,10 @@
 			selectedExtra: null,
 			time: '',
 			providerId: null,
-			photoFiles: [],
+			photoFilesZone: [],
+			photoFilesReference: [],
+			tattooZone: '',
+			tattooZoneOpen: false,
 			customFields: [],
 			customer: { firstName: '', lastName: '', email: '', phone: '' },
 			loading: false,
@@ -352,6 +466,31 @@
 
 		function setError(msg) {
 			state.error = msg || '';
+		}
+
+		function allPhotoFiles() {
+			return state.photoFilesZone.concat(state.photoFilesReference);
+		}
+
+		function renderPhotoSlotFeedback(files) {
+			if (!files || !files.length) {
+				return '';
+			}
+			const names = files
+				.map(function (f) {
+					return '<li class="hugh-ms__photo-upload-name">' + esc(f.name) + '</li>';
+				})
+				.join('');
+			return (
+				'<div class="hugh-ms__photo-upload-feedback">' +
+				'<p class="hugh-ms__photo-upload-status">' +
+				esc(S.photoUploaded || 'Fichier(s) chargé(s).') +
+				'</p>' +
+				'<ul class="hugh-ms__photo-upload-names">' +
+				names +
+				'</ul>' +
+				'</div>'
+			);
 		}
 
 		function serviceExtras() {
@@ -442,12 +581,12 @@
 			}
 			if (state.step === 6) {
 				const cf = photoFileCustomField(state.service.id, state.customFields, ui.photoFieldId);
-				if (cf && !state.photoFiles.length) {
+				if (cf && !allPhotoFiles().length) {
 					setError(S.photoRequired || S.errorGeneric);
 					render();
 					return;
 				}
-				if (!cf && state.photoFiles.length) {
+				if (!cf && allPhotoFiles().length) {
 					setError(S.photoNoField || S.errorGeneric);
 					render();
 					return;
@@ -482,6 +621,7 @@
 			if (!needsFormatStep() && state.step === 4) {
 				state.step = 3;
 			}
+			state.tattooZoneOpen = false;
 			render();
 		}
 
@@ -529,7 +669,18 @@
 				body.locationId = parseInt(loc, 10);
 			}
 			const cfSubmit = photoFileCustomField(state.service.id, state.customFields, ui.photoFieldId);
-			const useMultipart = cfSubmit && state.photoFiles.length > 0;
+			const zoneFieldSubmit = customFieldById(state.customFields, 3);
+			const bookingCustomFields = {};
+			if (zoneFieldSubmit && state.tattooZone) {
+				const zid = String(zoneFieldSubmit.id);
+				bookingCustomFields[zid] = {
+					type: zoneFieldSubmit.type || 'text',
+					label: zoneFieldSubmit.label != null ? String(zoneFieldSubmit.label) : 'Zone à tatouer',
+					value: state.tattooZone,
+				};
+			}
+			const photosForSubmit = allPhotoFiles();
+			const useMultipart = cfSubmit && photosForSubmit.length > 0;
 			let ok;
 			let json;
 			if (useMultipart) {
@@ -538,25 +689,26 @@
 				const cfPayload = {
 					type: 'file',
 					label: label,
-					value: state.photoFiles.map(function (file) {
+					value: photosForSubmit.map(function (file) {
 						return { name: file.name };
 					}),
 				};
-				body.bookings[0].customFields = {};
-				body.bookings[0].customFields[fid] = cfPayload;
+				bookingCustomFields[fid] = cfPayload;
+				body.bookings[0].customFields = bookingCustomFields;
 				if (token) {
 					body.recaptcha = token;
 				}
 				const fd = new FormData();
 				appendFormData(fd, body, '');
-				state.photoFiles.forEach(function (file, idx) {
+				photosForSubmit.forEach(function (file, idx) {
 					fd.append('files[' + fid + '][' + idx + ']', file, file.name);
 				});
 				const postRes = await ameliaPostForm('/bookings', fd);
 				ok = postRes.ok;
 				json = postRes.json;
 			} else {
-				body.bookings[0].customFields = null;
+				body.bookings[0].customFields =
+					Object.keys(bookingCustomFields).length ? bookingCustomFields : null;
 				const postRes = await ameliaPost('/bookings', body);
 				ok = postRes.ok;
 				json = postRes.json;
@@ -788,16 +940,29 @@
 		}
 
 		function renderTime() {
-			const times = (state.slotsFinal[state.date] && Object.keys(state.slotsFinal[state.date])) || [];
+			const daySlots = state.slotsFinal[state.date] || {};
+			const times = displayTimesForDate(state.slotsFinal, state.date);
+			const dateLabel = formatDateLabel(state.date);
+			const formatLabel = state.selectedExtra ? state.selectedExtra.name : state.service && state.service.name;
+			const metaParts = [dateLabel, formatLabel].filter(Boolean);
+			const durationLabel = serviceDurationLabel(state.service);
 			const buttons = times
 				.sort()
 				.map(function (t) {
-					const sel = state.time === t ? ' is-selected' : '';
+					const cell = daySlots[t];
+					const providerId = pickProviderFromSlot(cell);
+					const unavailable = !providerId;
+					const sel = !unavailable && state.time === t ? ' is-selected' : '';
+					const dis = unavailable ? ' disabled aria-disabled="true"' : '';
+					const unavailableClass = unavailable ? ' is-unavailable' : '';
 					return (
 						'<button type="button" class="hugh-ms__slot' +
 						sel +
+						unavailableClass +
 						'" data-time="' +
 						esc(t) +
+						'"' +
+						dis +
 						'">' +
 						esc(t) +
 						'</button>'
@@ -805,9 +970,19 @@
 				})
 				.join('');
 			return (
-				'<div class="hugh-ms__panel"><h2 class="hugh-ms__title">' +
+				'<div class="hugh-ms__panel">' +
+				'<div class="hugh-ms__step2-head">' +
+				'<h2 class="hugh-ms__title">' +
 				esc(S.stepTime) +
-				'</h2><div class="hugh-ms__slots">' +
+				'</h2>' +
+				'<button type="button" class="hugh-ms__step2-back" data-act="back">↶ ' +
+				esc(S.back) +
+				'</button>' +
+				'</div>' +
+				(metaParts.length ? '<p class="hugh-ms__time-meta">' + esc(metaParts.join(' • ')) + '</p>' : '') +
+				'<h3 class="hugh-ms__time-sub">' +
+				esc('Créneaux' + (durationLabel ? ' — ' + durationLabel : '')) +
+				'</h3><div class="hugh-ms__slots">' +
 				(buttons || '<p class="hugh-ms__muted">' + esc(S.errorSlots) + '</p>') +
 				'</div></div>'
 			);
@@ -815,42 +990,98 @@
 
 		function renderPhoto() {
 			const cf = photoFileCustomField(state.service.id, state.customFields, ui.photoFieldId);
+			const zoneField = customFieldById(state.customFields, 3);
+			const zoneFieldLabel = zoneField && zoneField.label ? String(zoneField.label) : 'Zone à tatouer';
+			const zoneOptions = customFieldOptions(zoneField);
+			const fallbackZoneOptions = [
+				{ value: 'bras', label: 'Bras' },
+				{ value: 'jambe', label: 'Jambe' },
+				{ value: 'dos', label: 'Dos' },
+				{ value: 'torse', label: 'Torse' },
+				{ value: 'cou', label: 'Cou' },
+				{ value: 'autre', label: 'Autre' },
+			];
+			const usableZoneOptions = zoneOptions.length ? zoneOptions : fallbackZoneOptions;
+			const selectedZone = usableZoneOptions.find(function (opt) {
+				return state.tattooZone === opt.value;
+			});
+			const zoneLabel = selectedZone ? selectedZone.label : 'Sélectionner...';
+			const zoneOptionsHtml = usableZoneOptions
+				.map(function (opt) {
+					const selected = state.tattooZone === opt.value ? ' is-selected' : '';
+					return (
+						'<button type="button" class="hugh-ms__photo-zone-option' +
+						selected +
+						'" data-zone-option="' +
+						esc(opt.value) +
+						'">' +
+						esc(opt.label) +
+						'</button>'
+					);
+				})
+				.join('');
 			const warn = cf ? '' : '<p class="hugh-ms__warn">' + esc(S.photoNoField) + '</p>';
-			const count = state.photoFiles.length;
-			const names =
-				count > 0 ?
-					'<ul class="hugh-ms__file-list">' +
-					state.photoFiles
-						.map(function (f) {
-							return '<li>' + esc(f.name) + '</li>';
-						})
-						.join('') +
-					'</ul>' :
-					'';
-			const clearBtn =
-				count > 0 ?
-					'<button type="button" class="hugh-ms__btn hugh-ms__btn--ghost hugh-ms__file-clear" data-photo-clear="1">' +
-					esc(S.photoClear) +
-					'</button>' :
-					'';
+			const zoneFeedback = renderPhotoSlotFeedback(state.photoFilesZone);
+			const refFeedback = renderPhotoSlotFeedback(state.photoFilesReference);
 			return (
-				'<div class="hugh-ms__panel"><h2 class="hugh-ms__title">' +
+				'<div class="hugh-ms__panel">' +
+				'<div class="hugh-ms__step2-head">' +
+				'<h2 class="hugh-ms__title">' +
 				esc(S.stepPhoto) +
 				'</h2>' +
-				'<p class="hugh-ms__muted">' +
+				'<button type="button" class="hugh-ms__step2-back" data-act="back">↶ ' +
+				esc(S.back) +
+				'</button>' +
+				'</div>' +
+				'<p class="hugh-ms__photo-guidelines">' +
 				esc(S.photoHint) +
 				'</p>' +
 				warn +
-				'<div class="hugh-ms__file-row">' +
-				'<label class="hugh-ms__file-label">' +
+				'<div class="hugh-ms__photo-upload-grid">' +
+				'<label class="hugh-ms__photo-upload-card">' +
+				'<input type="file" class="hugh-ms__file-input" name="bookingPhotos" data-photo-slot="zone" accept="image/*" multiple>' +
+				'<span class="hugh-ms__photo-upload-icon" aria-hidden="true"></span>' +
+				'<span class="hugh-ms__photo-upload-text">3 photos de la zone à tatouer</span>' +
+				zoneFeedback +
+				'</label>' +
+				'<label class="hugh-ms__photo-upload-card">' +
+				'<input type="file" class="hugh-ms__file-input" name="bookingPhotos" data-photo-slot="reference" accept="image/*" multiple>' +
+				'<span class="hugh-ms__photo-upload-icon" aria-hidden="true"></span>' +
+				'<span class="hugh-ms__photo-upload-text">1+ photo de référence ( style )</span>' +
+				refFeedback +
+				'</label>' +
+				'</div>' +
+				'<div class="hugh-ms__photo-zone-wrap">' +
+				'<label class="hugh-ms__photo-zone-label">' +
+				esc(zoneFieldLabel) +
+				'</label>' +
+				'<div class="hugh-ms__photo-zone-field' +
+				(state.tattooZoneOpen ? ' is-open' : '') +
+				'">' +
+				'<input type="hidden" name="tattooZone" value="' +
+				esc(state.tattooZone) +
+				'">' +
+				'<button type="button" class="hugh-ms__photo-zone-trigger" data-zone-toggle="1" aria-haspopup="listbox" aria-expanded="' +
+				(state.tattooZoneOpen ? 'true' : 'false') +
+				'">' +
+				'<span class="hugh-ms__photo-zone-value">' +
+				esc(zoneLabel) +
+				'</span>' +
+				'<span class="hugh-ms__photo-zone-arrow" aria-hidden="true"></span>' +
+				'</button>' +
+				'<div class="hugh-ms__photo-zone-menu' +
+				(state.tattooZoneOpen ? ' is-open' : '') +
+				'" role="listbox">' +
+				zoneOptionsHtml +
+				'</div>' +
+				'</div>' +
+				'</div>' +
+				'<label class="hugh-ms__file-label hugh-ms__file-label--fallback">' +
 				'<input type="file" class="hugh-ms__file-input" name="bookingPhotos" accept="image/*" multiple>' +
 				'<span class="hugh-ms__file-btn">' +
 				esc(S.photoChoose) +
 				'</span>' +
 				'</label>' +
-				clearBtn +
-				'</div>' +
-				names +
 				'</div>'
 			);
 		}
@@ -989,6 +1220,14 @@
 				if (!(t instanceof Element)) {
 					return;
 				}
+				if (state.step === 6 && state.tattooZoneOpen && !t.closest('.hugh-ms__photo-zone-field')) {
+					setTimeout(function () {
+						if (state.step === 6 && state.tattooZoneOpen) {
+							state.tattooZoneOpen = false;
+							render();
+						}
+					}, 0);
+				}
 				const cat = t.closest('[data-cat-idx]');
 				if (cat) {
 					const idx = parseInt(cat.getAttribute('data-cat-idx'), 10);
@@ -1001,7 +1240,8 @@
 						state.time = '';
 						state.providerId = null;
 						state.slotsFinal = {};
-						state.photoFiles = [];
+						state.photoFilesZone = [];
+						state.photoFilesReference = [];
 					}
 					render();
 					return;
@@ -1016,14 +1256,22 @@
 						state.serviceEntry = pickedServiceEntry;
 						state.service = pickedServiceEntry.service;
 						state.categoryName = pickedServiceEntry.categoryName;
-						state.photoFiles = [];
+						state.photoFilesZone = [];
+						state.photoFilesReference = [];
 						state.selectedExtra = null;
 					}
 					render();
 					return;
 				}
-				if (t.closest('[data-photo-clear]')) {
-					state.photoFiles = [];
+				if (t.closest('[data-zone-toggle]')) {
+					state.tattooZoneOpen = !state.tattooZoneOpen;
+					render();
+					return;
+				}
+				const zoneOpt = t.closest('[data-zone-option]');
+				if (zoneOpt) {
+					state.tattooZone = zoneOpt.getAttribute('data-zone-option') || '';
+					state.tattooZoneOpen = false;
 					render();
 					return;
 				}
@@ -1075,12 +1323,22 @@
 				'change',
 				function (e) {
 					const t = e.target;
-					if (!(t instanceof HTMLInputElement)) {
+					if (!(t instanceof HTMLInputElement) && !(t instanceof HTMLSelectElement)) {
 						return;
 					}
-					if (t.name === 'bookingPhotos' && t.type === 'file' && t.files) {
-						state.photoFiles = Array.prototype.slice.call(t.files, 0);
+					if (t instanceof HTMLInputElement && t.name === 'bookingPhotos' && t.type === 'file' && t.files) {
+						const list = Array.prototype.slice.call(t.files, 0);
+						const slot = t.getAttribute('data-photo-slot');
+						if (slot === 'reference') {
+							state.photoFilesReference = list;
+						} else {
+							state.photoFilesZone = list;
+						}
 						render();
+						return;
+					}
+					if (t.name === 'tattooZone') {
+						state.tattooZone = t.value || '';
 						return;
 					}
 					if (t.matches('.hugh-ms__fields input')) {
@@ -1092,9 +1350,17 @@
 		}
 
 		function syncFieldsFromDom() {
-			const ph = el.querySelector('input[name="bookingPhotos"]');
-			if (ph && ph.files && ph.files.length) {
-				state.photoFiles = Array.prototype.slice.call(ph.files, 0);
+			const zIn = el.querySelector('input[name="bookingPhotos"][data-photo-slot="zone"]');
+			const rIn = el.querySelector('input[name="bookingPhotos"][data-photo-slot="reference"]');
+			if (zIn && zIn.files && zIn.files.length) {
+				state.photoFilesZone = Array.prototype.slice.call(zIn.files, 0);
+			}
+			if (rIn && rIn.files && rIn.files.length) {
+				state.photoFilesReference = Array.prototype.slice.call(rIn.files, 0);
+			}
+			const zone = el.querySelector('input[name="tattooZone"]');
+			if (zone) {
+				state.tattooZone = zone.value || '';
 			}
 			['firstName', 'lastName', 'email', 'phone'].forEach(function (n) {
 				const inp = el.querySelector('input[name="' + n + '"]');
