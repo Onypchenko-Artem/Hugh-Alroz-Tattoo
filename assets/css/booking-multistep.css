@@ -1414,3 +1414,275 @@
 	filter: none;
 	background: #f2f2f2;
 }
+
+/* Step 7: customer information (Figma « information »). */
+.hugh-ms__inner--step-7 {
+	--hugh-ms-footer-slot: 132px;
+}
+
+.hugh-ms__inner--step-7 .hugh-ms__crumbs {
+	position: relative;
+	display: block;
+	height: 15px;
+	border: 1px solid #fff;
+	border-radius: 56px;
+	overflow: hidden;
+	font-size: 0;
+	line-height: 0;
+	background: #3a3a3a;
+}
+
+.hugh-ms__inner--step-7 .hugh-ms__crumb {
+	display: none;
+}
+
+.hugh-ms__inner--step-7 .hugh-ms__crumb.is-active {
+	display: block;
+	width: 84.5%;
+	height: 100%;
+	background: #fff;
+}
+
+.hugh-ms__inner--step-7 .hugh-ms__panel--info {
+	min-height: 0;
+	padding-left: clamp(48px, 4.16vw, 80px);
+}
+
+.hugh-ms__inner--step-7 .hugh-ms__step2-head {
+	display: flex;
+	align-items: baseline;
+	justify-content: space-between;
+	gap: 24px;
+}
+
+.hugh-ms__inner--step-7 .hugh-ms__title {
+	margin: 0 0 24px;
+	font-size: clamp(40px, 5.2vw, 100px);
+	font-weight: 500;
+	line-height: 1.21;
+	letter-spacing: 0.01em;
+	text-transform: uppercase;
+	color: #fff;
+}
+
+.hugh-ms__inner--step-7 .hugh-ms__step2-back--figma {
+	display: inline-flex;
+	align-items: center;
+	gap: 15px;
+	padding: 0;
+	border: 0;
+	background: transparent;
+	font: inherit;
+	cursor: pointer;
+	text-align: left;
+}
+
+.hugh-ms__inner--step-7 .hugh-ms__step2-back-ico {
+	display: block;
+	flex: 0 0 23px;
+	width: 23px;
+	height: 23px;
+	background: center / 11px 18px no-repeat
+		url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='18' fill='none'%3E%3Cpath stroke='%23C1C0C0' stroke-width='2' d='M7 1L1 9l6 8'/%3E%3C/svg%3E");
+}
+
+.hugh-ms__inner--step-7 .hugh-ms__step2-back-txt {
+	font-family: "Helvetica Neue", "Inter Tight", system-ui, sans-serif;
+	font-weight: 400;
+	font-size: 24px;
+	line-height: 29px;
+	letter-spacing: 0.02em;
+	text-transform: capitalize;
+	color: #c1c0c0;
+}
+
+.hugh-ms__inner--step-7 .hugh-ms__info-form {
+	display: flex;
+	flex-direction: column;
+	gap: 20px;
+	width: 100%;
+	max-width: 730px;
+}
+
+.hugh-ms__inner--step-7 .hugh-ms__info-row {
+	display: flex;
+	flex-wrap: wrap;
+	gap: 20px;
+	width: 100%;
+}
+
+.hugh-ms__inner--step-7 .hugh-ms__field {
+	display: flex;
+	flex-direction: column;
+	align-items: flex-start;
+	gap: 8px;
+	margin: 0;
+	font-size: inherit;
+	text-transform: none;
+	letter-spacing: normal;
+	color: #fff;
+}
+
+.hugh-ms__inner--step-7 .hugh-ms__field--half {
+	flex: 1 1 calc(50% - 10px);
+	min-width: min(100%, 280px);
+}
+
+.hugh-ms__inner--step-7 .hugh-ms__field--full {
+	width: 100%;
+}
+
+.hugh-ms__inner--step-7 .hugh-ms__field-label {
+	display: block;
+	width: 100%;
+	font-family: "Inter Tight", system-ui, sans-serif;
+	font-weight: 400;
+	font-size: 24px;
+	line-height: 29px;
+	text-transform: uppercase;
+	color: #fff;
+}
+
+.hugh-ms__inner--step-7 .hugh-ms__req {
+	font-weight: 400;
+	color: #fff;
+}
+
+.hugh-ms__inner--step-7 .hugh-ms__field-input {
+	box-sizing: border-box;
+	width: 100%;
+	min-height: 70px;
+	padding: 18px 14px 18px 15px;
+	font-family: "Inter Tight", system-ui, sans-serif;
+	font-size: 20px;
+	line-height: 24px;
+	font-weight: 400;
+	color: #fff;
+	background: transparent;
+	border: 1px solid #fff;
+	border-radius: 0;
+	-webkit-appearance: none;
+	appearance: none;
+}
+
+.hugh-ms__inner--step-7 .hugh-ms__field-input::placeholder {
+	color: #c1c0c0;
+	opacity: 1;
+}
+
+.hugh-ms__inner--step-7 .hugh-ms__field-input:focus {
+	outline: none;
+	border-color: #fff;
+	box-shadow: 0 0 0 1px #fff;
+}
+
+.hugh-ms__inner--step-7 .hugh-ms__field-input--note {
+	height: 70px;
+	min-height: 70px;
+	max-height: 70px;
+	resize: none;
+	overflow-y: auto;
+}
+
+.hugh-ms__inner--step-7 .hugh-ms__footer {
+	align-items: center;
+	justify-content: space-between;
+	gap: 20px;
+	flex-wrap: wrap;
+	z-index: 2;
+	padding-left: clamp(48px, 4.16vw, 80px);
+}
+
+.hugh-ms__inner--step-7 .hugh-ms__footer--info-step .hugh-ms__btn--ghost {
+	display: none;
+}
+
+.hugh-ms__inner--step-7 .hugh-ms__age-row {
+	display: flex;
+	align-items: center;
+	gap: 7px;
+	max-width: min(484px, 100%);
+	margin: 0;
+	font: inherit;
+	cursor: pointer;
+}
+
+.hugh-ms__inner--step-7 .hugh-ms__age-input {
+	flex: 0 0 32px;
+	width: 32px;
+	height: 32px;
+	margin: 0;
+	box-sizing: border-box;
+	cursor: pointer;
+	-webkit-appearance: none;
+	appearance: none;
+	background: transparent;
+	border: 2px solid #fff;
+	border-radius: 0;
+}
+
+.hugh-ms__inner--step-7 .hugh-ms__age-input:checked {
+	background-color: transparent;
+	background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='14' height='11' fill='none' viewBox='0 0 14 11'%3E%3Cpath stroke='%23ffffff' stroke-width='2' stroke-linecap='square' d='M1 5.5l4 4L13 1'/%3E%3C/svg%3E");
+	background-repeat: no-repeat;
+	background-position: center;
+	background-size: 14px 11px;
+}
+
+.hugh-ms__inner--step-7 .hugh-ms__age-input:focus-visible {
+	outline: 2px solid rgba(255, 255, 255, 0.45);
+	outline-offset: 2px;
+}
+
+.hugh-ms__inner--step-7 .hugh-ms__age-text {
+	font-family: "Inter Tight", system-ui, sans-serif;
+	font-weight: 300;
+	font-size: 18px;
+	line-height: 22px;
+	color: #fff;
+	text-transform: none;
+	letter-spacing: normal;
+}
+
+.hugh-ms__inner--step-7 .hugh-ms__btn--primary {
+	position: relative;
+	display: inline-flex;
+	align-items: center;
+	gap: 16px;
+	min-width: 265px;
+	min-height: 85px;
+	padding: 14px 14px 13px 31px;
+	font-size: 24px;
+	font-weight: 600;
+	letter-spacing: 0.01em;
+	text-transform: uppercase;
+	color: #000;
+	background: #fff;
+	border: 2px solid #fff;
+	border-radius: 0;
+}
+
+.hugh-ms__inner--step-7 .hugh-ms__btn--primary::after {
+	content: "";
+	width: 57px;
+	height: 58px;
+	background: #000;
+	flex: 0 0 auto;
+}
+
+.hugh-ms__inner--step-7 .hugh-ms__btn--primary::before {
+	content: "";
+	position: absolute;
+	right: 25px;
+	top: 50%;
+	width: 35px;
+	height: 35px;
+	background: center / contain no-repeat url("../images/arrow-up-outline.svg");
+	transform: translateY(-50%);
+	z-index: 1;
+}
+
+.hugh-ms__inner--step-7 .hugh-ms__btn--primary:hover {
+	filter: none;
+	background: #f2f2f2;
+}

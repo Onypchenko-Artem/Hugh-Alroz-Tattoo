@@ -458,7 +458,8 @@
 			tattooZone: '',
 			tattooZoneOpen: false,
 			customFields: [],
-			customer: { firstName: '', lastName: '', email: '', phone: '' },
+			customer: { firstName: '', lastName: '', email: '', phone: '', note: '' },
+			ageConfirmed: false,
 			loading: false,
 			error: '',
 			resultData: null,
@@ -603,6 +604,16 @@
 					render();
 					return;
 				}
+				if (!c.phone || !String(c.phone).trim()) {
+					setError(S.errorPhone || S.errorGeneric);
+					render();
+					return;
+				}
+				if (!state.ageConfirmed) {
+					setError(S.errorAge || S.errorGeneric);
+					render();
+					return;
+				}
 				state.step = 8;
 				render();
 				return;
@@ -653,12 +664,19 @@
 				payment: { gateway: 'onSite' },
 				bookings: [
 					{
-						customer: {
-							firstName: state.customer.firstName,
-							lastName: state.customer.lastName,
-							email: state.customer.email,
-							phone: state.customer.phone || null,
-						},
+						customer: (function () {
+							const cust = {
+								firstName: state.customer.firstName,
+								lastName: state.customer.lastName,
+								email: state.customer.email,
+								phone: state.customer.phone || null,
+							};
+							const nt = state.customer.note != null && String(state.customer.note).trim();
+							if (nt) {
+								cust.note = String(state.customer.note).trim();
+							}
+							return cust;
+						})(),
 						persons: 1,
 						extras: extrasPayload,
 					},
@@ -1088,24 +1106,74 @@
 
 		function renderInfo() {
 			const c = state.customer;
+			const req = ' <span class="hugh-ms__req" aria-hidden="true">*</span>';
+			const lbl = function (key, showReq) {
+				return esc(S[key] || key) + (showReq ? req : '');
+			};
 			return (
-				'<div class="hugh-ms__panel"><h2 class="hugh-ms__title">' +
+				'<div class="hugh-ms__panel hugh-ms__panel--info">' +
+				'<div class="hugh-ms__step2-head">' +
+				'<h2 class="hugh-ms__title">' +
 				esc(S.stepInfo) +
 				'</h2>' +
-				'<div class="hugh-ms__fields">' +
-				'<label class="hugh-ms__field"><span>Prénom</span><input type="text" name="firstName" value="' +
+				'<button type="button" class="hugh-ms__step2-back hugh-ms__step2-back--figma" data-act="back">' +
+				'<span class="hugh-ms__step2-back-ico" aria-hidden="true"></span>' +
+				'<span class="hugh-ms__step2-back-txt">' +
+				esc(S.back) +
+				'</span>' +
+				'</button>' +
+				'</div>' +
+				'<div class="hugh-ms__info-form">' +
+				'<div class="hugh-ms__info-row">' +
+				'<label class="hugh-ms__field hugh-ms__field--half">' +
+				'<span class="hugh-ms__field-label">' +
+				lbl('labelFirstName', true) +
+				'</span>' +
+				'<input class="hugh-ms__field-input" type="text" name="firstName" autocomplete="given-name" placeholder="" value="' +
 				esc(c.firstName) +
-				'" required></label>' +
-				'<label class="hugh-ms__field"><span>Nom</span><input type="text" name="lastName" value="' +
+				'" required>' +
+				'</label>' +
+				'<label class="hugh-ms__field hugh-ms__field--half">' +
+				'<span class="hugh-ms__field-label">' +
+				lbl('labelLastName', true) +
+				'</span>' +
+				'<input class="hugh-ms__field-input" type="text" name="lastName" autocomplete="family-name" placeholder="" value="' +
 				esc(c.lastName) +
-				'" required></label>' +
-				'<label class="hugh-ms__field"><span>Email</span><input type="email" name="email" value="' +
+				'" required>' +
+				'</label>' +
+				'</div>' +
+				'<label class="hugh-ms__field hugh-ms__field--full">' +
+				'<span class="hugh-ms__field-label">' +
+				lbl('labelEmail', true) +
+				'</span>' +
+				'<input class="hugh-ms__field-input" type="email" name="email" autocomplete="email" placeholder="' +
+				esc(S.phEmail || '') +
+				'" value="' +
 				esc(c.email) +
-				'" required></label>' +
-				'<label class="hugh-ms__field"><span>Téléphone</span><input type="tel" name="phone" value="' +
+				'" required>' +
+				'</label>' +
+				'<label class="hugh-ms__field hugh-ms__field--full">' +
+				'<span class="hugh-ms__field-label">' +
+				lbl('labelPhone', true) +
+				'</span>' +
+				'<input class="hugh-ms__field-input" type="tel" name="phone" autocomplete="tel" placeholder="' +
+				esc(S.phPhone || '') +
+				'" value="' +
 				esc(c.phone) +
-				'"></label>' +
-				'</div></div>'
+				'" required>' +
+				'</label>' +
+				'<label class="hugh-ms__field hugh-ms__field--full">' +
+				'<span class="hugh-ms__field-label">' +
+				lbl('labelProjectNote', false) +
+				'</span>' +
+				'<textarea class="hugh-ms__field-input hugh-ms__field-input--note" name="note" rows="1" placeholder="' +
+				esc(S.phNote || '') +
+				'">' +
+				esc(c.note || '') +
+				'</textarea>' +
+				'</label>' +
+				'</div>' +
+				'</div>'
 			);
 		}
 
@@ -1201,6 +1269,24 @@
 					esc(nextLabel) +
 					'</button>' :
 					'';
+			const step7 = state.step === 7;
+			const footerBack =
+				showBack && !step7 ?
+					'<button type="button" class="hugh-ms__btn hugh-ms__btn--ghost" data-act="back">' + esc(S.back) + '</button>' :
+					'';
+			const footerLeft =
+				step7 ?
+					'<label class="hugh-ms__age-row">' +
+					'<input type="checkbox" class="hugh-ms__age-input" name="ageConfirm" value="1"' +
+					(state.ageConfirmed ? ' checked' : '') +
+					'>' +
+					'<span class="hugh-ms__age-text">' +
+					esc(S.ageCheckbox || '') +
+					'</span>' +
+					'</label>' :
+					footerBack ?
+						footerBack :
+						'<span></span>';
 			el.innerHTML =
 				'<div class="hugh-ms__inner hugh-ms__inner--step-' +
 				state.step +
@@ -1208,8 +1294,10 @@
 				renderHeader() +
 				err +
 				main +
-				'<div class="hugh-ms__footer">' +
-				(showBack ? '<button type="button" class="hugh-ms__btn hugh-ms__btn--ghost" data-act="back">' + esc(S.back) + '</button>' : '<span></span>') +
+				'<div class="hugh-ms__footer' +
+				(step7 ? ' hugh-ms__footer--info-step' : '') +
+				'">' +
+				footerLeft +
 				nextBtn +
 				'</div></div>';
 		}
@@ -1313,7 +1401,7 @@
 					});
 					return;
 				}
-				if (t.matches('[data-act="back"]')) {
+				if (t.closest('[data-act="back"]')) {
 					syncFieldsFromDom();
 					goBack();
 					render();
@@ -1323,7 +1411,11 @@
 				'change',
 				function (e) {
 					const t = e.target;
-					if (!(t instanceof HTMLInputElement) && !(t instanceof HTMLSelectElement)) {
+					if (
+						!(t instanceof HTMLInputElement) &&
+						!(t instanceof HTMLSelectElement) &&
+						!(t instanceof HTMLTextAreaElement)
+					) {
 						return;
 					}
 					if (t instanceof HTMLInputElement && t.name === 'bookingPhotos' && t.type === 'file' && t.files) {
@@ -1341,8 +1433,11 @@
 						state.tattooZone = t.value || '';
 						return;
 					}
-					if (t.matches('.hugh-ms__fields input')) {
+					if (t.matches('.hugh-ms__fields input, .hugh-ms__info-form input, .hugh-ms__info-form textarea')) {
 						state.customer[t.name] = t.value;
+					}
+					if (t.matches('.hugh-ms__age-input')) {
+						state.ageConfirmed = !!t.checked;
 					}
 				},
 				true
@@ -1363,11 +1458,19 @@
 				state.tattooZone = zone.value || '';
 			}
 			['firstName', 'lastName', 'email', 'phone'].forEach(function (n) {
-				const inp = el.querySelector('input[name="' + n + '"]');
+				const inp = el.querySelector('.hugh-ms__info-form input[name="' + n + '"]');
 				if (inp) {
 					state.customer[n] = inp.value;
 				}
 			});
+			const noteTa = el.querySelector('.hugh-ms__info-form textarea[name="note"]');
+			if (noteTa) {
+				state.customer.note = noteTa.value;
+			}
+			const ageIn = el.querySelector('.hugh-ms__age-input');
+			if (ageIn) {
+				state.ageConfirmed = !!ageIn.checked;
+			}
 		}
 
 		async function afterDateNext() {
