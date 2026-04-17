@@ -9,17 +9,16 @@
 	--hugh-ms-text: #f5f2ed;
 	--hugh-ms-muted: rgba(245, 242, 237, 0.55);
 	--hugh-ms-danger: #e07070;
+	/* Fluid scale: desktop layout from 1280 to 1920 viewport width */
+	--hugh-ms-fluid-scale: clamp(0.6667, calc(100vw / 1920), 1);
 	--hugh-ms-pad-y: clamp(15px, 1.3vw, 25px);
 	--hugh-ms-pad-x: clamp(18px, 1.56vw, 30px);
-	/* Reserve space so main content does not sit under the fixed footer row */
-	--hugh-ms-footer-slot: 110px;
-
 	position: relative;
 	z-index: 1;
 	width: min(1569px, calc(100vw - 40px));
 	max-width: 1569px;
 	min-height: 818px;
-	height: 818px;
+	height: auto;
 	margin: 0 auto;
 	padding: var(--hugh-ms-pad-y) var(--hugh-ms-pad-x);
 	font-family: var(--hat-font-family, "Inter Tight", system-ui, sans-serif);
@@ -28,13 +27,14 @@
 	border: 1px solid var(--hugh-ms-border);
 	border-radius: 4px;
 	backdrop-filter: blur(8px);
+	zoom: var(--hugh-ms-fluid-scale);
 }
 
 .hugh-ms__inner {
 	display: flex;
 	flex-direction: column;
 	gap: clamp(16px, 2vw, 24px);
-	padding-bottom: calc(var(--hugh-ms-footer-slot) + var(--hugh-ms-pad-y));
+	min-height: calc(818px - (var(--hugh-ms-pad-y) * 2));
 }
 
 .hugh-ms__crumbs {
@@ -74,6 +74,59 @@
 .hugh-ms__panel {
 	min-height: 200px;
 	padding-left: clamp(48px, 4.16vw, 80px);
+}
+
+.hugh-ms__panel-controls {
+	display: flex;
+	align-items: flex-end;
+	justify-content: flex-end;
+	gap: 12px;
+	margin-top: clamp(16px, 1.6vw, 30px);
+}
+
+.hugh-ms__panel-controls--info-step {
+	justify-content: space-between;
+	gap: clamp(16px, 2vw, 28px);
+}
+
+.hugh-ms__panel-actions {
+	display: inline-flex;
+	justify-content: flex-end;
+	width: fit-content;
+	margin-left: 0;
+	margin-top: 0;
+}
+
+.hugh-ms__inner--step-1 .hugh-ms__panel,
+.hugh-ms__inner--step-2 .hugh-ms__panel,
+.hugh-ms__inner--step-3 .hugh-ms__panel,
+.hugh-ms__inner--step-5 .hugh-ms__panel,
+.hugh-ms__inner--step-6 .hugh-ms__panel {
+	position: relative;
+	flex: 1 1 auto;
+}
+
+.hugh-ms__inner--step-1 .hugh-ms__panel-controls,
+.hugh-ms__inner--step-2 .hugh-ms__panel-controls,
+.hugh-ms__inner--step-3 .hugh-ms__panel-controls,
+.hugh-ms__inner--step-5 .hugh-ms__panel-controls,
+.hugh-ms__inner--step-6 .hugh-ms__panel-controls {
+	position: absolute;
+	right: 0;
+	top: 0;
+	bottom: 0;
+	margin-top: 0;
+	display: flex;
+	flex-direction: column;
+	justify-content: flex-end;
+	align-items: flex-end;
+}
+
+.hugh-ms__inner--step-2 .hugh-ms__panel-controls .hugh-ms__btn--ghost,
+.hugh-ms__inner--step-3 .hugh-ms__panel-controls .hugh-ms__btn--ghost,
+.hugh-ms__inner--step-5 .hugh-ms__panel-controls .hugh-ms__btn--ghost,
+.hugh-ms__inner--step-6 .hugh-ms__panel-controls .hugh-ms__btn--ghost {
+	display: none;
 }
 
 .hugh-ms__grid {
@@ -325,13 +378,9 @@
 	justify-content: space-between;
 	align-items: center;
 	gap: 12px;
-	position: absolute;
-	left: var(--hugh-ms-pad-x);
-	right: var(--hugh-ms-pad-x);
-	bottom: var(--hugh-ms-pad-y);
+	margin-top: auto;
 	padding: 0;
 	border-top: 0;
-	z-index: 3;
 }
 
 .hugh-ms__btn {
@@ -1875,21 +1924,21 @@
 .hugh-ms__inner--step-8 .hugh-ms__pay-footer-stack {
 	display: flex;
 	flex-direction: column;
-	align-items: center;
+	align-items: flex-end;
 	gap: 15px;
 	flex: 0 0 auto;
 }
 
 .hugh-ms__inner--step-8 .hugh-ms__pay-secure {
 	margin: 0;
-	width: 100%;
+	width: auto;
 	font-family: "Inter Tight", system-ui, sans-serif;
 	font-size: 18px;
 	line-height: 22px;
 	font-weight: 300;
 	letter-spacing: 0.02em;
 	color: #fff;
-	text-align: center;
+	text-align: right;
 }
 
 .hugh-ms__inner--step-8 .hugh-ms__footer--pay-step .hugh-ms__btn--ghost {

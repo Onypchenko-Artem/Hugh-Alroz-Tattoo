@@ -1476,11 +1476,7 @@
 					esc(S.ageCheckbox || '') +
 					'</span>' +
 					'</label>' :
-					step8 ?
-						'<span class="hugh-ms__footer-spacer"></span>' :
-					footerBack ?
-						footerBack :
-						'<span></span>';
+					footerBack;
 			const footerPrimary =
 				step8 && nextBtn ?
 					'<div class="hugh-ms__pay-footer-stack">' +
@@ -1490,23 +1486,26 @@
 					nextBtn +
 					'</div>' :
 					nextBtn;
-			const footerClass =
-				(step7 ? ' hugh-ms__footer--info-step' : '') + (step8 ? ' hugh-ms__footer--pay-step' : '');
-			const footerHtml = step9 ? '' :
-				'<div class="hugh-ms__footer' +
-				footerClass +
-				'">' +
-				footerLeft +
-				footerPrimary +
-				'</div>';
+			const panelPrimary = footerPrimary ? '<div class="hugh-ms__panel-actions">' + footerPrimary + '</div>' : '';
+			const panelControlsClass =
+				'hugh-ms__panel-controls' +
+				(step7 ? ' hugh-ms__panel-controls--info-step' : '') +
+				(step8 ? ' hugh-ms__panel-controls--pay-step' : '');
+			const panelControls =
+				!step9 && (footerLeft || panelPrimary) ?
+					'<div class="' + panelControlsClass + '">' + (footerLeft || '') + panelPrimary + '</div>' :
+					'';
+			const mainHtml =
+				panelControls && /<\/div>\s*$/.test(main) ?
+					main.replace(/<\/div>\s*$/, panelControls + '</div>') :
+					main + panelControls;
 			el.innerHTML =
 				'<div class="hugh-ms__inner hugh-ms__inner--step-' +
 				state.step +
 				'">' +
 				renderHeader() +
 				err +
-				main +
-				footerHtml +
+				mainHtml +
 				'</div>';
 		}
 
