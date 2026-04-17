@@ -9,28 +9,41 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
 
-$faq_items = array(
-	array(
-		'question' => 'COMMENT BIEN ME PRÉPARER AVANT LA SÉANCE ?',
-		'answer'   => 'Douche obligatoire. Peau propre, sans crème. Bien dormir, bien manger, bien s’hydrater.',
-	),
-	array(
-		'question' => 'COMBIEN COÛTE UN TATOUAGE ?',
-		'answer'   => 'Douche obligatoire. Peau propre, sans crème. Bien dormir, bien manger, bien s’hydrater.',
-	),
-	array(
-		'question' => 'COMBIEN DE TEMPS DURE UNE SÉANCE ?',
-		'answer'   => 'Douche obligatoire. Peau propre, sans crème. Bien dormir, bien manger, bien s’hydrater.',
-	),
-	array(
-		'question' => 'QUELS SONT LES SOINS APRÈS LE TATOUAGE ?',
-		'answer'   => 'Douche obligatoire. Peau propre, sans crème. Bien dormir, bien manger, bien s’hydrater.',
-	),
-	array(
-		'question' => 'PEUT-ON MODIFIER UN TATOUAGE EXISTANT ?',
-		'answer'   => 'Douche obligatoire. Peau propre, sans crème. Bien dormir, bien manger, bien s’hydrater.',
-	),
-);
+$home_post_id = get_queried_object_id();
+
+$faq_eyebrow = function_exists( 'get_field' ) ? (string) get_field( 'home_faq_eyebrow', $home_post_id ) : '';
+$faq_title_1 = function_exists( 'get_field' ) ? (string) get_field( 'home_faq_title_line_1', $home_post_id ) : '';
+$faq_title_2 = function_exists( 'get_field' ) ? (string) get_field( 'home_faq_title_line_2', $home_post_id ) : '';
+$faq_items   = function_exists( 'get_field' ) ? get_field( 'home_faq_items', $home_post_id ) : array();
+
+$faq_eyebrow = '' !== $faq_eyebrow ? $faq_eyebrow : 'FAQ';
+$faq_title_1 = '' !== $faq_title_1 ? $faq_title_1 : 'QUESTIONS';
+$faq_title_2 = '' !== $faq_title_2 ? $faq_title_2 : 'FREQUENTES';
+
+if ( ! is_array( $faq_items ) || empty( $faq_items ) ) {
+	$faq_items = array(
+		array(
+			'question' => 'COMMENT BIEN ME PREPARER AVANT LA SEANCE ?',
+			'answer'   => 'Douche obligatoire. Peau propre, sans creme. Bien dormir, bien manger, bien s hydrater.',
+		),
+		array(
+			'question' => 'COMBIEN COUTE UN TATOUAGE ?',
+			'answer'   => 'Le prix depend de la taille, du style et de la complexite. Choisissez un format adapte a votre projet.',
+		),
+		array(
+			'question' => 'COMBIEN DE TEMPS DURE UNE SEANCE ?',
+			'answer'   => 'La duree depend du format reserve: short block, half day ou full day.',
+		),
+		array(
+			'question' => 'QUELS SONT LES SOINS APRES LE TATOUAGE ?',
+			'answer'   => 'Suivez le protocole de cicatrisation recommande pour garantir un resultat propre et durable.',
+		),
+		array(
+			'question' => 'PEUT-ON MODIFIER UN TATOUAGE EXISTANT ?',
+			'answer'   => 'Oui, selon le projet. Une consultation permet de definir la meilleure approche.',
+		),
+	);
+}
 ?>
 
 <section class="hat-faq" id="faq" aria-labelledby="hat-faq-title">
@@ -39,13 +52,13 @@ $faq_items = array(
 			<div class="hat-faq__header-left">
 				<p class="hat-faq__eyebrow">
 					<span class="hat-faq__eyebrow-bracket" aria-hidden="true">(</span>
-					<span class="hat-faq__eyebrow-word"><?php esc_html_e( 'FAQ', 'hughalroztatoo' ); ?></span>
+					<span class="hat-faq__eyebrow-word"><?php echo esc_html( $faq_eyebrow ); ?></span>
 					<span class="hat-faq__eyebrow-bracket" aria-hidden="true">)</span>
 				</p>
 
 				<h2 class="hat-faq__title" id="hat-faq-title">
-					<span class="hat-faq__title-line"><?php esc_html_e( 'QUESTIONS', 'hughalroztatoo' ); ?></span>
-					<span class="hat-faq__title-line hat-faq__title-line--indent"><?php esc_html_e( 'FRÉQUENTES', 'hughalroztatoo' ); ?></span>
+					<span class="hat-faq__title-line"><?php echo esc_html( $faq_title_1 ); ?></span>
+					<span class="hat-faq__title-line hat-faq__title-line--indent"><?php echo esc_html( $faq_title_2 ); ?></span>
 				</h2>
 			</div>
 
