@@ -263,18 +263,109 @@
 }
 
 @media (max-width: 640px) {
+	.hat-pricing {
+		padding: 38px 0 72px;
+	}
+
 	.hat-pricing__heading {
 		grid-template-columns: 1fr;
-		row-gap: clamp(12px, 3vw, 20px);
+		row-gap: 12px;
+		margin-bottom: 20px;
+	}
+
+	.hat-pricing__eyebrow {
+		gap: 6px;
+		font-size: 11px;
+		letter-spacing: 0.12em;
 	}
 
 	.hat-pricing__title {
 		grid-column: 1;
-		justify-self: start;
-		font-size: clamp(42px, 12vw, 100px);
+		justify-self: center;
+		column-gap: 8px;
+		row-gap: 2px;
+		width: auto;
+		font-size: clamp(24px, 10.2vw, 40px);
+		line-height: 0.9;
+		letter-spacing: -0.01em;
+	}
+
+	.hat-pricing__title-prefix:empty {
+		display: none;
+	}
+
+	.hat-pricing__title-wire {
+		width: 42px;
+		margin-left: 8px;
+	}
+
+	.hat-pricing__title-blur {
+		display: none;
+	}
+
+	.hat-pricing__grid {
+		gap: 10px;
+	}
+
+	.hat-pricing__card {
+		max-width: none;
+		min-height: 250px;
+		padding: 12px;
+	}
+
+	.hat-pricing__duration {
+		font-size: 14px;
+	}
+
+	.hat-pricing__badge {
+		top: 12px;
+		right: 12px;
+		width: 100px;
+		height: 32px;
+		padding: 8px;
+		gap: 4px;
+		font-size: 10px;
+		line-height: 1.15;
+	}
+
+	.hat-pricing__badge-icon {
+		width: 14px;
+		height: 14px;
+	}
+
+	.hat-pricing__bg-index {
+		display: none;
 	}
 
 	.hat-pricing__card-title {
-		margin-top: clamp(70px, 15vw, 92px);
+		margin: auto 0 10px;
+		font-size: 42px;
+		line-height: 0.9;
+	}
+
+	.hat-pricing__features {
+		margin-bottom: 14px;
+		gap: 5px;
+	}
+
+	.hat-pricing__features li {
+		padding-left: 19px;
+		font-size: 12px;
+		line-height: 1.25;
+	}
+
+	.hat-pricing__features li::before {
+		top: 0.1em;
+		width: 12px;
+		height: 12px;
+	}
+
+	.hat-pricing__price {
+		font-size: 42px;
+		line-height: 0.92;
+	}
+
+	.hat-pricing__card--popular {
+		background: linear-gradient(180deg, rgba(255, 255, 255, 0.12) 0%, rgba(255, 255, 255, 0.06) 100%);
 	}
 }

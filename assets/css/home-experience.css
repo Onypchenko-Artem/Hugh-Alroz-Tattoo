@@ -259,7 +259,98 @@
 }
 
 @media (max-width: 640px) {
+	.hat-experience {
+		padding: 44px 0 60px;
+	}
+
+	.hat-experience__grid {
+		grid-template-columns: 1fr;
+		row-gap: 0;
+	}
+
+	.hat-experience__eyebrow {
+		grid-column: 1;
+		gap: 6px;
+		font-size: 11px;
+		letter-spacing: 0.12em;
+		margin-bottom: 10px;
+	}
+
+	.hat-experience__heading {
+		grid-column: 1;
+		margin-bottom: 24px;
+	}
+
 	.hat-experience__title {
-		font-size: clamp(36px, 10vw, 52px);
+		font-size: clamp(36px, 10.8vw, 52px);
+		line-height: 0.9;
+	}
+
+	.hat-experience__title-main--first-row {
+		gap: 10px;
+	}
+
+	.hat-experience__title-tag {
+		font-size: 12px;
+		padding-left: 10px;
+	}
+
+	.hat-experience__title-main--with-wire {
+		margin-top: -2px;
+	}
+
+	.hat-experience__wire {
+		max-height: 42px;
+		margin: 0 10px;
+	}
+
+	.hat-experience__title-blur {
+		display: none;
+	}
+
+	.hat-experience__subtitle {
+		margin-top: 10px;
+		font-size: 14px;
+	}
+
+	.hat-experience__index {
+		display: none;
+	}
+
+	.hat-experience__row {
+		grid-column: 1;
+	}
+
+	.hat-experience__summary {
+		padding: 12px 0;
+	}
+
+	.hat-experience__item-title {
+		font-size: 24px;
+		line-height: 1;
+	}
+
+	.hat-experience__item-arrow {
+		width: 20px;
+	}
+
+	.hat-experience__accordion.is-open {
+		padding: 14px 14px 0;
+	}
+
+	.hat-experience__panel-inner {
+		max-width: 100%;
+		padding-bottom: 18px;
+	}
+
+	.hat-experience__panel-lead {
+		margin-bottom: 8px;
+		font-size: 14px;
+	}
+
+	.hat-experience__panel-text {
+		font-size: 13px;
+		line-height: 1.35;
+		text-align: left;
 	}
 }

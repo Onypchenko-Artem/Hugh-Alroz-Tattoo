@@ -273,7 +273,7 @@ $pricing_services_map = hughalroztatoo_amelia_services_by_ids( $pricing_service_
 				}
 				$card_url = add_query_arg( $query_args, $booking_base_url );
 				?>
-				<li class="hat-pricing__card">
+				<li class="hat-pricing__card<?php echo $popular ? ' hat-pricing__card--popular' : ''; ?>">
 					<a class="hat-pricing__card-link" href="<?php echo esc_url( $card_url ); ?>" aria-label="<?php echo esc_attr( sprintf( __( 'Choisir le format %1$s (%2$s)', 'hughalroztatoo' ), $title, $duration ) ); ?>">
 						<p class="hat-pricing__duration">
 							<span class="hat-pricing__duration-label"><?php esc_html_e( '(T)', 'hughalroztatoo' ); ?></span>
