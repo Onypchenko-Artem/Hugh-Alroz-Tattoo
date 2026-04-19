@@ -81,6 +81,14 @@
 	overflow: hidden;
 }
 
+.hat-portfolio__item.is-hidden {
+	display: none;
+}
+
+.hat-portfolio__item.is-revealing {
+	animation: hat-portfolio-reveal 0.45s ease both;
+}
+
 .hat-portfolio__item--wide {
 	grid-column: 1 / -1;
 }
@@ -120,6 +128,23 @@
 	transform: scale(1.03);
 }
 
+@keyframes hat-portfolio-reveal {
+	from {
+		opacity: 0;
+		transform: translateY(18px) scale(0.985);
+	}
+	to {
+		opacity: 1;
+		transform: translateY(0) scale(1);
+	}
+}
+
+@media (prefers-reduced-motion: reduce) {
+	.hat-portfolio__item.is-revealing {
+		animation: none;
+	}
+}
+
 .hat-portfolio__placeholder {
 	width: 100%;
 	height: 100%;
@@ -131,6 +156,10 @@
 	display: flex;
 	justify-content: center;
 	margin-top: clamp(56px, 5.469vw, 105px);
+}
+
+.hat-portfolio__footer.is-hidden {
+	display: none;
 }
 
 .hat-portfolio__more {

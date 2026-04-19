@@ -151,8 +151,8 @@
                 "label": "Hero CTA URL",
                 "name": "home_hero_cta_url",
                 "aria-label": "",
-                "type": "url",
-                "instructions": "",
+                "type": "link",
+                "instructions": "Можно указывать полный URL, относительный путь (/booking) или якорь (#contact).",
                 "required": 0,
                 "conditional_logic": 0,
                 "wrapper": {
@@ -160,8 +160,8 @@
                     "class": "",
                     "id": ""
                 },
-                "default_value": "#contact",
-                "placeholder": ""
+                "return_format": "array",
+                "allow_in_bindings": 0
             },
             {
                 "key": "field_hat_home_hero_strip_left",
@@ -480,6 +480,30 @@
                         "parent_repeater": "field_hat_home_pricing_cards"
                     },
                     {
+                        "key": "field_hat_home_pricing_card_service_id",
+                        "label": "Amelia Service ID",
+                        "name": "service_id",
+                        "aria-label": "",
+                        "type": "number",
+                        "instructions": "ID услуги из Amelia. Если заполнено, карточка автоматически берет название, длительность, цену и описание из этой услуги.",
+                        "required": 0,
+                        "conditional_logic": 0,
+                        "wrapper": {
+                            "width": "30",
+                            "class": "",
+                            "id": ""
+                        },
+                        "default_value": "",
+                        "min": 1,
+                        "max": "",
+                        "allow_in_bindings": 0,
+                        "placeholder": "12",
+                        "step": 1,
+                        "prepend": "",
+                        "append": "",
+                        "parent_repeater": "field_hat_home_pricing_cards"
+                    },
+                    {
                         "key": "field_hat_home_pricing_card_features",
                         "label": "Features (one per line)",
                         "name": "features",
@@ -609,8 +633,8 @@
                 "label": "Portfolio CTA URL",
                 "name": "home_portfolio_cta_url",
                 "aria-label": "",
-                "type": "url",
-                "instructions": "",
+                "type": "link",
+                "instructions": "Можно указывать полный URL, относительный путь (/booking) или якорь (#portfolio).",
                 "required": 0,
                 "conditional_logic": 0,
                 "wrapper": {
@@ -618,8 +642,8 @@
                     "class": "",
                     "id": ""
                 },
-                "default_value": "#portfolio",
-                "placeholder": ""
+                "return_format": "array",
+                "allow_in_bindings": 0
             },
             {
                 "key": "field_hat_home_portfolio_items",
@@ -1211,8 +1235,8 @@
                 "label": "Idea CTA URL",
                 "name": "home_idea_cta_url",
                 "aria-label": "",
-                "type": "url",
-                "instructions": "",
+                "type": "link",
+                "instructions": "Можно указывать полный URL, относительный путь (/booking) или якорь (#contact).",
                 "required": 0,
                 "conditional_logic": 0,
                 "wrapper": {
@@ -1220,8 +1244,8 @@
                     "class": "",
                     "id": ""
                 },
-                "default_value": "#contact",
-                "placeholder": ""
+                "return_format": "array",
+                "allow_in_bindings": 0
             },
             {
                 "key": "field_hat_home_idea_strip_1",

@@ -130,6 +130,7 @@ function hughalroztatoo_assets() {
 		$home_scripts = array(
 			'experience' => 'home-experience.js',
 			'faq'        => 'home-faq.js',
+			'portfolio'  => 'home-portfolio.js',
 		);
 
 		foreach ( $home_scripts as $suffix => $filename ) {

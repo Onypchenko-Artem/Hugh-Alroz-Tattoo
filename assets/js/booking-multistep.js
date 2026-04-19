@@ -382,6 +382,80 @@
 		return String(minutes) + 'MIN';
 	}
 
+	function normalizeLookupToken(value) {
+		return String(value == null ? '' : value)
+			.toLowerCase()
+			.normalize('NFD')
+			.replace(/[\u0300-\u036f]/g, '')
+			.replace(/[^a-z0-9]+/g, ' ')
+			.trim();
+	}
+
+	function preselectedServiceQuery() {
+		if (typeof window === 'undefined' || !window.location || !window.location.search) {
+			return null;
+		}
+		const q = new URLSearchParams(window.location.search);
+		const serviceIdRaw = q.get('hat_service_id') || q.get('hatServiceId') || q.get('serviceId') || '';
+		const serviceId = parseInt(serviceIdRaw, 10);
+		const serviceName = q.get('hat_service') || q.get('hatService') || q.get('service') || '';
+		const duration = q.get('hat_duration') || q.get('hatDuration') || q.get('duration') || '';
+		if (isNaN(serviceId) && !serviceName && !duration) {
+			return null;
+		}
+		return {
+			serviceId: !isNaN(serviceId) && serviceId > 0 ? serviceId : null,
+			serviceName: normalizeLookupToken(serviceName),
+			duration: normalizeLookupToken(duration),
+		};
+	}
+
+	function matchPreselectedService(flat, preselected) {
+		if (!preselected || !flat || !flat.length) {
+			return null;
+		}
+		if (preselected.serviceId) {
+			const exact = flat.find(function (entry) {
+				return entry && entry.service && parseInt(entry.service.id, 10) === preselected.serviceId;
+			});
+			if (exact) {
+				return exact;
+			}
+		}
+		let best = null;
+		let bestScore = 0;
+		flat.forEach(function (entry) {
+			if (!entry || !entry.service) {
+				return;
+			}
+			const svcName = normalizeLookupToken(entry.service.name || '');
+			const svcDuration = normalizeLookupToken(durationShortH(entry.service));
+			let score = 0;
+			if (preselected.serviceName) {
+				if (svcName === preselected.serviceName) {
+					score += 5;
+				} else if (svcName.indexOf(preselected.serviceName) !== -1 || preselected.serviceName.indexOf(svcName) !== -1) {
+					score += 2;
+				}
+			}
+			if (preselected.duration) {
+				if (svcDuration === preselected.duration) {
+					score += 3;
+				} else if (
+					svcDuration.indexOf(preselected.duration) !== -1 ||
+					preselected.duration.indexOf(svcDuration) !== -1
+				) {
+					score += 1;
+				}
+			}
+			if (score > bestScore) {
+				best = entry;
+				bestScore = score;
+			}
+		});
+		return bestScore > 0 ? best : null;
+	}
+
 	function displayTimesForDate(allSlots, date) {
 		const daySlots = allSlots && allSlots[date] ? allSlots[date] : {};
 		const dayTimes = Object.keys(daySlots || {});
@@ -1268,7 +1342,9 @@
 				totalNum != null ? String(Math.round(totalNum)) + ' CAD' : svc ? cadMoneyLabel(svc.price) : '—';
 			const pctRaw = cfg.depositPercent != null ? parseInt(cfg.depositPercent, 10) : 30;
 			const pct = isNaN(pctRaw) ? 30 : pctRaw;
-			const depLabel = (S.payRowDepositFmt || 'Acompte %d%%').replace('%d', String(pct));
+			const depLabel = (S.payRowDepositFmt || 'Acompte %d%%')
+				.replace('%d', String(pct))
+				.replace(/%%/g, '%');
 			let depDisplay = '—';
 			if (totalNum != null) {
 				depDisplay = String(Math.round((totalNum * pct) / 100)) + ' CAD';
@@ -1727,6 +1803,13 @@
 				state.categories = valuesMap(data.categories || []);
 				state.customFields = valuesMap(data.customFields);
 				state.flat = flattenServices(state.categories, ui.categoryIds || []);
+				const preselectedEntry = matchPreselectedService(state.flat, preselectedServiceQuery());
+				if (preselectedEntry) {
+					state.serviceEntry = preselectedEntry;
+					state.service = preselectedEntry.service;
+					state.categoryName = preselectedEntry.categoryName;
+					state.selectedCategoryId = parseInt(preselectedEntry.categoryId, 10);
+				}
 				const allow = ui.categoryIds && ui.categoryIds.length ? new Set(ui.categoryIds.map(function (id) { return parseInt(id, 10); })) : null;
 				state.categoryEntries = state.categories
 					.map(function (cat) {

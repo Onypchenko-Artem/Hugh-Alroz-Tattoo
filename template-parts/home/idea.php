@@ -10,13 +10,16 @@ if ( ! defined( 'ABSPATH' ) ) {
 }
 
 $home_post_id = get_queried_object_id();
+$idea_cta_url_raw = function_exists( 'get_field' ) ? get_field( 'home_idea_cta_url', $home_post_id ) : '';
 
 $idea_eyebrow   = function_exists( 'get_field' ) ? (string) get_field( 'home_idea_eyebrow', $home_post_id ) : '';
 $idea_title_1   = function_exists( 'get_field' ) ? (string) get_field( 'home_idea_title_line_1', $home_post_id ) : '';
 $idea_title_2   = function_exists( 'get_field' ) ? (string) get_field( 'home_idea_title_line_2', $home_post_id ) : '';
 $idea_text      = function_exists( 'get_field' ) ? (string) get_field( 'home_idea_text', $home_post_id ) : '';
 $idea_cta_label = function_exists( 'get_field' ) ? (string) get_field( 'home_idea_cta_label', $home_post_id ) : '';
-$idea_cta_url   = function_exists( 'get_field' ) ? (string) get_field( 'home_idea_cta_url', $home_post_id ) : '';
+$idea_cta_url   = is_array( $idea_cta_url_raw ) ? (string) ( $idea_cta_url_raw['url'] ?? '' ) : (string) $idea_cta_url_raw;
+$idea_cta_target = is_array( $idea_cta_url_raw ) ? (string) ( $idea_cta_url_raw['target'] ?? '' ) : '';
+$idea_cta_title = is_array( $idea_cta_url_raw ) ? (string) ( $idea_cta_url_raw['title'] ?? '' ) : '';
 $idea_strip_1   = function_exists( 'get_field' ) ? (string) get_field( 'home_idea_strip_1', $home_post_id ) : '';
 $idea_strip_2   = function_exists( 'get_field' ) ? (string) get_field( 'home_idea_strip_2', $home_post_id ) : '';
 
@@ -24,8 +27,9 @@ $idea_eyebrow   = '' !== $idea_eyebrow ? $idea_eyebrow : 'RESERVATION';
 $idea_title_1   = '' !== $idea_title_1 ? $idea_title_1 : "L'IDEE. L'ENCRE.";
 $idea_title_2   = '' !== $idea_title_2 ? $idea_title_2 : 'VOUS.';
 $idea_text      = '' !== $idea_text ? $idea_text : "Sur rendez-vous uniquement afin d'offrir une experience entierement personnalisee et dediee a chaque projet. Reservation en ligne disponible 24/7 pour organiser votre seance en toute simplicite, a l'heure qui vous convient.";
-$idea_cta_label = '' !== $idea_cta_label ? $idea_cta_label : 'RESERVER UNE SEANCE';
+$idea_cta_label = '' !== $idea_cta_label ? $idea_cta_label : ( '' !== $idea_cta_title ? $idea_cta_title : 'RESERVER UNE SEANCE' );
 $idea_cta_url   = '' !== $idea_cta_url ? $idea_cta_url : '#contact';
+$idea_cta_target = '' !== $idea_cta_target ? $idea_cta_target : '_self';
 $idea_strip_1   = '' !== $idea_strip_1 ? $idea_strip_1 : 'RDV//';
 $idea_strip_2   = '' !== $idea_strip_2 ? $idea_strip_2 : '/ 20.2026 /';
 ?>
@@ -54,7 +58,7 @@ $idea_strip_2   = '' !== $idea_strip_2 ? $idea_strip_2 : '/ 20.2026 /';
 				<?php echo esc_html( $idea_text ); ?>
 			</p>
 
-			<a class="hat-idea__cta" href="<?php echo esc_url( $idea_cta_url ); ?>">
+			<a class="hat-idea__cta" href="<?php echo esc_url( $idea_cta_url ); ?>" target="<?php echo esc_attr( $idea_cta_target ); ?>">
 				<span class="hat-idea__cta-label"><?php echo esc_html( $idea_cta_label ); ?></span>
 				<span class="hat-idea__cta-arrow" aria-hidden="true">
 					<img src="<?php echo esc_url( get_template_directory_uri() . '/assets/images/arrow-up-outline.svg' ); ?>" alt="" width="35" height="35">

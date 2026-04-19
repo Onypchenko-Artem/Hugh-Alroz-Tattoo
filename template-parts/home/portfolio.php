@@ -10,19 +10,23 @@ if ( ! defined( 'ABSPATH' ) ) {
 }
 
 $home_post_id = get_queried_object_id();
+$portfolio_url_raw = function_exists( 'get_field' ) ? get_field( 'home_portfolio_cta_url', $home_post_id ) : '';
 
 $portfolio_eyebrow = function_exists( 'get_field' ) ? (string) get_field( 'home_portfolio_eyebrow', $home_post_id ) : '';
 $portfolio_title_1 = function_exists( 'get_field' ) ? (string) get_field( 'home_portfolio_title_line_1', $home_post_id ) : '';
 $portfolio_title_2 = function_exists( 'get_field' ) ? (string) get_field( 'home_portfolio_title_line_2', $home_post_id ) : '';
 $portfolio_cta     = function_exists( 'get_field' ) ? (string) get_field( 'home_portfolio_cta_label', $home_post_id ) : '';
-$portfolio_url     = function_exists( 'get_field' ) ? (string) get_field( 'home_portfolio_cta_url', $home_post_id ) : '';
+$portfolio_url     = is_array( $portfolio_url_raw ) ? (string) ( $portfolio_url_raw['url'] ?? '' ) : (string) $portfolio_url_raw;
+$portfolio_target  = is_array( $portfolio_url_raw ) ? (string) ( $portfolio_url_raw['target'] ?? '' ) : '';
+$portfolio_title   = is_array( $portfolio_url_raw ) ? (string) ( $portfolio_url_raw['title'] ?? '' ) : '';
 $portfolio_items   = function_exists( 'get_field' ) ? get_field( 'home_portfolio_items', $home_post_id ) : array();
 
 $portfolio_eyebrow = '' !== $portfolio_eyebrow ? $portfolio_eyebrow : 'PORTFOLIO';
 $portfolio_title_1 = '' !== $portfolio_title_1 ? $portfolio_title_1 : "L'ENCRE";
 $portfolio_title_2 = '' !== $portfolio_title_2 ? $portfolio_title_2 : 'NE MENT PAS';
-$portfolio_cta     = '' !== $portfolio_cta ? $portfolio_cta : 'VOIR PLUS';
+$portfolio_cta     = '' !== $portfolio_cta ? $portfolio_cta : ( '' !== $portfolio_title ? $portfolio_title : 'VOIR PLUS' );
 $portfolio_url     = '' !== $portfolio_url ? $portfolio_url : '#portfolio';
+$portfolio_target  = '' !== $portfolio_target ? $portfolio_target : '_self';
 
 if ( ! is_array( $portfolio_items ) || empty( $portfolio_items ) ) {
 	$portfolio_items = array(
@@ -48,9 +52,48 @@ if ( ! is_array( $portfolio_items ) || empty( $portfolio_items ) ) {
 		),
 	);
 }
+
+$portfolio_entries = array();
+
+foreach ( $portfolio_items as $item ) {
+	$image = isset( $item['image'] ) ? $item['image'] : '';
+	$alt   = isset( $item['alt'] ) ? (string) $item['alt'] : '';
+	$size  = isset( $item['size'] ) && 'half' === $item['size'] ? 'half' : 'wide';
+
+	if ( is_array( $image ) ) {
+		$image_url = isset( $image['url'] ) ? (string) $image['url'] : '';
+		$image_alt = isset( $image['alt'] ) && '' !== (string) $image['alt'] ? (string) $image['alt'] : $alt;
+	} else {
+		$image_url = (string) $image;
+		$image_alt = $alt;
+	}
+
+	if ( '' === $image_url ) {
+		continue;
+	}
+
+	$portfolio_entries[] = array(
+		'url'  => $image_url,
+		'alt'  => $image_alt,
+		'size' => $size,
+	);
+}
+
+$portfolio_initial_count = 4;
+$portfolio_step_count    = 4;
+$portfolio_total_count   = count( $portfolio_entries );
+$portfolio_has_more      = $portfolio_total_count > $portfolio_initial_count;
+$portfolio_less_label    = __( 'VOIR MOINS', 'hughalroztatoo' );
 ?>
 
-<section class="hat-portfolio" id="portfolio" aria-labelledby="hat-portfolio-title">
+<section
+	class="hat-portfolio"
+	id="portfolio"
+	aria-labelledby="hat-portfolio-title"
+	data-portfolio-root
+	data-portfolio-initial="<?php echo esc_attr( (string) $portfolio_initial_count ); ?>"
+	data-portfolio-step="<?php echo esc_attr( (string) $portfolio_step_count ); ?>"
+>
 	<div class="hat-container">
 		<div class="hat-portfolio__header">
 			<p class="hat-portfolio__eyebrow">
@@ -72,37 +115,23 @@ if ( ! is_array( $portfolio_items ) || empty( $portfolio_items ) ) {
 		</div>
 	</div>
 
-	<div class="hat-portfolio__grid">
-		<?php foreach ( $portfolio_items as $item ) : ?>
+	<div class="hat-portfolio__grid" data-portfolio-grid>
+		<?php foreach ( $portfolio_entries as $index => $entry ) : ?>
 			<?php
-			$image = isset( $item['image'] ) ? $item['image'] : '';
-			$alt   = isset( $item['alt'] ) ? (string) $item['alt'] : '';
-			$size  = isset( $item['size'] ) && 'half' === $item['size'] ? 'half' : 'wide';
-
-			if ( is_array( $image ) ) {
-				$image_url = isset( $image['url'] ) ? (string) $image['url'] : '';
-				$image_alt = isset( $image['alt'] ) && '' !== (string) $image['alt'] ? (string) $image['alt'] : $alt;
-			} else {
-				$image_url = (string) $image;
-				$image_alt = $alt;
-			}
-
-			if ( '' === $image_url ) {
-				continue;
-			}
+			$hidden_class = $index >= $portfolio_initial_count ? ' is-hidden' : '';
 			?>
-			<figure class="hat-portfolio__item hat-portfolio__item--<?php echo esc_attr( $size ); ?>">
+			<figure class="hat-portfolio__item hat-portfolio__item--<?php echo esc_attr( $entry['size'] ); ?><?php echo esc_attr( $hidden_class ); ?>" data-portfolio-item>
 				<div class="hat-portfolio__img-wrap">
-					<img class="hat-portfolio__img" src="<?php echo esc_url( $image_url ); ?>" alt="<?php echo esc_attr( $image_alt ); ?>" loading="lazy">
+					<img class="hat-portfolio__img" src="<?php echo esc_url( $entry['url'] ); ?>" alt="<?php echo esc_attr( $entry['alt'] ); ?>" loading="lazy">
 				</div>
 			</figure>
 		<?php endforeach; ?>
 	</div>
 
 	<div class="hat-container">
-		<div class="hat-portfolio__footer">
-			<a class="hat-portfolio__more" href="<?php echo esc_url( $portfolio_url ); ?>">
-				<span class="hat-portfolio__more-label"><?php echo esc_html( $portfolio_cta ); ?></span>
+		<div class="hat-portfolio__footer<?php echo $portfolio_has_more ? '' : ' is-hidden'; ?>" data-portfolio-footer>
+			<a class="hat-portfolio__more" href="<?php echo esc_url( $portfolio_url ); ?>" target="<?php echo esc_attr( $portfolio_target ); ?>" data-portfolio-more data-portfolio-less-label="<?php echo esc_attr( $portfolio_less_label ); ?>" aria-expanded="false">
+				<span class="hat-portfolio__more-label" data-portfolio-more-label><?php echo esc_html( $portfolio_cta ); ?></span>
 				<img class="hat-portfolio__more-arrow" src="<?php echo esc_url( get_template_directory_uri() . '/assets/images/voir-plus.svg' ); ?>" alt="" aria-hidden="true" width="22" height="23">
 			</a>
 		</div>
