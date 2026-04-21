@@ -37,29 +37,42 @@ $hero_strip_left   = '' !== $hero_strip_left ? $hero_strip_left : 'TATTOO.RESERV
 $hero_strip_center = '' !== $hero_strip_center ? $hero_strip_center : '(&nbsp;R&nbsp;)';
 $hero_strip_right  = '' !== $hero_strip_right ? $hero_strip_right : 'SS26';
 
+$hero_heading_image        = function_exists( 'get_field' ) ? get_field( 'home_hero_heading_image', $home_post_id ) : null;
+$hero_heading_image_url    = '';
+$hero_heading_image_width  = '';
+$hero_heading_image_height = '';
+if ( is_array( $hero_heading_image ) ) {
+	$hero_heading_image_url    = (string) ( $hero_heading_image['url'] ?? '' );
+	$hero_heading_image_width  = (string) ( $hero_heading_image['width'] ?? '' );
+	$hero_heading_image_height = (string) ( $hero_heading_image['height'] ?? '' );
+} elseif ( is_numeric( $hero_heading_image ) && $hero_heading_image ) {
+	$hero_heading_image_url = (string) ( wp_get_attachment_image_url( (int) $hero_heading_image, 'full' ) ?: '' );
+}
+
 ?>
 
 <section
 	class="hat-hero"
 	id="hero"
-	aria-labelledby="hat-hero-heading"
 >
 	<div class="hat-hero__media" aria-hidden="true"></div>
 
 	<div class="hat-container hat-hero__body">
 		<div class="hat-hero__heading-top">
-			<h1 class="hat-hero__heading-block" id="hat-hero-heading">
-				<span class="hat-hero__name-line hat-hero__name-line--hugh"><?php echo esc_html( $hero_hugh ); ?></span>
-				<span class="hat-hero__heading-bottom">
-					<span class="hat-hero__name-line hat-hero__name-line--alroz">
-						<?php echo esc_html( $hero_alroz ); ?>
-						<span class="hat-hero__studio-tag" aria-label="<?php esc_attr_e( 'Tattoo Studio Prive', 'hughalroztatoo' ); ?>">
-							<span class="hat-hero__studio-tag-line"><?php echo esc_html( $hero_studio_line1 ); ?></span>
-							<span class="hat-hero__studio-tag-line"><?php echo esc_html( $hero_studio_line2 ); ?></span>
-						</span>
-					</span>
-				</span>
-			</h1>
+			<div class="hat-hero__studio-info">
+				<span class="hat-hero__studio-tag-line"><?php echo esc_html( $hero_studio_line1 ); ?></span>
+				<span class="hat-hero__studio-tag-line"><?php echo esc_html( $hero_studio_line2 ); ?></span>
+			</div>
+			<?php if ( $hero_heading_image_url ) : ?>
+			<div class="hat-hero__heading-image" aria-hidden="true">
+				<img
+					src="<?php echo esc_url( $hero_heading_image_url ); ?>"
+					alt=""
+					<?php echo $hero_heading_image_width ? 'width="' . esc_attr( $hero_heading_image_width ) . '"' : ''; ?>
+					<?php echo $hero_heading_image_height ? 'height="' . esc_attr( $hero_heading_image_height ) . '"' : ''; ?>
+				>
+			</div>
+			<?php endif; ?>
 		</div>
 
 		<div class="hat-hero__action-group">

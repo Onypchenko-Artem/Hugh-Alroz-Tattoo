@@ -63,21 +63,19 @@ $hat_bg_video_url   = esc_url( get_template_directory_uri() . '/assets/videos/ba
 				<span class="hat-header__nav-plus" aria-hidden="true">+</span>
 				<?php esc_html_e( 'MENU', 'hughalroztatoo' ); ?>
 			</button>
-			<div class="hat-header__mobile-nav">
-				<?php
-				wp_nav_menu(
-					array(
-						'theme_location' => 'primary',
-						'container'      => false,
-						'menu_class'     => '',
-						'fallback_cb'    => function () {
-							echo '<ul><li><a href="#"><span class="hat-header__nav-plus" aria-hidden="true">+</span> ' . esc_html__( 'MENU', 'hughalroztatoo' ) . '</a></li></ul>';
-						},
-						'items_wrap'     => '<ul>%3$s</ul>',
-					)
-				);
-				?>
-			</div>
+			<button
+				class="hat-header__burger"
+				type="button"
+				aria-expanded="false"
+				aria-controls="hat-desktop-menu"
+				aria-label="<?php esc_attr_e( 'Open menu', 'hughalroztatoo' ); ?>"
+			>
+				<span class="hat-header__burger-icon" aria-hidden="true">
+					<span></span>
+					<span></span>
+					<span></span>
+				</span>
+			</button>
 		</nav>
 	</div>
 

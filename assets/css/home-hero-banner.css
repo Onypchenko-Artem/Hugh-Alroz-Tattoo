@@ -2,9 +2,8 @@
 	position: relative;
 	display: flex;
 	flex-direction: column;
-	min-height: 100vh;
-	min-height: 100dvh;
-	padding: clamp(60px, 4.688vw, 90px) 0 clamp(198px, 17.1875vw, 330px);
+	min-height: clamp(820px, 59.427vw, 1141px);
+	padding: 0 0 clamp(28px, 3.646vw, 70px);
 	color: #fff;
 }
 
@@ -30,111 +29,82 @@
 .hat-hero__body {
 	position: relative;
 	z-index: 1;
-	flex: 1;
-	display: flex;
-	flex-direction: column;
+	height: clamp(560px, 48.125vw, 924px);
 	width: 100%;
-	padding-bottom: clamp(45px, 3.542vw, 68px);
+	margin-top: clamp(56px, 5.625vw, 108px);
+	padding-bottom: 0;
 }
 
-/* --- Title area: staggered layout per Figma --- */
+/* --- Title area --- */
 .hat-hero__heading-top {
-	position: relative;
-	margin-top: clamp(13px, 0.99vw, 19px);
-	margin-bottom: auto;
-}
-
-.hat-hero__heading-block {
-	margin: 0;
-	display: flex;
-	flex-direction: column;
-	text-transform: uppercase;
-	color: #fff;
-	gap: clamp(47px, 3.646vw, 70px);
-}
-
-.hat-hero__name-line {
-	display: block;
-	font-style: normal;
-	font-weight: 500;
-	font-size: clamp(205px, 16.042vw, 308px);
-	line-height: 0.75;
-	letter-spacing: -0.03em;
-	text-transform: uppercase;
-	color: #fff;
-	mix-blend-mode: hard-light;
-	opacity: 0.84;
-}
-
-.hat-hero__name-line--hugh {
-	padding-left: clamp(191px, 14.948vw, 287px);
-}
-
-.hat-hero__heading-bottom {
-	display: block;
-	margin-top: clamp(-48px, -2.5vw, -32px);
-}
-
-.hat-hero__name-line--alroz {
-	position: relative;
-	display: inline-block;
-	width: max-content;
-	margin-left: clamp(475px, 37.135vw, 713px);
-	padding-left: 0;
-	background: linear-gradient(105.38deg, #ffffff 39.21%, #434343 80.17%);
-	-webkit-background-clip: text;
-	background-clip: text;
-	-webkit-text-fill-color: transparent;
-	color: transparent;
-	mix-blend-mode: hard-light;
-	opacity: 1;
-}
-
-.hat-hero__studio-tag {
 	position: absolute;
-	right: 0;
-	bottom: 100%;
-	margin: 0 0 clamp(14px, 1.094vw, 21px) 0;
+	inset: 0;
+	margin: 0 0 clamp(24px, 2.604vw, 50px);
+	padding: 0 clamp(24px, 3.646vw, 70px);
+	overflow: hidden;
+}
+
+/* Studio label (top-left) */
+.hat-hero__studio-info {
+	position: relative;
+	top: 0;
+	left: 0;
 	display: flex;
 	flex-direction: column;
-	align-items: flex-end;
 	font-weight: 400;
 	font-size: clamp(16px, 1.25vw, 24px);
-	line-height: clamp(19px, 1.51vw, 29px);
+	line-height: clamp(20px, 1.51vw, 29px);
 	letter-spacing: -0.02em;
 	text-transform: uppercase;
-	text-align: right;
-	-webkit-text-fill-color: #fff;
 	color: #fff;
-	background: none;
-	-webkit-background-clip: unset;
-	background-clip: unset;
-	mix-blend-mode: normal;
-	opacity: 1;
 }
 
 .hat-hero__studio-tag-line {
 	display: block;
 }
 
+/* Hero heading image */
+.hat-hero__heading-image {
+	position: absolute;
+	inset: 0;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	pointer-events: none;
+}
+
+.hat-hero__heading-image img {
+	display: block;
+	height: min(924px, 100%);
+	max-height: 100%;
+	max-width: 100%;
+	width: auto;
+	object-fit: contain;
+}
+
 /* --- Lede + CTA group --- */
 .hat-hero__action-group {
+	position: absolute;
+	right: clamp(24px, 3.646vw, 70px);
+	bottom: clamp(24px, 2.604vw, 50px);
+	top: auto;
+	transform: none;
 	display: flex;
 	flex-direction: column;
 	align-items: flex-start;
-	align-self: center;
-	margin: 0 auto;
+	margin: 0;
+	width: clamp(280px, 21.146vw, 406px);
 }
 
 /* --- Description text --- */
 .hat-hero__lede {
-	margin: clamp(67px, 5.208vw, 100px) 0 clamp(51px, 4.01vw, 77px);
-	max-width: clamp(254px, 19.844vw, 381px);
+	margin: 0 0 clamp(16px, 1.406vw, 27px);
+	max-width: clamp(260px, 19.844vw, 381px);
 	text-align: justify;
-	text-indent: clamp(50px, 3.906vw, 75px);
-	font-size: clamp(13px, 1.042vw, 20px);
-	line-height: clamp(16px, 1.25vw, 24px);
-	font-weight: 300;
+	text-indent: clamp(40px, 4.167vw, 80px);
+	font-size: clamp(14px, 1.042vw, 20px);
+	line-height: clamp(18px, 1.25vw, 24px);
+	font-weight: 400;
 	letter-spacing: 0.02em;
 	color: #fff;
 }
@@ -143,16 +113,20 @@
 .hat-hero__cta {
 	display: inline-flex;
 	align-items: stretch;
+	justify-content: center;
 	background: #fff;
 	color: #000;
 	text-decoration: none;
 	font-weight: 600;
 	font-size: clamp(16px, 1.25vw, 24px);
-	line-height: clamp(19px, 1.51vw, 29px);
+	line-height: clamp(20px, 1.51vw, 29px);
 	letter-spacing: 0.01em;
 	text-transform: uppercase;
-	padding: clamp(9px, 0.729vw, 14px) clamp(12px, 0.938vw, 18px) clamp(9px, 0.729vw, 14px) clamp(23px, 1.823vw, 35px);
-	gap: clamp(17px, 1.354vw, 26px);
+	width: clamp(280px, 21.146vw, 406px);
+	min-height: clamp(58px, 4.427vw, 85px);
+	padding: clamp(12px, 1.042vw, 20px) clamp(16px, 1.927vw, 37px) clamp(11px, 0.99vw, 19px) clamp(20px, 2.76vw, 53px);
+	border: 2px solid #fff;
+	gap: clamp(12px, 1.354vw, 26px);
 }
 
 .hat-hero__cta-label {
@@ -164,8 +138,9 @@
 	display: flex;
 	align-items: center;
 	justify-content: center;
-	width: clamp(38px, 2.969vw, 57px);
-	height: clamp(38px, 2.969vw, 57px);
+	width: clamp(40px, 2.969vw, 57px);
+	height: clamp(40px, 3.021vw, 58px);
+	flex: 0 0 clamp(40px, 2.969vw, 57px);
 	background: #000;
 }
 
@@ -179,10 +154,10 @@
 	z-index: 1;
 	margin-top: auto;
 	padding: 0;
-	font-weight: 400;
+	font-weight: 500;
 	font-size: clamp(13px, 1.042vw, 20px);
 	line-height: clamp(16px, 1.25vw, 24px);
-	letter-spacing: 0.01em;
+	letter-spacing: -0.01em;
 	text-transform: uppercase;
 	color: #fff;
 }
@@ -207,94 +182,99 @@
 	text-align: center;
 	font-size: clamp(16px, 1.25vw, 24px);
 	line-height: clamp(19px, 1.51vw, 29px);
-	letter-spacing: 0.5em;
+	letter-spacing: -0.05em;
 }
 
 /* --- Responsive: below fluid range (< 1280px) --- */
 @media (max-width: 1279px) {
-	.hat-hero__name-line {
-		font-size: clamp(4rem, 16vw, 205px);
-		line-height: 0.85;
+	.hat-hero {
+		min-height: 100vh;
+		min-height: 100dvh;
+		padding: clamp(60px, 4.688vw, 90px) 0 clamp(120px, 12vw, 190px);
 	}
 
-	.hat-hero__name-line--hugh {
-		padding-left: clamp(2rem, 10vw, 191px);
+	.hat-hero__body {
+		height: auto;
+		min-height: 62vh;
+		margin-top: clamp(56px, 6vw, 88px);
+		padding-bottom: clamp(45px, 3.542vw, 68px);
 	}
 
-	.hat-hero__name-line--alroz {
-		margin-left: clamp(4rem, 25vw, 475px);
+	.hat-hero__action-group {
+		width: min(406px, 36vw);
 	}
 
-	.hat-hero__heading-bottom {
-		margin-top: -0.08em;
+	.hat-hero__lede {
+		font-size: clamp(14px, 1.45vw, 20px);
+		line-height: clamp(18px, 1.75vw, 24px);
 	}
 
-	.hat-hero__studio-tag {
-		position: static;
-		transform: none;
-		margin-top: clamp(12px, 0.833vw, 16px);
+	.hat-hero__cta {
+		width: 100%;
+		font-size: clamp(16px, 1.8vw, 24px);
+		line-height: 1.2;
+		padding: clamp(12px, 1.3vw, 20px) clamp(14px, 1.9vw, 37px) clamp(12px, 1.2vw, 19px) clamp(20px, 2.2vw, 53px);
+	}
+
+	.hat-hero__cta-arrow {
+		width: clamp(40px, 4.3vw, 57px);
+		height: clamp(40px, 4.4vw, 58px);
+		flex-basis: clamp(40px, 4.3vw, 57px);
+	}
+
+	.hat-hero__heading-image img {
+		height: clamp(220px, 40vh, 400px);
 	}
 }
 
 @media (max-width: 640px) {
 	.hat-hero {
-		padding: 108px 0 28px;
+		padding: clamp(84px, 28vw, 108px) 0 clamp(20px, 7.3vw, 28px);
 	}
 
 	.hat-hero__body {
-		padding-bottom: 18px;
+		padding-bottom: clamp(12px, 4.7vw, 18px);
 	}
 
 	.hat-hero__heading-top {
-		margin-top: 84px;
+		position: relative;
+		inset: auto;
+		margin-top: clamp(12px, 5.2vw, 20px);
 	}
 
-	.hat-hero__heading-block {
-		gap: 0;
-	}
-
-	.hat-hero__name-line {
-		font-size: clamp(85px, 25.5vw, 114px);
-		line-height: 0.88;
-		letter-spacing: -0.045em;
-	}
-
-	.hat-hero__name-line--hugh {
-		padding-left: 0;
-	}
-
-	.hat-hero__heading-bottom {
-		margin-top: -0.1em;
-	}
-
-	.hat-hero__name-line--alroz {
-		margin-left: clamp(24px, 7vw, 36px);
-		max-width: calc(100vw - (var(--hat-gutter-x) * 2) - 24px);
-	}
-
-	.hat-hero__studio-tag {
-		position: absolute;
-		right: 0;
-		bottom: calc(100% + 12px);
-		margin: 0;
-		align-items: flex-start;
-		font-size: 14px;
-		line-height: 1.05;
+	.hat-hero__studio-info {
+		position: static;
+		font-size: clamp(12px, 3.7vw, 14px);
+		line-height: 1.2;
 		letter-spacing: -0.03em;
-		text-align: left;
+	}
+
+	.hat-hero__heading-image {
+		position: static;
+		transform: none;
+	}
+
+	.hat-hero__heading-image img {
+		height: clamp(180px, 45vw, 260px);
 	}
 
 	.hat-hero__action-group {
+		position: static;
+		top: auto;
+		right: auto;
+		transform: none;
 		width: 100%;
+		align-self: center;
 		align-items: center;
+		margin: 0 auto;
 	}
 
 	.hat-hero__lede {
-		margin: 28px auto 34px;
+		margin: clamp(18px, 7.3vw, 28px) auto clamp(20px, 8.9vw, 34px);
 		max-width: 292px;
 		text-align: center;
 		text-indent: 0;
-		font-size: 15px;
+		font-size: clamp(13px, 3.9vw, 15px);
 		line-height: 1.18;
 		letter-spacing: 0;
 	}
@@ -302,34 +282,34 @@
 	.hat-hero__cta {
 		width: min(100%, 299px);
 		justify-content: space-between;
-		padding: 10px 10px 10px 24px;
-		gap: 12px;
-		font-size: 15px;
+		padding: clamp(8px, 2.6vw, 10px) clamp(8px, 2.6vw, 10px) clamp(8px, 2.6vw, 10px) clamp(18px, 6.3vw, 24px);
+		gap: clamp(8px, 3.1vw, 12px);
+		font-size: clamp(13px, 3.9vw, 15px);
 		line-height: 1;
 	}
 
 	.hat-hero__cta-arrow {
-		width: 47px;
-		height: 47px;
-		flex: 0 0 47px;
+		width: clamp(40px, 12.3vw, 47px);
+		height: clamp(40px, 12.3vw, 47px);
+		flex: 0 0 clamp(40px, 12.3vw, 47px);
 	}
 
 	.hat-hero__cta-arrow img {
-		width: 20px;
-		height: 20px;
+		width: clamp(16px, 5.2vw, 20px);
+		height: clamp(16px, 5.2vw, 20px);
 	}
 
 	.hat-hero__strip {
-		font-size: 10px;
+		font-size: clamp(9px, 2.6vw, 10px);
 		line-height: 1.2;
 	}
 
 	.hat-hero__strip-inner {
-		gap: 8px;
+		gap: clamp(6px, 2.1vw, 8px);
 	}
 
 	.hat-hero__strip-item--center {
-		font-size: 14px;
+		font-size: clamp(12px, 3.7vw, 14px);
 		line-height: 1;
 		letter-spacing: 0.35em;
 	}

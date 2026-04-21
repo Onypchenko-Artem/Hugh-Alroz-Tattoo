@@ -412,6 +412,35 @@ img {
 	display: none;
 }
 
+.hat-header__burger {
+	display: none;
+	align-items: center;
+	justify-content: center;
+	width: 44px;
+	height: 44px;
+	padding: 0;
+	background: transparent;
+	border: 0;
+	cursor: pointer;
+	flex-shrink: 0;
+}
+
+.hat-header__burger-icon {
+	display: flex;
+	flex-direction: column;
+	justify-content: space-between;
+	width: 24px;
+	height: 16px;
+}
+
+.hat-header__burger-icon span {
+	display: block;
+	width: 100%;
+	height: 1.5px;
+	background: #ffffff;
+	transition: opacity 0.2s ease;
+}
+
 body.hat-menu-open {
 	overflow: hidden;
 	padding-right: var(--hat-scrollbar-gap, 0px);
@@ -738,16 +767,12 @@ body.hat-menu-open .hat-header__nav {
 }
 
 @media (max-width: 1024px) {
-	.hat-desktop-menu {
-		display: none;
-	}
-
 	.hat-header__menu-toggle {
 		display: none;
 	}
 
-	.hat-header__mobile-nav {
-		display: block;
+	.hat-header__burger {
+		display: inline-flex;
 	}
 }
 

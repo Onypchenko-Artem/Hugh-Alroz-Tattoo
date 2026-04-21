@@ -2,16 +2,15 @@
 
 // Global theme entry point.
 (function () {
-	const toggle = document.querySelector(".hat-header__menu-toggle");
+	const toggles = document.querySelectorAll(".hat-header__menu-toggle, .hat-header__burger");
 	const desktopMenu = document.getElementById("hat-desktop-menu");
 
-	if (!toggle || !desktopMenu) {
+	if (!toggles.length || !desktopMenu) {
 		return;
 	}
 
 	const closeButton = desktopMenu.querySelector("[data-menu-close]");
 	const links = desktopMenu.querySelectorAll("a");
-	const desktopMedia = window.matchMedia("(min-width: 1025px)");
 	const prefersReducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)");
 
 	let closeFallbackTimerId = 0;
@@ -33,8 +32,12 @@
 	const getScrollbarGap = () =>
 		Math.max(0, window.innerWidth - document.documentElement.clientWidth);
 
+	const setToggleExpanded = (value) => {
+		toggles.forEach((t) => t.setAttribute("aria-expanded", value ? "true" : "false"));
+	};
+
 	const openMenu = () => {
-		if (!desktopMedia.matches || isMenuOpen()) {
+		if (isMenuOpen()) {
 			return;
 		}
 
@@ -44,7 +47,7 @@
 
 		desktopMenu.hidden = false;
 		desktopMenu.setAttribute("aria-hidden", "false");
-		toggle.setAttribute("aria-expanded", "true");
+		setToggleExpanded(true);
 		document.body.classList.add("hat-menu-open");
 
 		requestAnimationFrame(() => {
@@ -70,7 +73,7 @@
 		clearCloseAnimation();
 
 		desktopMenu.classList.remove("is-open");
-		toggle.setAttribute("aria-expanded", "false");
+		setToggleExpanded(false);
 		desktopMenu.setAttribute("aria-hidden", "true");
 
 		if (prefersReducedMotion.matches) {
@@ -89,12 +92,14 @@
 		closeFallbackTimerId = window.setTimeout(finishClose, 500);
 	};
 
-	toggle.addEventListener("click", () => {
-		if (isMenuOpen()) {
-			closeMenu();
-			return;
-		}
-		openMenu();
+	toggles.forEach((t) => {
+		t.addEventListener("click", () => {
+			if (isMenuOpen()) {
+				closeMenu();
+				return;
+			}
+			openMenu();
+		});
 	});
 
 	if (closeButton) {
@@ -108,18 +113,6 @@
 	document.addEventListener("keydown", (event) => {
 		if (event.key === "Escape" && isMenuOpen()) {
 			closeMenu();
-		}
-	});
-
-	desktopMedia.addEventListener("change", (event) => {
-		if (!event.matches) {
-			clearCloseAnimation();
-			desktopMenu.classList.remove("is-open");
-			document.body.classList.remove("hat-menu-open");
-			document.documentElement.style.removeProperty("--hat-scrollbar-gap");
-			toggle.setAttribute("aria-expanded", "false");
-			desktopMenu.hidden = true;
-			desktopMenu.setAttribute("aria-hidden", "true");
 		}
 	});
 })();
