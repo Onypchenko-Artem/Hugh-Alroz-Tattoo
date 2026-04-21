@@ -112,26 +112,26 @@
 /* --- CTA button --- */
 .hat-hero__cta {
 	display: inline-flex;
-	align-items: stretch;
-	justify-content: center;
+	align-items: center;
+	justify-content: space-between;
 	background: #fff;
 	color: #000;
 	text-decoration: none;
-	font-weight: 600;
+	font-weight: 700;
 	font-size: clamp(16px, 1.25vw, 24px);
 	line-height: clamp(20px, 1.51vw, 29px);
 	letter-spacing: 0.01em;
 	text-transform: uppercase;
 	width: clamp(280px, 21.146vw, 406px);
 	min-height: clamp(58px, 4.427vw, 85px);
-	padding: clamp(12px, 1.042vw, 20px) clamp(16px, 1.927vw, 37px) clamp(11px, 0.99vw, 19px) clamp(20px, 2.76vw, 53px);
-	border: 2px solid #fff;
-	gap: clamp(12px, 1.354vw, 26px);
+	padding: clamp(12px, 1.042vw, 20px) clamp(14px, 1.77vw, 34px) clamp(11px, 0.93vw, 18px) 34px;
+	gap: 20px;
 }
 
 .hat-hero__cta-label {
 	display: flex;
 	align-items: center;
+	white-space: nowrap;
 }
 
 .hat-hero__cta-arrow {
@@ -146,6 +146,8 @@
 
 .hat-hero__cta-arrow img {
 	display: block;
+	width: clamp(35px, 1.823vw, 35px);
+	height: clamp(35px, 1.823vw, 35px);
 }
 
 /* --- Bottom strip --- */
@@ -214,6 +216,7 @@
 		font-size: clamp(16px, 1.8vw, 24px);
 		line-height: 1.2;
 		padding: clamp(12px, 1.3vw, 20px) clamp(14px, 1.9vw, 37px) clamp(12px, 1.2vw, 19px) clamp(20px, 2.2vw, 53px);
+		padding-left: 34px;
 	}
 
 	.hat-hero__cta-arrow {
@@ -283,6 +286,7 @@
 		width: min(100%, 299px);
 		justify-content: space-between;
 		padding: clamp(8px, 2.6vw, 10px) clamp(8px, 2.6vw, 10px) clamp(8px, 2.6vw, 10px) clamp(18px, 6.3vw, 24px);
+		padding-left: 34px;
 		gap: clamp(8px, 3.1vw, 12px);
 		font-size: clamp(13px, 3.9vw, 15px);
 		line-height: 1;
