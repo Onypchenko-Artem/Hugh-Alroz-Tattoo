@@ -380,6 +380,7 @@
 
 	.hat-faq__header-right {
 		width: 100%;
+		position: relative;
 		flex-direction: row;
 		align-items: flex-end;
 		justify-content: flex-end;
