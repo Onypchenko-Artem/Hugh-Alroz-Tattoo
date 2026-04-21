@@ -97,9 +97,9 @@ $portfolio_less_label    = __( 'VOIR MOINS', 'hughalroztatoo' );
 	<div class="hat-container">
 		<div class="hat-portfolio__header">
 			<p class="hat-portfolio__eyebrow">
-				<span class="hat-portfolio__eyebrow-bracket" aria-hidden="true">[</span>
+				<span class="hat-portfolio__eyebrow-bracket" aria-hidden="true">(</span>
 				<span class="hat-portfolio__eyebrow-word"><?php echo esc_html( $portfolio_eyebrow ); ?></span>
-				<span class="hat-portfolio__eyebrow-bracket" aria-hidden="true">]</span>
+				<span class="hat-portfolio__eyebrow-bracket" aria-hidden="true">)</span>
 			</p>
 
 			<div class="hat-portfolio__title-row">
