@@ -345,7 +345,7 @@ img {
 }
 
 .hat-header--hero .hat-header__inner {
-	padding: clamp(19px, 1.51vw, 29px) clamp(47px, 3.646vw, 70px);
+	padding: clamp(19px, 1.51vw, 29px) var(--hat-gutter-x);
 }
 
 .hat-header--hero .hat-header__logo .custom-logo-link img {
@@ -415,30 +415,14 @@ img {
 .hat-header__burger {
 	display: none;
 	align-items: center;
-	justify-content: center;
-	width: 44px;
-	height: 44px;
+	gap: clamp(6px, 0.52vw, 10px);
 	padding: 0;
 	background: transparent;
 	border: 0;
+	color: #fff;
+	text-transform: uppercase;
+	font: inherit;
 	cursor: pointer;
-	flex-shrink: 0;
-}
-
-.hat-header__burger-icon {
-	display: flex;
-	flex-direction: column;
-	justify-content: space-between;
-	width: 24px;
-	height: 16px;
-}
-
-.hat-header__burger-icon span {
-	display: block;
-	width: 100%;
-	height: 1.5px;
-	background: #ffffff;
-	transition: opacity 0.2s ease;
 }
 
 body.hat-menu-open {
@@ -485,7 +469,7 @@ body.hat-menu-open .hat-header__nav {
 	display: flex;
 	flex-direction: column;
 	height: 100%;
-	padding: clamp(19px, 1.51vw, 29px) clamp(47px, 3.646vw, 70px) clamp(24px, 2.08vw, 40px);
+	padding: clamp(19px, 1.51vw, 29px) var(--hat-gutter-x) clamp(24px, 2.08vw, 40px);
 }
 
 .hat-desktop-menu__mark {
@@ -773,6 +757,12 @@ body.hat-menu-open .hat-header__nav {
 
 	.hat-header__burger {
 		display: inline-flex;
+	}
+}
+
+@media (max-width: 640px) {
+	:root {
+		--hat-gutter-x: 20px;
 	}
 }
 
