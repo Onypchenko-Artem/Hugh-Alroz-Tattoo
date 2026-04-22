@@ -2088,3 +2088,323 @@
 	text-transform: uppercase;
 	cursor: pointer;
 }
+
+/* Mobile adapt for step 1 (date book). */
+@media (max-width: 767px) {
+	.hugh-ms-booking {
+		zoom: 1;
+		width: 100%;
+		max-width: 393px;
+		min-height: 594px;
+		padding: 19px 20px 32px;
+		border: 0;
+		border-radius: 0;
+		background: #000;
+	}
+
+	.hugh-ms__inner {
+		gap: 32px;
+		min-height: auto;
+	}
+
+	.hugh-ms__inner--step-1 {
+		gap: 32px;
+	}
+
+	.hugh-ms__inner--step-1 .hugh-ms__crumbs {
+		width: 100%;
+		height: 8px;
+		margin: 0 auto;
+		border: 1px solid #fff;
+		border-radius: 21px;
+		background: transparent;
+		overflow: hidden;
+	}
+
+	.hugh-ms__inner--step-1 .hugh-ms__crumb.is-active {
+		width: 9.6%;
+		height: 100%;
+		background: #fff;
+	}
+
+	.hugh-ms__inner--step-1 .hugh-ms__panel {
+		padding-left: 0;
+		min-height: 0;
+	}
+
+	.hugh-ms__inner--step-1 .hugh-ms__title {
+		margin: 0 0 8px;
+		font-size: 24px;
+		font-weight: 700;
+		line-height: 29px;
+		letter-spacing: 0;
+	}
+
+	.hugh-ms__inner--step-1 .hugh-ms__lead {
+		margin: 0 0 15px;
+		font-size: 16px;
+		font-weight: 400;
+		line-height: 1.2;
+		letter-spacing: 0.02em;
+	}
+
+	.hugh-ms__inner--step-1 .hugh-ms__grid {
+		gap: 6px;
+		max-width: 100%;
+	}
+
+	.hugh-ms__inner--step-1 .hugh-ms__card {
+		min-height: 172px;
+		padding: 27px 21px 36px;
+		gap: 15px;
+	}
+
+	.hugh-ms__inner--step-1 .hugh-ms__card-title {
+		font-size: 18px;
+		font-weight: 500;
+		line-height: 22px;
+		letter-spacing: 0;
+	}
+
+	.hugh-ms__inner--step-1 .hugh-ms__card-meta {
+		max-width: 240px;
+		font-size: 15px;
+		font-weight: 400;
+		line-height: 1.2;
+		letter-spacing: 0.03em;
+	}
+
+	.hugh-ms__inner--step-1 .hugh-ms__panel-controls {
+		position: static;
+		margin-top: 32px;
+		width: 100%;
+		justify-content: flex-start;
+		align-items: stretch;
+	}
+
+	.hugh-ms__inner--step-1 .hugh-ms__footer {
+		width: 100%;
+		justify-content: stretch;
+	}
+
+	.hugh-ms__inner--step-1 .hugh-ms__panel-actions {
+		display: flex;
+		width: 100%;
+	}
+
+	.hugh-ms__inner--step-1 .hugh-ms__btn--primary {
+		width: 100%;
+		min-height: 54px;
+		padding: 12px 24px;
+		justify-content: center;
+		gap: 22px;
+		font-size: 18px;
+		font-weight: 700;
+		line-height: 22px;
+	}
+
+	.hugh-ms__inner--step-1 .hugh-ms__btn--primary::after {
+		width: 35.38px;
+		height: 36px;
+		background: #000 center / 21.72px 21.72px no-repeat url("../images/arrow-up-outline.svg");
+	}
+
+	.hugh-ms__inner--step-1 .hugh-ms__btn--primary::before {
+		content: none;
+	}
+
+	/* Step 2 mobile */
+	.hugh-ms__inner--step-2 {
+		gap: 35px;
+	}
+
+	.hugh-ms__inner--step-2 .hugh-ms__crumbs {
+		width: 95px;
+		height: 3px;
+		margin: 0 auto;
+		border: 0;
+		border-radius: 21px;
+		background: #d7d7d7;
+	}
+
+	.hugh-ms__inner--step-2 .hugh-ms__crumb.is-active {
+		width: 100%;
+		height: 100%;
+		background: #d7d7d7;
+	}
+
+	.hugh-ms__inner--step-2 .hugh-ms__panel {
+		padding-left: 0;
+		min-height: 0;
+	}
+
+	.hugh-ms__inner--step-2 .hugh-ms__step2-head {
+		position: relative;
+		display: flex;
+		flex-direction: column;
+		align-items: flex-start;
+		gap: 11px;
+		max-width: 212px;
+		margin-bottom: 15px;
+	}
+
+	.hugh-ms__inner--step-2 .hugh-ms__step2-back,
+	.hugh-ms__inner--step-2 .hugh-ms__step2-back--figma {
+		position: static;
+		right: auto;
+		top: auto;
+		z-index: auto;
+		display: inline-flex;
+		align-items: center;
+		gap: 5px;
+		order: 0;
+	}
+
+	.hugh-ms__inner--step-2 .hugh-ms__step2-back-ico {
+		flex: 0 0 18px;
+		width: 18px;
+		height: 18px;
+	}
+
+	.hugh-ms__inner--step-2 .hugh-ms__step2-back-txt {
+		font-family: "Helvetica Neue", "Inter Tight", system-ui, sans-serif;
+		font-size: 16px;
+		font-weight: 400;
+		line-height: 19px;
+		color: #c1c0c0;
+		text-transform: capitalize;
+		letter-spacing: 0.02em;
+	}
+
+	.hugh-ms__inner--step-2 .hugh-ms__title {
+		order: 1;
+		margin: 0;
+		font-size: 24px;
+		font-weight: 700;
+		line-height: 29px;
+		letter-spacing: 0;
+	}
+
+	.hugh-ms__inner--step-2 .hugh-ms__title::after {
+		content: "Étape 1 sur 6";
+		display: block;
+		margin-top: 11px;
+		font-size: 14px;
+		font-weight: 400;
+		line-height: 17px;
+		letter-spacing: 0.01em;
+		text-transform: none;
+		color: #c0c0c0;
+	}
+
+	.hugh-ms__inner--step-2 .hugh-ms__cal-wrap {
+		width: 100%;
+		height: 332px;
+		padding: 19px 20px 18px;
+		border: 1px solid #fff;
+	}
+
+	.hugh-ms__inner--step-2 .hugh-ms__cal-nav {
+		margin-bottom: 18px;
+	}
+
+	.hugh-ms__inner--step-2 .hugh-ms__cal-month {
+		font-size: 18px;
+		font-weight: 500;
+		line-height: 22px;
+	}
+
+	.hugh-ms__inner--step-2 .hugh-ms__cal-arrows {
+		gap: 7px;
+	}
+
+	.hugh-ms__inner--step-2 .hugh-ms__cal-arrow {
+		width: 19px;
+		height: 19px;
+		font-size: 24px;
+		line-height: 1;
+	}
+
+	.hugh-ms__inner--step-2 .hugh-ms__cal-weekdays {
+		margin-bottom: 6px;
+	}
+
+	.hugh-ms__inner--step-2 .hugh-ms__cal-weekday {
+		font-size: 15px;
+		font-weight: 600;
+		line-height: 18px;
+		color: #b8b8b8;
+	}
+
+	.hugh-ms__inner--step-2 .hugh-ms__cal-grid {
+		gap: 2px 0;
+	}
+
+	.hugh-ms__inner--step-2 .hugh-ms__cal-cell {
+		min-height: 34px;
+		font-size: 14px;
+		font-weight: 400;
+		line-height: 17px;
+		letter-spacing: 0.02em;
+		border-radius: 0;
+	}
+
+	.hugh-ms__inner--step-2 .hugh-ms__cal-cell.is-selected {
+		min-width: 40px;
+		min-height: 27px;
+		background: #fff;
+		color: #000;
+		border-color: #fff;
+	}
+
+	.hugh-ms__inner--step-2 .hugh-ms__cal-cell.is-disabled,
+	.hugh-ms__inner--step-2 .hugh-ms__cal-cell:disabled {
+		opacity: 1;
+		color: #5b5b5b;
+	}
+
+	.hugh-ms__inner--step-2 .hugh-ms__cal-cell--outside {
+		color: #8a8686;
+		opacity: 1;
+	}
+
+	.hugh-ms__inner--step-2 .hugh-ms__panel-controls {
+		position: static;
+		margin-top: 35px;
+		width: 100%;
+		justify-content: flex-start;
+		align-items: stretch;
+	}
+
+	.hugh-ms__inner--step-2 .hugh-ms__footer {
+		width: 100%;
+		justify-content: stretch;
+	}
+
+	.hugh-ms__inner--step-2 .hugh-ms__panel-actions {
+		display: flex;
+		width: 100%;
+	}
+
+	.hugh-ms__inner--step-2 .hugh-ms__btn--primary {
+		width: 100%;
+		min-height: 54px;
+		padding: 12px 24px;
+		justify-content: center;
+		gap: 22px;
+		font-size: 18px;
+		font-weight: 700;
+		line-height: 22px;
+		border-radius: 0;
+	}
+
+	.hugh-ms__inner--step-2 .hugh-ms__btn--primary::after {
+		width: 35.38px;
+		height: 36px;
+		background: #000 center / 21.72px 21.72px no-repeat url("../images/arrow-up-outline.svg");
+	}
+
+	.hugh-ms__inner--step-2 .hugh-ms__btn--primary::before {
+		content: none;
+	}
+}
