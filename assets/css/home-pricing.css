@@ -106,7 +106,7 @@
 	position: relative;
 	display: flex;
 	flex-direction: column;
-	min-height: clamp(420px, 37.708vw, 724px);
+	min-height: clamp(515px, 44.68vw, 858px);
 	max-width: clamp(300px, 29.01vw, 557px);
 	padding: clamp(20px, 1.563vw, 30px);
 	background: rgba(255, 255, 255, 0.01);
@@ -201,11 +201,34 @@
 }
 
 .hat-pricing__card-title,
+.hat-pricing__card-tag,
 .hat-pricing__features,
 .hat-pricing__price,
+.hat-pricing__cta,
 .hat-pricing__duration {
 	position: relative;
 	z-index: 1;
+}
+
+.hat-pricing__card-tag {
+	margin: auto 0 clamp(6px, 0.625vw, 12px);
+	display: inline-flex;
+	align-items: center;
+	gap: clamp(5px, 0.417vw, 8px);
+	font-size: clamp(14px, 1.042vw, 20px);
+	font-weight: 500;
+	line-height: 1.2;
+	color: #7A14FF;
+	text-transform: lowercase;
+	width: fit-content;
+}
+
+.hat-pricing__card-tag::before {
+	content: "";
+	flex-shrink: 0;
+	width: clamp(14px, 1.042vw, 20px);
+	height: clamp(14px, 1.042vw, 20px);
+	background: url("../images/star.svg") no-repeat center / contain;
 }
 
 .hat-pricing__card-title {
@@ -215,6 +238,56 @@
 	font-weight: 500;
 	letter-spacing: -0.02em;
 	text-transform: uppercase;
+}
+
+.hat-pricing__card-tag + .hat-pricing__card-title {
+	margin-top: 0;
+}
+
+.hat-pricing__cta {
+	box-sizing: border-box;
+	display: flex;
+	align-items: center;
+	justify-content: space-between;
+	gap: clamp(14px, 1.354vw, 26px);
+	width: 100%;
+	max-width: clamp(280px, 21.146vw, 406px);
+	height: clamp(60px, 4.427vw, 85px);
+	margin-top: clamp(18px, 1.563vw, 30px);
+	padding: clamp(14px, 1.042vw, 20px) clamp(18px, 1.927vw, 37px) clamp(13px, 0.99vw, 19px) clamp(22px, 2.76vw, 53px);
+	background: #fff;
+	border: 2px solid #fff;
+	color: #000;
+	font-family: 'Inter Tight', 'Inter', system-ui, -apple-system, sans-serif;
+	font-size: clamp(14px, 1.25vw, 24px);
+	font-weight: 600;
+	line-height: 1.21;
+	letter-spacing: 0.01em;
+	text-transform: uppercase;
+	white-space: nowrap;
+}
+
+.hat-pricing__cta-text {
+	flex: 1 1 auto;
+	text-align: center;
+	white-space: nowrap;
+}
+
+.hat-pricing__cta-icon {
+	display: inline-flex;
+	align-items: center;
+	justify-content: center;
+	width: clamp(44px, 2.969vw, 57px);
+	height: clamp(44px, 3.021vw, 58px);
+	flex-shrink: 0;
+	background: #000;
+	color: #fff;
+}
+
+.hat-pricing__cta-icon svg {
+	width: clamp(24px, 1.823vw, 35px);
+	height: clamp(24px, 1.823vw, 35px);
+	display: block;
 }
 
 .hat-pricing__features {
@@ -264,108 +337,158 @@
 
 @media (max-width: 640px) {
 	.hat-pricing {
-		padding: 38px 0 72px;
+		padding: 40px 0 60px;
 	}
 
 	.hat-pricing__heading {
 		grid-template-columns: 1fr;
-		row-gap: 12px;
-		margin-bottom: 20px;
+		row-gap: 14px;
+		margin-bottom: 24px;
 	}
 
 	.hat-pricing__eyebrow {
-		gap: 6px;
-		font-size: 11px;
-		letter-spacing: 0.12em;
+		gap: 8px;
+		font-size: 14px;
+		letter-spacing: 0.04em;
+		text-transform: uppercase;
 	}
 
 	.hat-pricing__title {
 		grid-column: 1;
-		justify-self: center;
-		column-gap: 8px;
-		row-gap: 2px;
-		width: auto;
-		font-size: clamp(24px, 10.2vw, 40px);
-		line-height: 0.9;
-		letter-spacing: -0.01em;
-	}
-
-	.hat-pricing__title-prefix:empty {
-		display: none;
+		font-size: 40px;
 	}
 
 	.hat-pricing__title-wire {
-		width: 42px;
-		margin-left: 8px;
+		width: 38px;
+		height: auto;
 	}
 
-	.hat-pricing__title-blur {
-		display: none;
-	}
+	/*.hat-pricing__title-blur {*/
+	/*	display: none;*/
+	/*}*/
 
 	.hat-pricing__grid {
-		gap: 10px;
+		gap: 15px;
 	}
 
 	.hat-pricing__card {
 		max-width: none;
-		min-height: 250px;
-		padding: 12px;
+		min-height: 485px;
+		padding: 11px 9px 13px;
+		background: rgba(0, 0, 0, 0.14);
+		border: 1px solid #999999;
 	}
 
 	.hat-pricing__duration {
 		font-size: 14px;
+		font-weight: 300;
+		line-height: 17px;
+		letter-spacing: 0.02em;
+		text-transform: uppercase;
 	}
 
 	.hat-pricing__badge {
-		top: 12px;
-		right: 12px;
-		width: 100px;
-		height: 32px;
-		padding: 8px;
-		gap: 4px;
-		font-size: 10px;
-		line-height: 1.15;
+		top: 11px;
+		right: 9px;
+		width: auto;
+		min-width: 138px;
+		height: 42px;
+		padding: 9px 10px;
+		gap: 2px;
+		background: #7015E5;
+		font-size: 13px;
+		font-weight: 500;
+		line-height: 16px;
+		letter-spacing: 0.01em;
+		color: #E7E6E6;
 	}
 
 	.hat-pricing__badge-icon {
-		width: 14px;
-		height: 14px;
+		width: 22px;
+		height: 22px;
 	}
 
 	.hat-pricing__bg-index {
-		display: none;
+		display: block;
+		top: 0;
+		left: -8px;
+		font-size: 220px;
+		filter: blur(8px);
+		color: rgba(70, 70, 70, 0.6);
 	}
 
 	.hat-pricing__card-title {
-		margin: auto 0 10px;
-		font-size: 42px;
-		line-height: 0.9;
+		margin: auto 0 0;
+		font-size: 32px;
+		line-height: 39px;
+		font-weight: 500;
+		letter-spacing: -0.01em;
+	}
+
+	.hat-pricing__card-tag {
+		margin: auto 0 0;
+		gap: 6px;
+		font-size: 13px;
+		font-weight: 500;
+		line-height: 16px;
+		text-transform: none;
+	}
+
+	.hat-pricing__card-tag::before {
+		width: 16px;
+		height: 16px;
+	}
+
+	.hat-pricing__card-tag + .hat-pricing__card-title {
+		margin-top: 6px;
+	}
+
+	.hat-pricing__cta {
+		max-width: none;
+		width: 100%;
+		height: 54px;
+		margin-top: 20px;
+		padding: 9px 9px 9px 30px;
+		font-size: 16px;
+		font-weight: 600;
+		line-height: 19px;
+		letter-spacing: 0.01em;
+		gap: 12px;
+		border-width: 2px;
+	}
+
+	.hat-pricing__cta-icon {
+		width: 36px;
+		height: 36px;
+	}
+
+	.hat-pricing__cta-icon svg {
+		width: 22px;
+		height: 22px;
 	}
 
 	.hat-pricing__features {
-		margin-bottom: 14px;
-		gap: 5px;
+		margin: 16px 0 30px;
+		gap: 9px;
 	}
 
 	.hat-pricing__features li {
-		padding-left: 19px;
-		font-size: 12px;
-		line-height: 1.25;
+		padding-left: 27px;
+		font-size: 15px;
+		font-weight: 500;
+		line-height: 18px;
+		letter-spacing: 0.02em;
 	}
 
 	.hat-pricing__features li::before {
-		top: 0.1em;
-		width: 12px;
-		height: 12px;
+		top: 0;
+		width: 18px;
+		height: 18px;
 	}
 
 	.hat-pricing__price {
-		font-size: 42px;
-		line-height: 0.92;
-	}
-
-	.hat-pricing__card--popular {
-		background: linear-gradient(180deg, rgba(255, 255, 255, 0.12) 0%, rgba(255, 255, 255, 0.06) 100%);
+		font-size: 40px;
+		line-height: 48px;
+		letter-spacing: 0;
 	}
 }

@@ -307,7 +307,17 @@
 	}
 
 	.hat-experience__title-blur {
-		display: none;
+		left: -30px;
+		height: 40px;
+		-webkit-mask-image: linear-gradient(to left, transparent, black 70%);
+		mask-image: linear-gradient(to left, transparent, black 70%);
+	}
+
+	.hat-experience__title-blur:not(.hat-experience__title-blur--start) {
+		right: -30px;
+		height: 40px;
+		-webkit-mask-image: linear-gradient(to right, transparent, black 70%);
+		mask-image: linear-gradient(to right, transparent, black 70%);
 	}
 
 	.hat-experience__subtitle {

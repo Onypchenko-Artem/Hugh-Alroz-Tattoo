@@ -387,6 +387,10 @@
 		gap: 20px;
 	}
 
+	.hat-faq__ampersand {
+		display: none;
+	}
+
 	.hat-faq__eyebrow {
 		gap: 6px;
 		margin-bottom: 0;
@@ -419,16 +423,6 @@
 		-webkit-background-clip: text;
 		-webkit-text-fill-color: transparent;
 		background-clip: text;
-	}
-
-	.hat-faq__ampersand {
-		position: absolute;
-		top: 0;
-		right: 0;
-		font-size: 16px;
-		line-height: 19px;
-		letter-spacing: -0.02em;
-		margin: 0;
 	}
 
 	.hat-faq__nav {

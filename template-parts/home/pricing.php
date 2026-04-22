@@ -233,6 +233,12 @@ $pricing_services_map = hughalroztatoo_amelia_services_by_ids( $pricing_service_
 		</div>
 
 		<ul class="hat-pricing__grid">
+			<?php
+			$pricing_card_tags = array(
+				1 => 'nouveau projet',
+				2 => 'meilleur qualité / prix',
+			);
+			?>
 			<?php foreach ( $pricing_cards as $index => $card ) : ?>
 				<?php
 				$duration = isset( $card['duration'] ) ? (string) $card['duration'] : '';
@@ -240,6 +246,10 @@ $pricing_services_map = hughalroztatoo_amelia_services_by_ids( $pricing_service_
 				$features = isset( $card['features'] ) ? (string) $card['features'] : '';
 				$price    = isset( $card['price'] ) ? (string) $card['price'] : '';
 				$popular  = ! empty( $card['popular'] );
+				$card_tag = isset( $card['tag'] ) ? trim( (string) $card['tag'] ) : '';
+				if ( '' === $card_tag && isset( $pricing_card_tags[ $index ] ) ) {
+					$card_tag = $pricing_card_tags[ $index ];
+				}
 				$service_id = isset( $card['service_id'] ) ? (int) $card['service_id'] : 0;
 				$service_data = $service_id > 0 && isset( $pricing_services_map[ $service_id ] ) ? $pricing_services_map[ $service_id ] : null;
 				if ( is_array( $service_data ) ) {
@@ -286,6 +296,9 @@ $pricing_services_map = hughalroztatoo_amelia_services_by_ids( $pricing_service_
 							</p>
 						<?php endif; ?>
 						<span class="hat-pricing__bg-index" aria-hidden="true"><?php echo esc_html( str_pad( (string) ( $index + 1 ), 2, '0', STR_PAD_LEFT ) ); ?></span>
+						<?php if ( '' !== $card_tag ) : ?>
+							<p class="hat-pricing__card-tag"><?php echo esc_html( $card_tag ); ?></p>
+						<?php endif; ?>
 						<h3 class="hat-pricing__card-title"><?php echo esc_html( $title ); ?></h3>
 						<ul class="hat-pricing__features">
 							<?php foreach ( $lines as $line ) : ?>
@@ -296,6 +309,14 @@ $pricing_services_map = hughalroztatoo_amelia_services_by_ids( $pricing_service_
 							<?php endforeach; ?>
 						</ul>
 						<p class="hat-pricing__price"><?php echo esc_html( $price ); ?></p>
+						<span class="hat-pricing__cta" aria-hidden="true">
+							<span class="hat-pricing__cta-text"><?php esc_html_e( 'RÉSERVER CE FORMAT', 'hughalroztatoo' ); ?></span>
+							<span class="hat-pricing__cta-icon" aria-hidden="true">
+								<svg width="35" height="35" viewBox="0 0 35 35" fill="none" xmlns="http://www.w3.org/2000/svg" focusable="false">
+									<path d="M7 18.2083H25.8173M15.9342 28.4167L26.125 18.2083L15.9342 8" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"/>
+								</svg>
+							</span>
+						</span>
 					</a>
 				</li>
 			<?php endforeach; ?>
