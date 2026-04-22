@@ -60,7 +60,7 @@ $hat_bg_video_url   = esc_url( get_template_directory_uri() . '/assets/videos/ba
 				aria-expanded="false"
 				aria-controls="hat-desktop-menu"
 			>
-				<span class="hat-header__nav-plus" aria-hidden="true">+</span>
+				<span class="hat-header__nav-plus" aria-hidden="true"></span>
 				<?php esc_html_e( 'MENU', 'hughalroztatoo' ); ?>
 			</button>
 			<button
@@ -70,7 +70,7 @@ $hat_bg_video_url   = esc_url( get_template_directory_uri() . '/assets/videos/ba
 				aria-controls="hat-desktop-menu"
 				aria-label="<?php esc_attr_e( 'Open menu', 'hughalroztatoo' ); ?>"
 			>
-				<span class="hat-header__nav-plus" aria-hidden="true">+</span>
+				<span class="hat-header__nav-plus" aria-hidden="true"></span>
 				<?php esc_html_e( 'MENU', 'hughalroztatoo' ); ?>
 			</button>
 		</nav>
