@@ -11,7 +11,7 @@
 	<div class="hat-container hat-footer__inner">
 		<div class="hat-footer__top">
 			<section class="hat-footer__column" aria-labelledby="hat-footer-contact-title">
-				<h2 class="hat-footer__title" id="hat-footer-contact-title"><?php esc_html_e( 'CONTACT', 'hughalroztatoo' ); ?></h2>
+				<p class="hat-footer__title" id="hat-footer-contact-title"><?php esc_html_e( 'CONTACT', 'hughalroztatoo' ); ?></p>
 				<ul class="hat-footer__list">
 					<li>
 						<a href="tel:+18195986128" class="hat-footer__link">+1 (819) 598-6128</a>
@@ -23,7 +23,7 @@
 			</section>
 
 			<section class="hat-footer__column" aria-labelledby="hat-footer-social-title">
-				<h2 class="hat-footer__title hat-footer__title--mirror" id="hat-footer-social-title"><?php esc_html_e( 'RÉSEAUX SOCIAUX', 'hughalroztatoo' ); ?></h2>
+				<p class="hat-footer__title hat-footer__title--mirror" id="hat-footer-social-title"><?php esc_html_e( 'RÉSEAUX SOCIAUX', 'hughalroztatoo' ); ?></p>
 				<ul class="hat-footer__list">
 					<li>
 						<a class="hat-footer__social hat-footer__social--instagram" href="#">

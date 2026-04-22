@@ -157,6 +157,7 @@ img {
 	-webkit-text-fill-color: transparent;
 	background-clip: text;
 	text-fill-color: transparent;
+	white-space: nowrap;
 }
 
 .hat-footer__list {
@@ -321,16 +322,132 @@ img {
 }
 
 @media (max-width: 640px) {
+	.hat-footer {
+		padding-block: 33px;
+	}
+
+	.hat-footer .hat-container {
+		padding-inline: 23px;
+	}
+
+	.hat-footer__inner {
+		gap: 59px;
+	}
+
 	.hat-footer__top {
-		grid-template-columns: 1fr;
+		grid-template-columns: 1fr auto;
+		column-gap: 55px;
+		row-gap: 42px;
+		align-items: start;
+	}
+
+	.hat-footer__column:first-child {
+		max-width: 178px;
+	}
+
+	.hat-footer__column:last-of-type {
+		grid-column: 1 / -1;
+		max-width: 193px;
+	}
+
+	.hat-footer__title {
+		margin: 0 0 25px;
+		font-size: 22px;
+		line-height: 27px;
+	}
+
+	.hat-footer__list {
+		gap: 8px;
+	}
+
+	.hat-footer__link,
+	.hat-footer__social {
+		font-size: 16px;
+		line-height: 19px;
 	}
 
 	.hat-footer__to-top-wrap {
 		grid-column: auto;
+		justify-content: flex-end;
+	}
+
+	.hat-footer a.hat-footer__to-top {
+		font-size: 14px;
+		line-height: 105%;
+		font-weight: 500;
+		text-decoration: underline;
+		text-underline-offset: 2px;
+	}
+
+	.hat-footer a.hat-footer__to-top::after {
+		display: none;
+	}
+
+	.hat-footer__column:last-of-type .hat-footer__list {
+		gap: 9px;
+	}
+
+	.hat-footer__social-icon {
+		width: 20px;
+		height: 20px;
+	}
+
+	.hat-footer__social--instagram {
+		gap: 8px;
+	}
+
+	.hat-footer__social--instagram span:last-child {
+		font-size: 18px;
+		font-weight: 600;
+		line-height: 22px;
+		text-decoration: underline;
+		text-underline-offset: 2px;
+	}
+
+	.hat-footer__column:last-of-type .hat-footer__list li:last-child .hat-footer__link {
+		font-size: 18px;
+		line-height: 22px;
+		color: #C8C8C8;
+	}
+
+	.hat-footer__bottom {
+		padding-top: 21px;
+		gap: 22px;
+		align-items: stretch;
+	}
+
+	.hat-footer__copy {
+		font-size: 16px;
+		line-height: 19px;
+	}
+
+	.hat-footer__to-top-wrap {
+		grid-row: 1;
+		grid-column: 2;
 	}
 
 	.hat-footer__legal ul {
-		gap: 12px 18px;
+		display: grid;
+		grid-template-rows: repeat(2, auto);
+		grid-auto-flow: column;
+		grid-auto-columns: max-content;
+		justify-content: space-between;
+		align-items: start;
+		column-gap: 91px;
+		row-gap: 12px;
+		width: 100%;
+	}
+
+	.hat-footer__legal a {
+		font-size: 15px;
+		line-height: 18px;
+		text-transform: capitalize;
+	}
+
+	.hat-footer__legal li:nth-child(3),
+	.hat-footer__legal li:nth-child(4) {
+		justify-self: end;
+		text-align: right;
 	}
 }
 
