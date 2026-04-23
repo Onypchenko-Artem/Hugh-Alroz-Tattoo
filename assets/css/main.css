@@ -82,11 +82,19 @@ img {
 	color: var(--hat-color-primary);
 }
 
-.hat-header,
 .hat-footer {
 	background: #000000;
 	color: #fff;
 	position: relative;
+}
+
+.hat-header {
+	z-index: 50;
+	color: #fff;
+	position: relative;
+}
+
+.hat-footer {
 	z-index: 1;
 }
 
@@ -106,7 +114,8 @@ img {
 	gap: var(--hat-gap);
 	align-items: center;
 	justify-content: space-between;
-	padding-block: clamp(13px, 1.042vw, 20px);
+	margin-top: 29px;
+	padding-bottom: 0;
 	flex-wrap: wrap;
 }
 
@@ -457,7 +466,7 @@ img {
 	top: 0;
 	left: 0;
 	right: 0;
-	z-index: 30;
+	z-index: 50;
 	background: transparent;
 }
 
@@ -571,6 +580,12 @@ img {
 body.hat-menu-open {
 	overflow: hidden;
 	padding-right: var(--hat-scrollbar-gap, 0px);
+}
+
+@media (max-width: 1024px) {
+	body.hat-menu-open {
+		padding-right: 0;
+	}
 }
 
 .hat-desktop-menu {
@@ -935,7 +950,7 @@ body.hat-menu-open {
 	}
 
 	.hat-desktop-menu__logo .custom-logo-link img {
-		max-height: 32px;
+		max-height: 50px;
 	}
 
 	.hat-desktop-menu__close {

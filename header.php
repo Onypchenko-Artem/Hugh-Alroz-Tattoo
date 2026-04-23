@@ -18,6 +18,7 @@ $hat_bg_video_url   = esc_url( get_template_directory_uri() . '/assets/videos/ba
 </head>
 <body <?php body_class(); ?>>
 <?php wp_body_open(); ?>
+<?php if ( $hat_is_hero ) : ?>
 <div class="hat-site-bg" aria-hidden="true">
 	<video
 		class="hat-site-bg__video"
@@ -35,13 +36,14 @@ $hat_bg_video_url   = esc_url( get_template_directory_uri() . '/assets/videos/ba
 		<source src="<?php echo $hat_bg_video_url; ?>" type="video/mp4">
 	</video>
 </div>
+<?php endif; ?>
 
-<header class="hat-header<?php echo $hat_is_hero ? ' hat-header--hero' : ''; ?>">
+<header class="hat-header">
 	<div class="hat-container hat-header__inner">
 		<div class="hat-header__logo">
 			<?php if ( has_custom_logo() ) : ?>
 				<?php the_custom_logo(); ?>
-			<?php elseif ( $hat_is_hero ) : ?>
+			<?php else : ?>
 				<a class="hat-header__brand" href="<?php echo esc_url( home_url( '/' ) ); ?>">
 					<span class="hat-header__brand-mark" aria-hidden="true">A</span>
 					<span class="hat-header__brand-text">
@@ -49,8 +51,6 @@ $hat_bg_video_url   = esc_url( get_template_directory_uri() . '/assets/videos/ba
 						<span class="hat-header__brand-line"><?php esc_html_e( 'TATTOO', 'hughalroztatoo' ); ?></span>
 					</span>
 				</a>
-			<?php else : ?>
-				<a href="<?php echo esc_url( home_url( '/' ) ); ?>"><?php bloginfo( 'name' ); ?></a>
 			<?php endif; ?>
 		</div>
 		<nav class="hat-header__nav" aria-label="<?php esc_attr_e( 'Primary', 'hughalroztatoo' ); ?>">

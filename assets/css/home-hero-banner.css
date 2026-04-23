@@ -14,18 +14,6 @@
 	background: transparent;
 }
 
-.hat-hero__media::after {
-	content: "";
-	position: absolute;
-	inset: 0;
-	background: linear-gradient(
-		180deg,
-		rgba(0, 0, 0, 0.45) 0%,
-		rgba(0, 0, 0, 0.35) 40%,
-		rgba(0, 0, 0, 0.6) 100%
-	);
-}
-
 .hat-hero__body {
 	position: relative;
 	z-index: 1;
@@ -239,7 +227,7 @@
 	.hat-hero__body {
 		position: absolute;
 		left: var(--hat-gutter-x);
-		top: 99px;
+		top: 30px;
 		z-index: 1;
 		display: flex;
 		flex-direction: column;

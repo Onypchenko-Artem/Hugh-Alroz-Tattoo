@@ -1102,7 +1102,13 @@
 			const times = displayTimesForDate(state.slotsFinal, state.date);
 			const dateLabel = formatDateLabel(state.date);
 			const formatLabel = state.selectedExtra ? state.selectedExtra.name : state.service && state.service.name;
-			const metaParts = [dateLabel, formatLabel].filter(Boolean);
+			const metaHtml = dateLabel || formatLabel
+				? '<p class="hugh-ms__time-meta">' +
+					(dateLabel ? '<span class="hugh-ms__time-meta-date">' + esc(dateLabel) + '</span>' : '') +
+					(dateLabel && formatLabel ? '<span class="hugh-ms__time-meta-sep"> • </span>' : '') +
+					(formatLabel ? '<span class="hugh-ms__time-meta-format">' + esc(formatLabel) + '</span>' : '') +
+					'</p>'
+				: '';
 			const durationLabel = serviceDurationLabel(state.service);
 			const buttons = times
 				.sort()
@@ -1140,7 +1146,7 @@
 				'</span>' +
 				'</button>' +
 				'</div>' +
-				(metaParts.length ? '<p class="hugh-ms__time-meta">' + esc(metaParts.join(' • ')) + '</p>' : '') +
+				metaHtml +
 				'<h3 class="hugh-ms__time-sub">' +
 				esc('Créneaux' + (durationLabel ? ' — ' + durationLabel : '')) +
 				'</h3><div class="hugh-ms__slots">' +
@@ -1595,7 +1601,7 @@
 					e.preventDefault();
 				}
 				if (t.closest('[data-act="close"]')) {
-					window.location.reload();
+					window.location.href = '/';
 					return;
 				}
 				if (state.step === 6 && state.tattooZoneOpen && !t.closest('.hugh-ms__photo-zone-field')) {

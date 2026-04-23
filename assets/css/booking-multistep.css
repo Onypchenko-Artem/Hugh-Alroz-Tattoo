@@ -57,7 +57,7 @@
 .hugh-ms__title {
 	margin: 0 0 16px;
 	font-size: clamp(1.1rem, 2.5vw, 1.35rem);
-	font-weight: 400;
+	font-weight: 300;
 	text-transform: uppercase;
 	letter-spacing: 0.06em;
 }
@@ -544,7 +544,7 @@
 
 .hugh-ms__inner--step-1 .hugh-ms__card-title {
 	font-size: clamp(1.5rem, 3vw, 2rem);
-	font-weight: 400;
+	font-weight: 300;
 	line-height: 1.2;
 	text-transform: uppercase;
 	color: inherit;
@@ -653,7 +653,7 @@
 .hugh-ms__inner--step-2 .hugh-ms__title {
 	margin-bottom: 24px;
 	font-size: clamp(60px, 5.2vw, 100px);
-	font-weight: 400;
+	font-weight: 300;
 	line-height: 1;
 	letter-spacing: 0.01em;
 	color: #fff;
@@ -688,7 +688,7 @@
 
 .hugh-ms__cal-month {
 	font-size: 32px;
-	font-weight: 400;
+	font-weight: 300;
 	line-height: 1;
 	letter-spacing: 0.01em;
 	text-transform: uppercase;
@@ -816,7 +816,6 @@
 	overflow: hidden;
 	font-size: 0;
 	line-height: 0;
-	background: #3a3a3a;
 }
 
 .hugh-ms__inner--step-3 .hugh-ms__crumb {
@@ -845,7 +844,7 @@
 .hugh-ms__inner--step-3 .hugh-ms__title {
 	margin-bottom: 32px;
 	font-size: clamp(60px, 5.2vw, 100px);
-	font-weight: 400;
+	font-weight: 300;
 	line-height: 1;
 	letter-spacing: 0.01em;
 	color: #fff;
@@ -891,7 +890,7 @@
 
 .hugh-ms__inner--step-3 .hugh-ms__card-title {
 	font-size: 32px;
-	font-weight: 400;
+	font-weight: 300;
 	line-height: 1.25;
 	text-transform: uppercase;
 	letter-spacing: 0.02em;
@@ -969,7 +968,6 @@
 	overflow: hidden;
 	font-size: 0;
 	line-height: 0;
-	background: #3a3a3a;
 }
 
 .hugh-ms__inner--step-5 .hugh-ms__crumb {
@@ -998,7 +996,7 @@
 .hugh-ms__inner--step-5 .hugh-ms__title {
 	margin-bottom: 20px;
 	font-size: clamp(60px, 5.2vw, 100px);
-	font-weight: 400;
+	font-weight: 300;
 	line-height: 1.05;
 	letter-spacing: 0.01em;
 	color: #fff;
@@ -1019,6 +1017,15 @@
 	font-size: 20px;
 	line-height: 24px;
 	color: #fff;
+}
+
+.hugh-ms__time-meta-date {
+	color: #fff;
+}
+
+.hugh-ms__time-meta-sep,
+.hugh-ms__time-meta-format {
+	color: #ccc;
 }
 
 .hugh-ms__time-sub {
@@ -1149,7 +1156,6 @@
 	overflow: hidden;
 	font-size: 0;
 	line-height: 0;
-	background: #3a3a3a;
 }
 
 .hugh-ms__inner--step-6 .hugh-ms__crumb {
@@ -1179,7 +1185,7 @@
 .hugh-ms__inner--step-6 .hugh-ms__title {
 	margin-bottom: 24px;
 	font-size: clamp(60px, 5.2vw, 100px);
-	font-weight: 400;
+	font-weight: 300;
 	line-height: 1;
 	letter-spacing: 0.01em;
 	color: #fff;
@@ -1481,7 +1487,6 @@
 	overflow: hidden;
 	font-size: 0;
 	line-height: 0;
-	background: #3a3a3a;
 }
 
 .hugh-ms__inner--step-7 .hugh-ms__crumb {
@@ -1510,7 +1515,7 @@
 .hugh-ms__inner--step-7 .hugh-ms__title {
 	margin: 0 0 24px;
 	font-size: clamp(40px, 5.2vw, 100px);
-	font-weight: 400;
+	font-weight: 300;
 	line-height: 1.21;
 	letter-spacing: 0.01em;
 	text-transform: uppercase;
@@ -1765,7 +1770,6 @@
 	overflow: hidden;
 	font-size: 0;
 	line-height: 0;
-	background: #3a3a3a;
 }
 
 .hugh-ms__inner--step-8 .hugh-ms__crumb {
@@ -1795,7 +1799,7 @@
 .hugh-ms__inner--step-8 .hugh-ms__title {
 	margin: 0 0 28px;
 	font-size: clamp(58px, 5.2vw, 100px);
-	font-weight: 400;
+	font-weight: 300;
 	line-height: 1;
 	letter-spacing: 0.01em;
 	text-transform: uppercase;
@@ -2089,12 +2093,17 @@
 	cursor: pointer;
 }
 
+/* Unified heading weight across all booking steps. */
+.hugh-ms__title {
+	font-weight: 600;
+}
+
 /* Mobile adapt for step 1 (date book). */
 @media (max-width: 767px) {
 	.hugh-ms-booking {
 		zoom: 1;
 		width: 100%;
-		max-width: 393px;
+		/*max-width: 393px;*/
 		min-height: 594px;
 		padding: 19px 20px 32px;
 		border: 0;
@@ -2104,7 +2113,32 @@
 
 	.hugh-ms__inner {
 		gap: 32px;
-		min-height: auto;
+		min-height: calc(594px - 19px - 32px);
+	}
+
+	/* Show a compact progress bar on every mobile step. */
+	.hugh-ms__inner .hugh-ms__crumbs {
+		display: block;
+		width: 95px;
+		height: 3px;
+		margin: 0 auto;
+		border: 0;
+		border-radius: 21px;
+		background: #d7d7d7;
+		overflow: hidden;
+		font-size: 0;
+		line-height: 0;
+	}
+
+	.hugh-ms__inner .hugh-ms__crumb {
+		display: none;
+	}
+
+	.hugh-ms__inner .hugh-ms__crumb.is-active {
+		display: block;
+		width: 100%;
+		height: 100%;
+		background: #d7d7d7;
 	}
 
 	.hugh-ms__inner--step-1 {
@@ -2130,12 +2164,14 @@
 	.hugh-ms__inner--step-1 .hugh-ms__panel {
 		padding-left: 0;
 		min-height: 0;
+		display: flex;
+		flex-direction: column;
 	}
 
 	.hugh-ms__inner--step-1 .hugh-ms__title {
 		margin: 0 0 8px;
 		font-size: 24px;
-		font-weight: 700;
+		font-weight: 600;
 		line-height: 29px;
 		letter-spacing: 0;
 	}
@@ -2143,7 +2179,7 @@
 	.hugh-ms__inner--step-1 .hugh-ms__lead {
 		margin: 0 0 15px;
 		font-size: 16px;
-		font-weight: 400;
+		font-weight: 300;
 		line-height: 1.2;
 		letter-spacing: 0.02em;
 	}
@@ -2151,6 +2187,7 @@
 	.hugh-ms__inner--step-1 .hugh-ms__grid {
 		gap: 6px;
 		max-width: 100%;
+		margin-bottom: 32px;
 	}
 
 	.hugh-ms__inner--step-1 .hugh-ms__card {
@@ -2169,14 +2206,14 @@
 	.hugh-ms__inner--step-1 .hugh-ms__card-meta {
 		max-width: 240px;
 		font-size: 15px;
-		font-weight: 400;
+		font-weight: 300;
 		line-height: 1.2;
 		letter-spacing: 0.03em;
 	}
 
 	.hugh-ms__inner--step-1 .hugh-ms__panel-controls {
 		position: static;
-		margin-top: 32px;
+		margin-top: auto;
 		width: 100%;
 		justify-content: flex-start;
 		align-items: stretch;
@@ -2199,7 +2236,7 @@
 		justify-content: center;
 		gap: 22px;
 		font-size: 18px;
-		font-weight: 700;
+		font-weight: 600;
 		line-height: 22px;
 	}
 
@@ -2236,6 +2273,8 @@
 	.hugh-ms__inner--step-2 .hugh-ms__panel {
 		padding-left: 0;
 		min-height: 0;
+		display: flex;
+		flex-direction: column;
 	}
 
 	.hugh-ms__inner--step-2 .hugh-ms__step2-head {
@@ -2269,7 +2308,7 @@
 	.hugh-ms__inner--step-2 .hugh-ms__step2-back-txt {
 		font-family: "Helvetica Neue", "Inter Tight", system-ui, sans-serif;
 		font-size: 16px;
-		font-weight: 400;
+		font-weight: 300;
 		line-height: 19px;
 		color: #c1c0c0;
 		text-transform: capitalize;
@@ -2280,7 +2319,7 @@
 		order: 1;
 		margin: 0;
 		font-size: 24px;
-		font-weight: 700;
+		font-weight: 600;
 		line-height: 29px;
 		letter-spacing: 0;
 	}
@@ -2290,7 +2329,7 @@
 		display: block;
 		margin-top: 11px;
 		font-size: 14px;
-		font-weight: 400;
+		font-weight: 300;
 		line-height: 17px;
 		letter-spacing: 0.01em;
 		text-transform: none;
@@ -2302,6 +2341,7 @@
 		height: 332px;
 		padding: 19px 20px 18px;
 		border: 1px solid #fff;
+		margin-bottom: 32px;
 	}
 
 	.hugh-ms__inner--step-2 .hugh-ms__cal-nav {
@@ -2343,7 +2383,7 @@
 	.hugh-ms__inner--step-2 .hugh-ms__cal-cell {
 		min-height: 34px;
 		font-size: 14px;
-		font-weight: 400;
+		font-weight: 300;
 		line-height: 17px;
 		letter-spacing: 0.02em;
 		border-radius: 0;
@@ -2351,7 +2391,7 @@
 
 	.hugh-ms__inner--step-2 .hugh-ms__cal-cell.is-selected {
 		min-width: 40px;
-		min-height: 27px;
+		height: 27px;
 		background: #fff;
 		color: #000;
 		border-color: #fff;
@@ -2370,7 +2410,7 @@
 
 	.hugh-ms__inner--step-2 .hugh-ms__panel-controls {
 		position: static;
-		margin-top: 35px;
+		margin-top: auto;
 		width: 100%;
 		justify-content: flex-start;
 		align-items: stretch;
@@ -2393,7 +2433,7 @@
 		justify-content: center;
 		gap: 22px;
 		font-size: 18px;
-		font-weight: 700;
+		font-weight: 600;
 		line-height: 22px;
 		border-radius: 0;
 	}
@@ -2407,4 +2447,1062 @@
 	.hugh-ms__inner--step-2 .hugh-ms__btn--primary::before {
 		content: none;
 	}
+
+	/* Step 3 mobile */
+	.hugh-ms__inner--step-3 {
+		gap: 35px;
+	}
+
+	.hugh-ms__inner--step-3 .hugh-ms__crumbs {
+		width: 95px;
+		height: 3px;
+		margin: 0 auto;
+		border: 0;
+		border-radius: 21px;
+		background: #d7d7d7;
+	}
+
+	.hugh-ms__inner--step-3 .hugh-ms__crumb.is-active {
+		width: 100%;
+		height: 100%;
+		background: #d7d7d7;
+	}
+
+	.hugh-ms__inner--step-3 .hugh-ms__panel {
+		padding-left: 0;
+		min-height: 0;
+		display: flex;
+		flex-direction: column;
+	}
+
+	.hugh-ms__inner--step-3 .hugh-ms__step2-head {
+		position: relative;
+		display: flex;
+		flex-direction: column;
+		align-items: flex-start;
+		gap: 11px;
+		max-width: 235px;
+		margin-bottom: 15px;
+	}
+
+	.hugh-ms__inner--step-3 .hugh-ms__step2-back,
+	.hugh-ms__inner--step-3 .hugh-ms__step2-back--figma {
+		position: static;
+		right: auto;
+		top: auto;
+		z-index: auto;
+		display: inline-flex;
+		align-items: center;
+		gap: 5px;
+		order: 0;
+	}
+
+	.hugh-ms__inner--step-3 .hugh-ms__step2-back-ico {
+		flex: 0 0 18px;
+		width: 18px;
+		height: 18px;
+	}
+
+	.hugh-ms__inner--step-3 .hugh-ms__step2-back-txt {
+		font-family: "Helvetica Neue", "Inter Tight", system-ui, sans-serif;
+		font-size: 16px;
+		font-weight: 300;
+		line-height: 19px;
+		color: #c1c0c0;
+		text-transform: capitalize;
+		letter-spacing: 0.02em;
+	}
+
+	.hugh-ms__inner--step-3 .hugh-ms__title {
+		order: 1;
+		margin: 0;
+		font-size: 24px;
+		font-weight: 600;
+		line-height: 29px;
+		letter-spacing: 0;
+	}
+
+	.hugh-ms__inner--step-3 .hugh-ms__title::after {
+		content: "Étape 2 sur 6";
+		display: block;
+		margin-top: 11px;
+		font-size: 14px;
+		font-weight: 300;
+		line-height: 17px;
+		letter-spacing: 0.01em;
+		text-transform: none;
+		color: #c0c0c0;
+	}
+
+	.hugh-ms__inner--step-3 .hugh-ms__grid {
+		gap: 10px;
+		max-width: 100%;
+		margin-bottom: 32px;
+	}
+
+	.hugh-ms__inner--step-3 .hugh-ms__card {
+		min-height: 107px;
+		padding: 24px 19px;
+		gap: 9px;
+		border: 1px solid #fff;
+		border-radius: 0;
+		background: transparent;
+		color: #fff;
+	}
+
+	.hugh-ms__inner--step-3 .hugh-ms__card-title {
+		font-size: 18px;
+		font-weight: 300;
+		line-height: 22px;
+		letter-spacing: 0;
+		text-transform: uppercase;
+		color: inherit;
+	}
+
+	.hugh-ms__inner--step-3 .hugh-ms__card-meta--price {
+		font-size: 18px;
+		font-weight: 600;
+		line-height: 22px;
+		letter-spacing: 0;
+		text-transform: uppercase;
+		color: inherit;
+	}
+
+	.hugh-ms__inner--step-3 .hugh-ms__card.is-selected {
+		background: #fff;
+		color: #000;
+		border-color: #fff;
+	}
+
+	.hugh-ms__inner--step-3 .hugh-ms__panel-controls {
+		position: static;
+		margin-top: auto;
+		width: 100%;
+		justify-content: flex-start;
+		align-items: stretch;
+	}
+
+	.hugh-ms__inner--step-3 .hugh-ms__footer {
+		width: 100%;
+		justify-content: stretch;
+	}
+
+	.hugh-ms__inner--step-3 .hugh-ms__panel-actions {
+		display: flex;
+		width: 100%;
+	}
+
+	.hugh-ms__inner--step-3 .hugh-ms__btn--primary {
+		width: 100%;
+		min-height: 54px;
+		padding: 12px 24px;
+		justify-content: center;
+		gap: 22px;
+		font-size: 18px;
+		font-weight: 600;
+		line-height: 22px;
+		border-radius: 0;
+	}
+
+	.hugh-ms__inner--step-3 .hugh-ms__btn--primary::after {
+		width: 35.38px;
+		height: 36px;
+		background: #000 center / 21.72px 21.72px no-repeat url("../images/arrow-up-outline.svg");
+	}
+
+	.hugh-ms__inner--step-3 .hugh-ms__btn--primary::before {
+		content: none;
+	}
+
+	/* Step 4 (time) mobile */
+	.hugh-ms__inner--step-5 {
+		gap: 35px;
+	}
+
+	.hugh-ms__inner--step-5 .hugh-ms__crumbs {
+		width: 95px;
+		height: 3px;
+		margin: 0 auto;
+		border: 0;
+		border-radius: 21px;
+		background: #d7d7d7;
+	}
+
+	.hugh-ms__inner--step-5 .hugh-ms__crumb.is-active {
+		width: 100%;
+		height: 100%;
+		background: #d7d7d7;
+	}
+
+	.hugh-ms__inner--step-5 .hugh-ms__panel {
+		padding-left: 0;
+		min-height: 0;
+		display: flex;
+		flex-direction: column;
+	}
+
+	.hugh-ms__inner--step-5 .hugh-ms__step2-head {
+		position: relative;
+		display: flex;
+		flex-direction: column;
+		align-items: flex-start;
+		gap: 11px;
+		max-width: 250px;
+		margin-bottom: 15px;
+	}
+
+	.hugh-ms__inner--step-5 .hugh-ms__step2-back,
+	.hugh-ms__inner--step-5 .hugh-ms__step2-back--figma {
+		position: static;
+		right: auto;
+		top: auto;
+		z-index: auto;
+		display: inline-flex;
+		align-items: center;
+		gap: 5px;
+		order: 0;
+	}
+
+	.hugh-ms__inner--step-5 .hugh-ms__step2-back-ico {
+		flex: 0 0 18px;
+		width: 18px;
+		height: 18px;
+	}
+
+	.hugh-ms__inner--step-5 .hugh-ms__step2-back-txt {
+		font-family: "Helvetica Neue", "Inter Tight", system-ui, sans-serif;
+		font-size: 16px;
+		font-weight: 300;
+		line-height: 19px;
+		color: #c1c0c0;
+		text-transform: capitalize;
+		letter-spacing: 0.02em;
+	}
+
+	.hugh-ms__inner--step-5 .hugh-ms__title {
+		order: 1;
+		margin: 0;
+		font-size: 24px;
+		font-weight: 600;
+		line-height: 29px;
+		letter-spacing: 0;
+	}
+
+	.hugh-ms__inner--step-5 .hugh-ms__title::after {
+		content: "Étape 3 sur 6";
+		display: block;
+		margin-top: 11px;
+		font-size: 14px;
+		font-weight: 300;
+		line-height: 17px;
+		letter-spacing: 0.01em;
+		text-transform: none;
+		color: #c0c0c0;
+	}
+
+	.hugh-ms__inner--step-5 .hugh-ms__time-meta {
+		margin: 0 0 25px;
+		font-size: 15px;
+		font-weight: 300;
+		line-height: 18px;
+		color: #fff;
+	}
+
+	.hugh-ms__inner--step-5 .hugh-ms__time-sub {
+		margin: 0 0 15px;
+		font-size: 15px;
+		font-weight: 300;
+		line-height: 18px;
+		color: #fff;
+	}
+
+	.hugh-ms__inner--step-5 .hugh-ms__slots {
+		gap: 12px 19px;
+		max-width: 100%;
+	}
+
+	.hugh-ms__inner--step-5 .hugh-ms__slot {
+		width: 105px;
+		min-height: 39px;
+		padding: 10px 20px 11px;
+		font-size: 15px;
+		font-weight: 300;
+		line-height: 18px;
+		border-width: 1px;
+	}
+
+	.hugh-ms__inner--step-5 .hugh-ms__slot:disabled {
+		color: #b5b5b5;
+		background: #323131;
+		border-color: #c1c0c0;
+	}
+
+	.hugh-ms__inner--step-5 .hugh-ms__slot:disabled::after {
+		width: 67px;
+		border-top-width: 1px;
+		border-top-color: #b5b5b5;
+	}
+
+	.hugh-ms__inner--step-5 .hugh-ms__panel-controls {
+		position: static;
+		margin-top: auto;
+		width: 100%;
+		justify-content: flex-start;
+		align-items: stretch;
+	}
+
+	.hugh-ms__inner--step-5 .hugh-ms__footer {
+		width: 100%;
+		justify-content: stretch;
+	}
+
+	.hugh-ms__inner--step-5 .hugh-ms__panel-actions {
+		display: flex;
+		width: 100%;
+	}
+
+	.hugh-ms__inner--step-5 .hugh-ms__btn--primary {
+		width: 100%;
+		min-height: 54px;
+		padding: 12px 24px;
+		justify-content: center;
+		gap: 22px;
+		font-size: 18px;
+		font-weight: 600;
+		line-height: 22px;
+		border-radius: 0;
+	}
+
+	.hugh-ms__inner--step-5 .hugh-ms__btn--primary::after {
+		width: 35.38px;
+		height: 36px;
+		background: #000 center / 21.72px 21.72px no-repeat url("../images/arrow-up-outline.svg");
+	}
+
+	.hugh-ms__inner--step-5 .hugh-ms__btn--primary::before {
+		content: none;
+	}
+
+	/* Step 5 (photos) mobile */
+	.hugh-ms__inner--step-6 {
+		gap: 30px;
+	}
+
+	.hugh-ms__inner--step-6 .hugh-ms__crumbs {
+		width: 95px;
+		height: 3px;
+		margin: 0 auto;
+		border: 0;
+		border-radius: 21px;
+		background: #d7d7d7;
+	}
+
+	.hugh-ms__inner--step-6 .hugh-ms__crumb.is-active {
+		width: 100%;
+		height: 100%;
+		background: #d7d7d7;
+	}
+
+	.hugh-ms__inner--step-6 .hugh-ms__panel {
+		padding-left: 0;
+		min-height: 0;
+		display: flex;
+		flex-direction: column;
+	}
+
+	.hugh-ms__inner--step-6 .hugh-ms__step2-head {
+		position: relative;
+		display: flex;
+		flex-direction: column;
+		align-items: flex-start;
+		gap: 11px;
+		max-width: 270px;
+		margin-bottom: 11px;
+	}
+
+	.hugh-ms__inner--step-6 .hugh-ms__step2-back,
+	.hugh-ms__inner--step-6 .hugh-ms__step2-back--figma {
+		position: static;
+		right: auto;
+		top: auto;
+		z-index: auto;
+		display: inline-flex;
+		align-items: center;
+		gap: 5px;
+		order: 0;
+	}
+
+	.hugh-ms__inner--step-6 .hugh-ms__step2-back-ico {
+		flex: 0 0 18px;
+		width: 18px;
+		height: 18px;
+	}
+
+	.hugh-ms__inner--step-6 .hugh-ms__step2-back-txt {
+		font-family: "Helvetica Neue", "Inter Tight", system-ui, sans-serif;
+		font-size: 16px;
+		font-weight: 300;
+		line-height: 19px;
+		color: #c1c0c0;
+		text-transform: capitalize;
+		letter-spacing: 0.02em;
+	}
+
+	.hugh-ms__inner--step-6 .hugh-ms__title {
+		order: 1;
+		margin: 0;
+		font-size: 24px;
+		font-weight: 600;
+		line-height: 29px;
+		letter-spacing: 0;
+	}
+
+	.hugh-ms__inner--step-6 .hugh-ms__title::after {
+		content: "Étape 4 sur 6";
+		display: block;
+		margin-top: 11px;
+		font-size: 14px;
+		font-weight: 300;
+		line-height: 17px;
+		letter-spacing: 0.01em;
+		text-transform: none;
+		color: #c0c0c0;
+	}
+
+	.hugh-ms__inner--step-6 .hugh-ms__photo-guidelines {
+		width: 100%;
+		margin: 0;
+		font-size: 15px;
+		font-weight: 300;
+		line-height: 18px;
+		letter-spacing: 0.02em;
+	}
+
+	.hugh-ms__inner--step-6 .hugh-ms__photo-upload-grid {
+		width: 100%;
+		gap: 10px;
+		margin: 25px 0 0;
+	}
+
+	.hugh-ms__inner--step-6 .hugh-ms__photo-upload-card {
+		min-height: 86px;
+		padding: 10px 20px 11px;
+		gap: 8px;
+		border: 1px solid #fff;
+	}
+
+	.hugh-ms__inner--step-6 .hugh-ms__photo-upload-icon {
+		width: 24px;
+		height: 24px;
+	}
+
+	.hugh-ms__inner--step-6 .hugh-ms__photo-upload-text {
+		font-family: "Helvetica Neue", "Inter Tight", system-ui, sans-serif;
+		font-size: 16px;
+		font-weight: 300;
+		line-height: 19px;
+		text-align: center;
+	}
+
+	.hugh-ms__inner--step-6 .hugh-ms__photo-zone-wrap {
+		width: 100%;
+		gap: 10px;
+		margin-top: 25px;
+		margin-bottom: 32px;
+	}
+
+	.hugh-ms__inner--step-6 .hugh-ms__photo-zone-label {
+		font-size: 18px;
+		font-weight: 300;
+		line-height: 22px;
+	}
+
+	.hugh-ms__inner--step-6 .hugh-ms__photo-zone-field {
+		min-height: 51px;
+	}
+
+	.hugh-ms__inner--step-6 .hugh-ms__photo-zone-trigger {
+		min-height: 51px;
+		padding: 16px 14px 16px 15px;
+		font-size: 16px;
+		font-weight: 300;
+		line-height: 19px;
+	}
+
+	.hugh-ms__inner--step-6 .hugh-ms__photo-zone-arrow {
+		width: 13px;
+		height: 13px;
+	}
+
+	.hugh-ms__inner--step-6 .hugh-ms__photo-zone-menu {
+		left: 0;
+		right: 0;
+		width: 100%;
+		max-width: 100%;
+		padding: 8px 0;
+	}
+
+	.hugh-ms__inner--step-6 .hugh-ms__photo-zone-option {
+		padding: 12px 15px;
+		font-size: 16px;
+		line-height: 19px;
+	}
+
+	.hugh-ms__inner--step-6 .hugh-ms__panel-controls {
+		position: static;
+		margin-top: auto;
+		width: 100%;
+		justify-content: flex-start;
+		align-items: stretch;
+	}
+
+	.hugh-ms__inner--step-6 .hugh-ms__footer {
+		width: 100%;
+		justify-content: stretch;
+	}
+
+	.hugh-ms__inner--step-6 .hugh-ms__panel-actions {
+		display: flex;
+		width: 100%;
+	}
+
+	.hugh-ms__inner--step-6 .hugh-ms__btn--primary {
+		width: 100%;
+		min-height: 54px;
+		padding: 12px 24px;
+		justify-content: center;
+		gap: 22px;
+		font-size: 18px;
+		font-weight: 600;
+		line-height: 22px;
+		border-radius: 0;
+	}
+
+	.hugh-ms__inner--step-6 .hugh-ms__btn--primary::after {
+		width: 35.38px;
+		height: 36px;
+		background: #000 center / 21.72px 21.72px no-repeat url("../images/arrow-up-outline.svg");
+	}
+
+	.hugh-ms__inner--step-6 .hugh-ms__btn--primary::before {
+		content: none;
+	}
+
+	/* Step 6 (info) mobile */
+	.hugh-ms__inner--step-7 {
+		gap: 30px;
+		min-height: calc(629px - 19px - 32px);
+	}
+
+	.hugh-ms__inner--step-7 .hugh-ms__crumbs {
+		width: 95px;
+		height: 3px;
+		margin: 0 auto;
+		border: 0;
+		border-radius: 21px;
+		background: #d7d7d7;
+	}
+
+	.hugh-ms__inner--step-7 .hugh-ms__crumb.is-active {
+		width: 100%;
+		height: 100%;
+		background: #d7d7d7;
+	}
+
+	.hugh-ms__inner--step-7 .hugh-ms__panel,
+	.hugh-ms__inner--step-7 .hugh-ms__panel--info {
+		padding-left: 0;
+		padding-right: 0;
+		min-height: 0;
+		display: flex;
+		flex-direction: column;
+	}
+
+	.hugh-ms__inner--step-7 .hugh-ms__step2-head {
+		position: relative;
+		display: flex;
+		flex-direction: column;
+		align-items: flex-start;
+		gap: 11px;
+		max-width: 232px;
+		margin-bottom: 22px;
+	}
+
+	.hugh-ms__inner--step-7 .hugh-ms__step2-back,
+	.hugh-ms__inner--step-7 .hugh-ms__step2-back--figma {
+		position: static;
+		right: auto;
+		top: auto;
+		z-index: auto;
+		display: inline-flex;
+		align-items: center;
+		gap: 5px;
+		order: 0;
+	}
+
+	.hugh-ms__inner--step-7 .hugh-ms__step2-back-ico {
+		flex: 0 0 18px;
+		width: 18px;
+		height: 18px;
+	}
+
+	.hugh-ms__inner--step-7 .hugh-ms__step2-back-txt {
+		font-family: "Helvetica Neue", "Inter Tight", system-ui, sans-serif;
+		font-size: 16px;
+		font-weight: 300;
+		line-height: 19px;
+		color: #c1c0c0;
+		text-transform: capitalize;
+		letter-spacing: 0.02em;
+	}
+
+	.hugh-ms__inner--step-7 .hugh-ms__title {
+		order: 1;
+		margin: 0;
+		font-size: 24px;
+		font-weight: 600;
+		line-height: 29px;
+		letter-spacing: 0;
+	}
+
+	.hugh-ms__inner--step-7 .hugh-ms__title::after {
+		content: "Étape 5 sur 6";
+		display: block;
+		margin-top: 11px;
+		font-size: 14px;
+		font-weight: 300;
+		line-height: 17px;
+		letter-spacing: 0.01em;
+		text-transform: none;
+		color: #c0c0c0;
+	}
+
+	.hugh-ms__inner--step-7 .hugh-ms__info-form {
+		max-width: 100%;
+		gap: 15px;
+		margin-bottom: 15px;
+	}
+
+	.hugh-ms__inner--step-7 .hugh-ms__info-row {
+		gap: 24px;
+		flex-wrap: nowrap;
+	}
+
+	.hugh-ms__inner--step-7 .hugh-ms__field--half {
+		flex: 0 0 calc(50% - 12px);
+		min-width: 0;
+	}
+
+	.hugh-ms__inner--step-7 .hugh-ms__field {
+		gap: 6px;
+	}
+
+	.hugh-ms__inner--step-7 .hugh-ms__field-label {
+		font-size: 16px;
+		font-weight: 500;
+		line-height: 19px;
+	}
+
+	.hugh-ms__inner--step-7 .hugh-ms__field-input {
+		min-height: 45px;
+		padding: 13px 10px 15px;
+		font-size: 14px;
+		font-weight: 300;
+		line-height: 17px;
+	}
+
+	.hugh-ms__inner--step-7 .hugh-ms__field-input::placeholder {
+		color: #c1c0c0;
+	}
+
+	.hugh-ms__inner--step-7 .hugh-ms__field-input--note {
+		height: 45px;
+		min-height: 45px;
+		max-height: 45px;
+		padding: 13px 11px 15px;
+	}
+
+	.hugh-ms__inner--step-7 .hugh-ms__panel-controls {
+		position: static;
+		margin-top: auto;
+		width: 100%;
+		display: flex;
+		flex-direction: column;
+		align-items: stretch;
+		justify-content: flex-start;
+		gap: 32px;
+	}
+
+	.hugh-ms__inner--step-7 .hugh-ms__age-row {
+		max-width: 263px;
+		gap: 7px;
+	}
+
+	.hugh-ms__inner--step-7 .hugh-ms__cb-outline {
+		flex: 0 0 24px;
+		width: 24px;
+		height: 24px;
+		border-width: 1px;
+	}
+
+	.hugh-ms__inner--step-7 .hugh-ms__age-text {
+		font-size: 12px;
+		font-weight: 300;
+		line-height: 15px;
+	}
+
+	.hugh-ms__inner--step-7 .hugh-ms__footer {
+		width: 100%;
+		justify-content: stretch;
+		padding-left: 0;
+	}
+
+	.hugh-ms__inner--step-7 .hugh-ms__panel-actions {
+		display: flex;
+		width: 100%;
+	}
+
+	.hugh-ms__inner--step-7 .hugh-ms__btn--primary {
+		width: 100%;
+		min-height: 54px;
+		padding: 12px 24px;
+		justify-content: center;
+		gap: 22px;
+		font-size: 18px;
+		font-weight: 600;
+		line-height: 22px;
+		border-radius: 0;
+	}
+
+	.hugh-ms__inner--step-7 .hugh-ms__btn--primary::after {
+		width: 35.38px;
+		height: 36px;
+		background: #000 center / 21.72px 21.72px no-repeat url("../images/arrow-up-outline.svg");
+	}
+
+	.hugh-ms__inner--step-7 .hugh-ms__btn--primary::before {
+		content: none;
+	}
+
+	/* Step 7 (payment) mobile */
+	.hugh-ms__inner--step-8 {
+		gap: 30px;
+		min-height: calc(593px - 19px - 32px);
+		--hugh-ms-footer-slot: 0;
+	}
+
+	.hugh-ms__inner--step-8 .hugh-ms__crumbs {
+		width: 95px;
+		height: 3px;
+		margin: 0 auto;
+		border: 0;
+		border-radius: 21px;
+		background: #d7d7d7;
+	}
+
+	.hugh-ms__inner--step-8 .hugh-ms__crumb.is-active {
+		width: 100%;
+		height: 100%;
+		background: #d7d7d7;
+	}
+
+	.hugh-ms__inner--step-8 .hugh-ms__panel,
+	.hugh-ms__inner--step-8 .hugh-ms__panel--pay {
+		padding-left: 0;
+		padding-right: 0;
+		min-height: 0;
+		display: flex;
+		flex-direction: column;
+	}
+
+	.hugh-ms__inner--step-8 .hugh-ms__step2-head {
+		position: relative;
+		display: flex;
+		flex-direction: column;
+		align-items: flex-start;
+		gap: 11px;
+		max-width: 290px;
+		margin-bottom: 15px;
+	}
+
+	.hugh-ms__inner--step-8 .hugh-ms__step2-back,
+	.hugh-ms__inner--step-8 .hugh-ms__step2-back--figma {
+		position: static;
+		right: auto;
+		top: auto;
+		z-index: auto;
+		display: inline-flex;
+		align-items: center;
+		gap: 5px;
+		order: 0;
+	}
+
+	.hugh-ms__inner--step-8 .hugh-ms__step2-back-ico {
+		flex: 0 0 18px;
+		width: 18px;
+		height: 18px;
+	}
+
+	.hugh-ms__inner--step-8 .hugh-ms__step2-back-txt {
+		font-family: "Helvetica Neue", "Inter Tight", system-ui, sans-serif;
+		font-size: 16px;
+		font-weight: 300;
+		line-height: 19px;
+		color: #c1c0c0;
+		text-transform: capitalize;
+		letter-spacing: 0.02em;
+	}
+
+	.hugh-ms__inner--step-8 .hugh-ms__title {
+		order: 1;
+		margin: 0;
+		font-size: 24px;
+		font-weight: 600;
+		line-height: 29px;
+		letter-spacing: 0;
+	}
+
+	.hugh-ms__inner--step-8 .hugh-ms__title::after {
+		content: "Étape 6 sur 6";
+		display: block;
+		margin-top: 10px;
+		font-size: 14px;
+		font-weight: 300;
+		line-height: 17px;
+		letter-spacing: 0.01em;
+		text-transform: none;
+		color: #c0c0c0;
+	}
+
+	.hugh-ms__inner--step-8 .hugh-ms__pay-layout {
+		max-width: 100%;
+		gap: 15px;
+		margin-bottom: 18px;
+	}
+
+	.hugh-ms__inner--step-8 .hugh-ms__pay-sheet {
+		width: 100%;
+		min-height: 204px;
+		padding: 25px 23px 22px;
+		border: 1px solid #fff;
+	}
+
+	.hugh-ms__inner--step-8 .hugh-ms__pay-row {
+		font-size: 16px;
+		font-weight: 300;
+		line-height: 19px;
+	}
+
+	.hugh-ms__inner--step-8 .hugh-ms__pay-sheet .hugh-ms__pay-row + .hugh-ms__pay-row {
+		margin-top: 6px;
+	}
+
+	.hugh-ms__inner--step-8 .hugh-ms__pay-sep {
+		margin: 14px 0 15px;
+	}
+
+	.hugh-ms__inner--step-8 .hugh-ms__pay-disclaimer {
+		width: 100%;
+		font-size: 14px;
+		font-weight: 300;
+		line-height: 17px;
+		letter-spacing: 0.02em;
+	}
+
+	.hugh-ms__inner--step-8 .hugh-ms__pay-terms {
+		width: 100%;
+		gap: 7px;
+	}
+
+	.hugh-ms__inner--step-8 .hugh-ms__pay-terms-input {
+		margin-top: 0;
+		flex: 0 0 24px;
+		width: 24px;
+		height: 24px;
+		border-width: 1px;
+	}
+
+	.hugh-ms__inner--step-8 .hugh-ms__pay-terms-text,
+	.hugh-ms__inner--step-8 .hugh-ms__pay-terms-line {
+		font-size: 14px;
+		font-weight: 300;
+		line-height: 17px;
+	}
+
+	.hugh-ms__inner--step-8 .hugh-ms__panel-controls {
+		position: static;
+		margin-top: auto;
+		width: 100%;
+		display: flex;
+		flex-direction: column;
+		align-items: stretch;
+		justify-content: flex-start;
+		gap: 9px;
+	}
+
+	.hugh-ms__inner--step-8 .hugh-ms__panel-actions {
+		display: flex;
+		width: 100%;
+	}
+
+	.hugh-ms__inner--step-8 .hugh-ms__footer {
+		width: 100%;
+		padding-left: 0;
+		bottom: auto;
+	}
+
+	.hugh-ms__inner--step-8 .hugh-ms__footer-spacer {
+		display: none;
+	}
+
+	.hugh-ms__inner--step-8 .hugh-ms__pay-footer-stack {
+		width: 100%;
+		align-items: stretch;
+		gap: 9px;
+		flex-direction: column-reverse;
+	}
+
+	.hugh-ms__inner--step-8 .hugh-ms__pay-secure {
+		width: 100%;
+		font-size: 12px;
+		font-weight: 300;
+		line-height: 15px;
+		text-align: center;
+		letter-spacing: 0.02em;
+	}
+
+	.hugh-ms__inner--step-8 .hugh-ms__btn--primary {
+		width: 100%;
+		min-height: 61px;
+		padding: 18px 24px 19px;
+		font-size: 18px;
+		font-weight: 600;
+		line-height: 22px;
+		letter-spacing: 0.02em;
+		border-width: 1px;
+		border-radius: 0;
+	}
+
+	/* Step 9 had hidden crumbs in desktop rules; show on mobile too. */
+	.hugh-ms__inner--step-9 .hugh-ms__crumbs {
+		display: block;
+	}
+
+	/* Step 8 (confirmation) mobile */
+	.hugh-ms__inner--step-9 {
+		gap: 25px;
+		min-height: calc(593px - 19px - 32px);
+		padding-bottom: 0;
+	}
+
+	.hugh-ms__inner--step-9 .hugh-ms__panel,
+	.hugh-ms__inner--step-9 .hugh-ms__panel--done {
+		flex: 1;
+		padding-left: 0;
+		padding-right: 0;
+		min-height: 0;
+		display: flex;
+		flex-direction: column;
+	}
+
+	.hugh-ms__inner--step-9 .hugh-ms__done-wrap {
+		flex: 1;
+		width: 100%;
+		gap: 15px;
+		margin: 0;
+	}
+
+	.hugh-ms__inner--step-9 .hugh-ms__done-icon {
+		width: 95px;
+		height: 95px;
+		margin: 12px 0 0;
+	}
+
+	.hugh-ms__inner--step-9 .hugh-ms__title {
+		margin: 0;
+		width: 100%;
+		font-size: 24px;
+		font-weight: 600;
+		line-height: 29px;
+		letter-spacing: 0.02em;
+		text-align: center;
+	}
+
+	.hugh-ms__inner--step-9 .hugh-ms__done-sheet {
+		width: 100%;
+		min-height: 143px;
+		padding: 22px 23px 22px;
+		border: 1px solid #fff;
+		gap: 6px;
+	}
+
+	.hugh-ms__inner--step-9 .hugh-ms__done-row {
+		gap: 24px;
+		font-size: 16px;
+		line-height: 19px;
+	}
+
+	.hugh-ms__inner--step-9 .hugh-ms__done-k,
+	.hugh-ms__inner--step-9 .hugh-ms__done-v {
+		font-weight: 300;
+	}
+
+	.hugh-ms__inner--step-9 .hugh-ms__done-row.is-strong .hugh-ms__done-k,
+	.hugh-ms__inner--step-9 .hugh-ms__done-row.is-strong .hugh-ms__done-v {
+		font-weight: 600;
+	}
+
+	.hugh-ms__inner--step-9 .hugh-ms__done-note {
+		width: 100%;
+		margin: 8px 0 0;
+		font-size: 14px;
+		font-weight: 300;
+		line-height: 17px;
+		text-align: left;
+		letter-spacing: 0.02em;
+	}
+
+	.hugh-ms__inner--step-9 .hugh-ms__done-close {
+		width: 100%;
+		height: 61px;
+		margin-top: auto;
+		padding: 20px;
+		font-size: 18px;
+		font-weight: 600;
+		line-height: 22px;
+		letter-spacing: 0.02em;
+		border: 1px solid #fff;
+		border-radius: 0;
+	}
+
+	/* Keep desktop-like progress behavior on every mobile step. */
+	.hugh-ms__inner[class*="hugh-ms__inner--step-"] .hugh-ms__crumbs {
+		display: block !important;
+		width: 100% !important;
+		height: 8px !important;
+		margin: 0 auto !important;
+		border: 1px solid #fff !important;
+		border-radius: 21px !important;
+		background: transparent !important;
+		overflow: hidden !important;
+	}
+
+	.hugh-ms__inner[class*="hugh-ms__inner--step-"] .hugh-ms__crumb {
+		display: none !important;
+	}
+
+	.hugh-ms__inner[class*="hugh-ms__inner--step-"] .hugh-ms__crumb.is-active {
+		display: block !important;
+		height: 100% !important;
+		background: #fff !important;
+	}
+
+	.hugh-ms__inner[class*="hugh-ms__inner--step-"].hugh-ms__inner--step-1 .hugh-ms__crumb.is-active { width: 9.6% !important; }
+	.hugh-ms__inner[class*="hugh-ms__inner--step-"].hugh-ms__inner--step-2 .hugh-ms__crumb.is-active { width: 23% !important; }
+	.hugh-ms__inner[class*="hugh-ms__inner--step-"].hugh-ms__inner--step-3 .hugh-ms__crumb.is-active { width: 40% !important; }
+	.hugh-ms__inner[class*="hugh-ms__inner--step-"].hugh-ms__inner--step-5 .hugh-ms__crumb.is-active { width: 53% !important; }
+	.hugh-ms__inner[class*="hugh-ms__inner--step-"].hugh-ms__inner--step-6 .hugh-ms__crumb.is-active { width: 71.7% !important; }
+	.hugh-ms__inner[class*="hugh-ms__inner--step-"].hugh-ms__inner--step-7 .hugh-ms__crumb.is-active { width: 84.5% !important; }
+	.hugh-ms__inner[class*="hugh-ms__inner--step-"].hugh-ms__inner--step-8 .hugh-ms__crumb.is-active,
+	.hugh-ms__inner[class*="hugh-ms__inner--step-"].hugh-ms__inner--step-9 .hugh-ms__crumb.is-active { width: 100% !important; }
 }
