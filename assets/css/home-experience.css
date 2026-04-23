@@ -159,8 +159,7 @@
 	padding: 0;
 	transition:
 		background-color 0.7s cubic-bezier(0.16, 1, 0.3, 1),
-		color 0.7s cubic-bezier(0.16, 1, 0.3, 1),
-		padding 0.7s cubic-bezier(0.16, 1, 0.3, 1);
+		color 0.7s cubic-bezier(0.16, 1, 0.3, 1);
 }
 
 .hat-experience__accordion.is-open {
@@ -351,12 +350,12 @@
 	}
 
 	.hat-experience__accordion.is-open {
-		padding: 14px 14px 0;
+		padding: 14px 14px 18px;
 	}
 
 	.hat-experience__panel-inner {
 		max-width: 100%;
-		padding-bottom: 18px;
+		padding-bottom: 0;
 	}
 
 	.hat-experience__panel-lead {

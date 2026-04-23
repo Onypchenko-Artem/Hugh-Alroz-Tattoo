@@ -92,14 +92,24 @@
 		fallbackTimer = window.setTimeout(finishAnimation, DURATION + 100);
 	}
 
+	function flashPressed(btn) {
+		if (!btn) return;
+		btn.classList.add("is-pressed");
+		window.setTimeout(function () {
+			btn.classList.remove("is-pressed");
+		}, 90);
+	}
+
 	if (prevBtn) {
 		prevBtn.addEventListener("click", function () {
+			flashPressed(prevBtn);
 			goTo(current - 1);
 		});
 	}
 
 	if (nextBtn) {
 		nextBtn.addEventListener("click", function () {
+			flashPressed(nextBtn);
 			goTo(current + 1);
 		});
 	}

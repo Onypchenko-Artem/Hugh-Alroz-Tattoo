@@ -355,7 +355,7 @@
 
 	.hat-pricing__title {
 		grid-column: 1;
-		font-size: 40px;
+		font-size: clamp(24px, 9.3vw, 40px);
 	}
 
 	.hat-pricing__title-wire {

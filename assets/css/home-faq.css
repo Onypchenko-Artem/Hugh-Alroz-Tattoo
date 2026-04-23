@@ -88,28 +88,40 @@
 	justify-content: center;
 	width: clamp(40px, 2.604vw, 50px);
 	height: clamp(40px, 2.604vw, 50px);
-	border: 1px solid rgba(255, 255, 255, 0.4);
-	background: white;
-	color: #fff;
+	border: 1px solid #fff;
+	background: #fff;
+	color: #000;
 	cursor: pointer;
-	transition: background-color 0.3s ease, border-color 0.3s ease;
+	transition: transform 0.08s ease, box-shadow 0.08s ease, background-color 0.1s ease;
 }
 
 .hat-faq__nav-btn:hover {
-	background: rgba(255, 255, 255, 0.1);
-	border-color: white;
-	color: white;
+	background: #fff;
+	border-color: #fff;
+	color: #000;
+}
+
+.hat-faq__nav-btn:active,
+.hat-faq__nav-btn.is-pressed {
+	transform: scale(0.92);
+	background: #e6e6e6;
+	box-shadow: inset 0 0 0 1px rgba(0, 0, 0, 0.08);
 }
 
 .hat-faq__nav-btn svg {
 	width: clamp(16px, 1.042vw, 20px);
 	height: clamp(16px, 1.042vw, 20px);
-	color: black;
-	transition: color 0.3s ease;
+	color: #000;
+	transition: transform 0.08s ease;
 }
 
 .hat-faq__nav-btn:hover svg {
-	color: white;
+	color: #000;
+}
+
+.hat-faq__nav-btn:active svg,
+.hat-faq__nav-btn.is-pressed svg {
+	transform: scale(0.9);
 }
 
 /* ---- Slider (stacked carousel) ---- */

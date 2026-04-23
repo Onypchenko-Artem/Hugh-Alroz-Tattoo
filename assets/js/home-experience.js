@@ -36,13 +36,17 @@
 
 		function open() {
 			running = true;
-			var endHeight = inner.scrollHeight;
 
 			panel.style.transition = "none";
 			panel.style.height = "0px";
 
 			accordion.classList.add("is-open");
 			trigger.setAttribute("aria-expanded", "true");
+
+			// Force layout recalculation so padding/width from .is-open is applied
+			// before measuring the real content height.
+			void panel.offsetHeight;
+			var endHeight = inner.scrollHeight;
 
 			nextFrame(function () {
 				panel.style.transition = "height " + DURATION + "ms " + EASING;
