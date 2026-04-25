@@ -165,14 +165,19 @@
 .hat-portfolio__more {
 	display: inline-flex;
 	align-items: center;
-	gap: clamp(8px, 0.625vw, 12px);
+	gap: clamp(8px, 0.78vw, 15px);
+	padding: 0;
+	border: 0;
+	background: transparent;
 	color: #fff;
+	font: inherit;
 	text-decoration: none;
 	font-weight: 400;
-	font-size: clamp(18px, 1.458vw, 28px);
-	line-height: 1;
+	font-size: clamp(13px, 1.458vw, 28px);
+	line-height: clamp(16px, 1.458vw, 28px);
 	letter-spacing: 0.08em;
 	text-transform: uppercase;
+	cursor: pointer;
 	transition: opacity 0.2s ease;
 }
 
@@ -264,15 +269,15 @@
 	}
 
 	.hat-portfolio__more {
-		font-size: 16px;
+		font-size: clamp(13px, 4.07vw, 16px);
 		font-weight: 600;
-		line-height: 19px;
+		line-height: clamp(16px, 4.83vw, 19px);
 		letter-spacing: 0.01em;
-		gap: 15px;
+		gap: clamp(12px, 3.82vw, 15px);
 	}
 
 	.hat-portfolio__more-arrow {
-		width: 14px;
-		height: 13px;
+		width: clamp(11px, 3.56vw, 14px);
+		height: clamp(10px, 3.31vw, 13px);
 	}
 }

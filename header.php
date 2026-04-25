@@ -127,11 +127,7 @@ $hat_bg_video_url   = esc_url( get_template_directory_uri() . '/assets/videos/ba
 			</nav>
 
 			<div class="hat-desktop-menu__bottom">
-				<div class="hat-desktop-menu__langs" aria-label="<?php esc_attr_e( 'Language switcher', 'hughalroztatoo' ); ?>">
-					<a href="#" aria-current="true">FR</a>
-					<span class="hat-desktop-menu__lang-separator" aria-hidden="true"></span>
-					<a href="#">EN</a>
-				</div>
+				<?php hughalroztatoo_render_lang_switcher(); ?>
 				<a class="hat-desktop-menu__email" href="mailto:alroztattoos@gmail.com">alroztattoos@gmail.com</a>
 			</div>
 		</div>

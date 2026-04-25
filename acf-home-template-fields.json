@@ -34,7 +34,7 @@
                     "class": "",
                     "id": ""
                 },
-                "default_value": "HUGH",
+                "default_value": "",
                 "maxlength": "",
                 "allow_in_bindings": 0,
                 "placeholder": "",
@@ -55,7 +55,7 @@
                     "class": "",
                     "id": ""
                 },
-                "default_value": "ALROZ",
+                "default_value": "",
                 "maxlength": "",
                 "allow_in_bindings": 0,
                 "placeholder": "",
@@ -102,7 +102,7 @@
                     "class": "",
                     "id": ""
                 },
-                "default_value": "( ) TATOO",
+                "default_value": "",
                 "maxlength": "",
                 "allow_in_bindings": 0,
                 "placeholder": "",
@@ -123,7 +123,7 @@
                     "class": "",
                     "id": ""
                 },
-                "default_value": "STUDIO PRIVE",
+                "default_value": "",
                 "maxlength": "",
                 "allow_in_bindings": 0,
                 "placeholder": "",
@@ -144,7 +144,7 @@
                     "class": "",
                     "id": ""
                 },
-                "default_value": "Nous travaillons uniquement sur rendez-vous afin d'accorder toute notre attention a chaque projet. Reservez votre seance a l'avance et choisissez le moment qui vous convient.",
+                "default_value": "",
                 "maxlength": "",
                 "allow_in_bindings": 0,
                 "rows": 3,
@@ -165,7 +165,7 @@
                     "class": "",
                     "id": ""
                 },
-                "default_value": "RESERVER UNE SEANCE",
+                "default_value": "",
                 "maxlength": "",
                 "allow_in_bindings": 0,
                 "placeholder": "",
@@ -203,7 +203,7 @@
                     "class": "",
                     "id": ""
                 },
-                "default_value": "TATTOO.RESERVE",
+                "default_value": "",
                 "maxlength": "",
                 "allow_in_bindings": 0,
                 "placeholder": "",
@@ -224,7 +224,7 @@
                     "class": "",
                     "id": ""
                 },
-                "default_value": "(&nbsp;R&nbsp;)",
+                "default_value": "",
                 "maxlength": "",
                 "allow_in_bindings": 0,
                 "placeholder": "",
@@ -245,7 +245,7 @@
                     "class": "",
                     "id": ""
                 },
-                "default_value": "SS26",
+                "default_value": "",
                 "maxlength": "",
                 "allow_in_bindings": 0,
                 "placeholder": "",
@@ -283,7 +283,7 @@
                     "class": "",
                     "id": ""
                 },
-                "default_value": "FORMATS",
+                "default_value": "",
                 "maxlength": "",
                 "allow_in_bindings": 0,
                 "placeholder": "",
@@ -304,7 +304,7 @@
                     "class": "",
                     "id": ""
                 },
-                "default_value": "Choisissez",
+                "default_value": "",
                 "maxlength": "",
                 "allow_in_bindings": 0,
                 "placeholder": "",
@@ -325,7 +325,7 @@
                     "class": "",
                     "id": ""
                 },
-                "default_value": "votre",
+                "default_value": "",
                 "maxlength": "",
                 "allow_in_bindings": 0,
                 "placeholder": "",
@@ -346,7 +346,7 @@
                     "class": "",
                     "id": ""
                 },
-                "default_value": "format",
+                "default_value": "",
                 "maxlength": "",
                 "allow_in_bindings": 0,
                 "placeholder": "",
@@ -367,7 +367,7 @@
                     "class": "",
                     "id": ""
                 },
-                "default_value": "de",
+                "default_value": "",
                 "maxlength": "",
                 "allow_in_bindings": 0,
                 "placeholder": "",
@@ -388,7 +388,7 @@
                     "class": "",
                     "id": ""
                 },
-                "default_value": "reservation",
+                "default_value": "",
                 "maxlength": "",
                 "allow_in_bindings": 0,
                 "placeholder": "",
@@ -584,7 +584,7 @@
                     "class": "",
                     "id": ""
                 },
-                "default_value": "PORTFOLIO",
+                "default_value": "",
                 "maxlength": "",
                 "allow_in_bindings": 0,
                 "placeholder": "",
@@ -605,7 +605,7 @@
                     "class": "",
                     "id": ""
                 },
-                "default_value": "L'ENCRE",
+                "default_value": "",
                 "maxlength": "",
                 "allow_in_bindings": 0,
                 "placeholder": "",
@@ -626,7 +626,7 @@
                     "class": "",
                     "id": ""
                 },
-                "default_value": "NE MENT PAS",
+                "default_value": "",
                 "maxlength": "",
                 "allow_in_bindings": 0,
                 "placeholder": "",
@@ -647,29 +647,12 @@
                     "class": "",
                     "id": ""
                 },
-                "default_value": "VOIR PLUS",
+                "default_value": "",
                 "maxlength": "",
                 "allow_in_bindings": 0,
                 "placeholder": "",
                 "prepend": "",
                 "append": ""
-            },
-            {
-                "key": "field_hat_home_portfolio_cta_url",
-                "label": "Portfolio CTA URL",
-                "name": "home_portfolio_cta_url",
-                "aria-label": "",
-                "type": "link",
-                "instructions": "Можно указывать полный URL, относительный путь (/booking) или якорь (#portfolio).",
-                "required": 0,
-                "conditional_logic": 0,
-                "wrapper": {
-                    "width": "50",
-                    "class": "",
-                    "id": ""
-                },
-                "return_format": "array",
-                "allow_in_bindings": 0
             },
             {
                 "key": "field_hat_home_portfolio_items",
@@ -805,7 +788,7 @@
                     "class": "",
                     "id": ""
                 },
-                "default_value": "CONDITIONS",
+                "default_value": "",
                 "maxlength": "",
                 "allow_in_bindings": 0,
                 "placeholder": "",
@@ -826,7 +809,7 @@
                     "class": "",
                     "id": ""
                 },
-                "default_value": "L'EXPERIENCE",
+                "default_value": "",
                 "maxlength": "",
                 "allow_in_bindings": 0,
                 "placeholder": "",
@@ -847,7 +830,7 @@
                     "class": "",
                     "id": ""
                 },
-                "default_value": "AVANT TOUT",
+                "default_value": "",
                 "maxlength": "",
                 "allow_in_bindings": 0,
                 "placeholder": "",
@@ -868,7 +851,7 @@
                     "class": "",
                     "id": ""
                 },
-                "default_value": "// P /",
+                "default_value": "",
                 "maxlength": "",
                 "allow_in_bindings": 0,
                 "placeholder": "",
@@ -889,7 +872,7 @@
                     "class": "",
                     "id": ""
                 },
-                "default_value": "Un cadre. Une intention.",
+                "default_value": "",
                 "maxlength": "",
                 "allow_in_bindings": 0,
                 "placeholder": "",
@@ -1017,7 +1000,7 @@
                     "class": "",
                     "id": ""
                 },
-                "default_value": "FAQ",
+                "default_value": "",
                 "maxlength": "",
                 "allow_in_bindings": 0,
                 "placeholder": "",
@@ -1038,7 +1021,7 @@
                     "class": "",
                     "id": ""
                 },
-                "default_value": "QUESTIONS",
+                "default_value": "",
                 "maxlength": "",
                 "allow_in_bindings": 0,
                 "placeholder": "",
@@ -1059,7 +1042,7 @@
                     "class": "",
                     "id": ""
                 },
-                "default_value": "FREQUENTES",
+                "default_value": "",
                 "maxlength": "",
                 "allow_in_bindings": 0,
                 "placeholder": "",
@@ -1165,7 +1148,7 @@
                     "class": "",
                     "id": ""
                 },
-                "default_value": "RESERVATION",
+                "default_value": "",
                 "maxlength": "",
                 "allow_in_bindings": 0,
                 "placeholder": "",
@@ -1186,7 +1169,7 @@
                     "class": "",
                     "id": ""
                 },
-                "default_value": "L'IDEE. L'ENCRE.",
+                "default_value": "",
                 "maxlength": "",
                 "allow_in_bindings": 0,
                 "placeholder": "",
@@ -1207,7 +1190,7 @@
                     "class": "",
                     "id": ""
                 },
-                "default_value": "VOUS.",
+                "default_value": "",
                 "maxlength": "",
                 "allow_in_bindings": 0,
                 "placeholder": "",
@@ -1228,7 +1211,7 @@
                     "class": "",
                     "id": ""
                 },
-                "default_value": "Sur rendez-vous uniquement afin d'offrir une experience entierement personnalisee et dediee a chaque projet. Reservation en ligne disponible 24/7 pour organiser votre seance en toute simplicite.",
+                "default_value": "",
                 "maxlength": "",
                 "allow_in_bindings": 0,
                 "rows": 4,
@@ -1249,7 +1232,7 @@
                     "class": "",
                     "id": ""
                 },
-                "default_value": "RESERVER UNE SEANCE",
+                "default_value": "",
                 "maxlength": "",
                 "allow_in_bindings": 0,
                 "placeholder": "",
@@ -1287,7 +1270,7 @@
                     "class": "",
                     "id": ""
                 },
-                "default_value": "RDV//",
+                "default_value": "",
                 "maxlength": "",
                 "allow_in_bindings": 0,
                 "placeholder": "",
@@ -1308,7 +1291,7 @@
                     "class": "",
                     "id": ""
                 },
-                "default_value": "/ 20.2026 /",
+                "default_value": "",
                 "maxlength": "",
                 "allow_in_bindings": 0,
                 "placeholder": "",

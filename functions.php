@@ -13,6 +13,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 define( 'HUGHALROZTATOO_VERSION', '1.0' );
 
 require get_template_directory() . '/inc/booking-multistep.php';
+require get_template_directory() . '/inc/site-settings.php';
 
 /**
  * Preconnect to Google Fonts (Inter Tight)
@@ -155,3 +156,148 @@ add_action( 'wp_enqueue_scripts', 'hughalroztatoo_assets' );
  */
 add_filter( 'use_block_editor_for_post', '__return_false' );
 add_filter( 'use_block_editor_for_post_type', '__return_false' );
+
+/**
+ * Redirect direct hits to the static front page slug (e.g. /home-page/ or /en/home-page/)
+ * to the clean language root URL. Keeps the address bar free of /home-page/ on the home.
+ */
+function hughalroztatoo_redirect_front_page_slug() {
+	if ( is_admin() || wp_doing_ajax() || ( defined( 'REST_REQUEST' ) && REST_REQUEST ) ) {
+		return;
+	}
+
+	if ( 'page' !== get_option( 'show_on_front' ) ) {
+		return;
+	}
+
+	$front_page_id = (int) get_option( 'page_on_front' );
+	if ( ! $front_page_id ) {
+		return;
+	}
+
+	if ( ! is_page() ) {
+		return;
+	}
+
+	$queried_id = (int) get_queried_object_id();
+	if ( ! $queried_id ) {
+		return;
+	}
+
+	$front_page_ids = array( $front_page_id );
+
+	if ( function_exists( 'pll_get_post_translations' ) ) {
+		$translations = pll_get_post_translations( $front_page_id );
+		if ( is_array( $translations ) ) {
+			$front_page_ids = array_unique( array_merge( $front_page_ids, array_map( 'intval', array_values( $translations ) ) ) );
+		}
+	}
+
+	if ( ! in_array( $queried_id, $front_page_ids, true ) ) {
+		return;
+	}
+
+	$target = home_url( '/' );
+	if ( function_exists( 'pll_home_url' ) && function_exists( 'pll_get_post_language' ) ) {
+		$lang = pll_get_post_language( $queried_id );
+		if ( $lang ) {
+			$target = pll_home_url( $lang );
+		}
+	}
+
+	$current_url = ( is_ssl() ? 'https://' : 'http://' ) . $_SERVER['HTTP_HOST'] . strtok( $_SERVER['REQUEST_URI'], '?' );
+	if ( untrailingslashit( $current_url ) === untrailingslashit( $target ) ) {
+		return;
+	}
+
+	wp_safe_redirect( $target, 301 );
+	exit;
+}
+add_action( 'template_redirect', 'hughalroztatoo_redirect_front_page_slug' );
+
+/**
+ * Build a list of Polylang languages for the current request, each carrying the
+ * URL of the current page translated into that language. Falls back to the
+ * language home URL when a translation does not exist so the switcher always
+ * yields a meaningful destination, regardless of where on the site it is used.
+ *
+ * @return array<int,array<string,mixed>> List of language descriptors.
+ */
+function hughalroztatoo_get_language_switcher_items() {
+	if ( ! function_exists( 'pll_the_languages' ) ) {
+		return array();
+	}
+
+	$languages = pll_the_languages(
+		array(
+			'raw'                    => 1,
+			'echo'                   => 0,
+			'hide_current'           => 0,
+			'hide_if_empty'          => 0,
+			'hide_if_no_translation' => 0,
+		)
+	);
+
+	if ( empty( $languages ) || ! is_array( $languages ) ) {
+		return array();
+	}
+
+	$items = array();
+
+	foreach ( $languages as $language ) {
+		if ( empty( $language['slug'] ) ) {
+			continue;
+		}
+
+		$slug = (string) $language['slug'];
+		$url  = ! empty( $language['url'] ) ? (string) $language['url'] : '';
+
+		if ( ( '' === $url || ! empty( $language['no_translation'] ) ) && function_exists( 'pll_home_url' ) ) {
+			$url = pll_home_url( $slug );
+		}
+
+		if ( '' === $url ) {
+			$url = home_url( '/' );
+		}
+
+		$locale = ! empty( $language['locale'] ) ? (string) $language['locale'] : $slug;
+		$name   = ! empty( $language['name'] ) ? (string) $language['name'] : $slug;
+
+		$items[] = array(
+			'slug'    => $slug,
+			'locale'  => $locale,
+			'name'    => $name,
+			'url'     => $url,
+			'current' => ! empty( $language['current_lang'] ),
+		);
+	}
+
+	return $items;
+}
+
+/**
+ * Render the bespoke Polylang-backed language switcher used inside the burger
+ * menu. Outputs nothing when Polylang is unavailable.
+ */
+function hughalroztatoo_render_lang_switcher() {
+	$items = hughalroztatoo_get_language_switcher_items();
+	if ( empty( $items ) ) {
+		return;
+	}
+
+	?>
+	<div class="hat-desktop-menu__langs" aria-label="<?php esc_attr_e( 'Language switcher', 'hughalroztatoo' ); ?>">
+		<?php foreach ( $items as $index => $item ) : ?>
+			<?php if ( $index > 0 ) : ?>
+				<span class="hat-desktop-menu__lang-separator" aria-hidden="true"></span>
+			<?php endif; ?>
+			<a
+				href="<?php echo esc_url( $item['url'] ); ?>"
+				hreflang="<?php echo esc_attr( $item['locale'] ? str_replace( '_', '-', $item['locale'] ) : $item['slug'] ); ?>"
+				lang="<?php echo esc_attr( $item['slug'] ); ?>"
+				<?php echo $item['current'] ? 'aria-current="true"' : ''; ?>
+			><?php echo esc_html( strtoupper( $item['slug'] ) ); ?></a>
+		<?php endforeach; ?>
+	</div>
+	<?php
+}

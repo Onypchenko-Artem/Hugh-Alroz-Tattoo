@@ -10,48 +10,14 @@ if ( ! defined( 'ABSPATH' ) ) {
 }
 
 $home_post_id = get_queried_object_id();
-$portfolio_url_raw = function_exists( 'get_field' ) ? get_field( 'home_portfolio_cta_url', $home_post_id ) : '';
 
 $portfolio_eyebrow = function_exists( 'get_field' ) ? (string) get_field( 'home_portfolio_eyebrow', $home_post_id ) : '';
 $portfolio_title_1 = function_exists( 'get_field' ) ? (string) get_field( 'home_portfolio_title_line_1', $home_post_id ) : '';
 $portfolio_title_2 = function_exists( 'get_field' ) ? (string) get_field( 'home_portfolio_title_line_2', $home_post_id ) : '';
 $portfolio_cta     = function_exists( 'get_field' ) ? (string) get_field( 'home_portfolio_cta_label', $home_post_id ) : '';
-$portfolio_url     = is_array( $portfolio_url_raw ) ? (string) ( $portfolio_url_raw['url'] ?? '' ) : (string) $portfolio_url_raw;
-$portfolio_target  = is_array( $portfolio_url_raw ) ? (string) ( $portfolio_url_raw['target'] ?? '' ) : '';
-$portfolio_title   = is_array( $portfolio_url_raw ) ? (string) ( $portfolio_url_raw['title'] ?? '' ) : '';
 $portfolio_items   = function_exists( 'get_field' ) ? get_field( 'home_portfolio_items', $home_post_id ) : array();
 
-$portfolio_eyebrow = '' !== $portfolio_eyebrow ? $portfolio_eyebrow : 'PORTFOLIO';
-$portfolio_title_1 = '' !== $portfolio_title_1 ? $portfolio_title_1 : "L'ENCRE";
-$portfolio_title_2 = '' !== $portfolio_title_2 ? $portfolio_title_2 : 'NE MENT PAS';
-$portfolio_cta     = '' !== $portfolio_cta ? $portfolio_cta : ( '' !== $portfolio_title ? $portfolio_title : 'VOIR PLUS' );
-$portfolio_url     = '' !== $portfolio_url ? $portfolio_url : '#portfolio';
-$portfolio_target  = '' !== $portfolio_target ? $portfolio_target : '_self';
-
-if ( ! is_array( $portfolio_items ) || empty( $portfolio_items ) ) {
-	$portfolio_items = array(
-		array(
-			'image' => get_template_directory_uri() . '/assets/images/photo 1.jpg',
-			'alt'   => 'Tattoo work 1',
-			'size'  => 'wide',
-		),
-		array(
-			'image' => get_template_directory_uri() . '/assets/images/photo 2.jpg',
-			'alt'   => 'Tattoo work 2',
-			'size'  => 'half',
-		),
-		array(
-			'image' => get_template_directory_uri() . '/assets/images/photo 3.jpg',
-			'alt'   => 'Tattoo work 3',
-			'size'  => 'half',
-		),
-		array(
-			'image' => get_template_directory_uri() . '/assets/images/photo 4.jpg',
-			'alt'   => 'Tattoo work 4',
-			'size'  => 'wide',
-		),
-	);
-}
+$portfolio_items   = is_array( $portfolio_items ) ? $portfolio_items : array();
 
 $portfolio_entries = array();
 
@@ -84,37 +50,54 @@ $portfolio_step_count    = 4;
 $portfolio_total_count   = count( $portfolio_entries );
 $portfolio_has_more      = $portfolio_total_count > $portfolio_initial_count;
 $portfolio_less_label    = __( 'VOIR MOINS', 'hughalroztatoo' );
+$portfolio_has_heading   = '' !== $portfolio_eyebrow || '' !== $portfolio_title_1 || '' !== $portfolio_title_2;
+$portfolio_has_cta       = $portfolio_has_more && '' !== $portfolio_cta;
+
+if ( ! $portfolio_has_heading && empty( $portfolio_entries ) ) {
+	return;
+}
 ?>
 
 <section
 	class="hat-portfolio"
 	id="portfolio"
-	aria-labelledby="hat-portfolio-title"
+	<?php echo ( '' !== $portfolio_title_1 || '' !== $portfolio_title_2 ) ? 'aria-labelledby="hat-portfolio-title"' : ''; ?>
 	data-portfolio-root
 	data-portfolio-initial="<?php echo esc_attr( (string) $portfolio_initial_count ); ?>"
 	data-portfolio-step="<?php echo esc_attr( (string) $portfolio_step_count ); ?>"
 >
+	<?php if ( $portfolio_has_heading ) : ?>
 	<div class="hat-container">
 		<div class="hat-portfolio__header">
+			<?php if ( '' !== $portfolio_eyebrow ) : ?>
 			<p class="hat-portfolio__eyebrow">
 				<span class="hat-portfolio__eyebrow-bracket" aria-hidden="true">(</span>
 				<span class="hat-portfolio__eyebrow-word"><?php echo esc_html( $portfolio_eyebrow ); ?></span>
 				<span class="hat-portfolio__eyebrow-bracket" aria-hidden="true">)</span>
 			</p>
+			<?php endif; ?>
 
+			<?php if ( '' !== $portfolio_title_1 || '' !== $portfolio_title_2 ) : ?>
 			<div class="hat-portfolio__title-row">
 				<h2 class="hat-portfolio__title" id="hat-portfolio-title">
-					<span class="hat-portfolio__title-line"><?php echo esc_html( $portfolio_title_1 ); ?></span>
-					<span class="hat-portfolio__title-line"><?php echo esc_html( $portfolio_title_2 ); ?></span>
+					<?php if ( '' !== $portfolio_title_1 ) : ?>
+						<span class="hat-portfolio__title-line"><?php echo esc_html( $portfolio_title_1 ); ?></span>
+					<?php endif; ?>
+					<?php if ( '' !== $portfolio_title_2 ) : ?>
+						<span class="hat-portfolio__title-line"><?php echo esc_html( $portfolio_title_2 ); ?></span>
+					<?php endif; ?>
 				</h2>
 
 				<span class="hat-portfolio__ornament" aria-hidden="true">
 					<img src="<?php echo esc_url( get_template_directory_uri() . '/assets/images/ornament.svg' ); ?>" alt="">
 				</span>
 			</div>
+			<?php endif; ?>
 		</div>
 	</div>
+	<?php endif; ?>
 
+	<?php if ( ! empty( $portfolio_entries ) ) : ?>
 	<div class="hat-portfolio__grid" data-portfolio-grid>
 		<?php foreach ( $portfolio_entries as $index => $entry ) : ?>
 			<?php
@@ -127,13 +110,16 @@ $portfolio_less_label    = __( 'VOIR MOINS', 'hughalroztatoo' );
 			</figure>
 		<?php endforeach; ?>
 	</div>
+	<?php endif; ?>
 
+	<?php if ( $portfolio_has_cta ) : ?>
 	<div class="hat-container">
-		<div class="hat-portfolio__footer<?php echo $portfolio_has_more ? '' : ' is-hidden'; ?>" data-portfolio-footer>
-			<a class="hat-portfolio__more" href="<?php echo esc_url( $portfolio_url ); ?>" target="<?php echo esc_attr( $portfolio_target ); ?>" data-portfolio-more data-portfolio-less-label="<?php echo esc_attr( $portfolio_less_label ); ?>" aria-expanded="false">
+		<div class="hat-portfolio__footer" data-portfolio-footer>
+			<button class="hat-portfolio__more" type="button" data-portfolio-more data-portfolio-less-label="<?php echo esc_attr( $portfolio_less_label ); ?>" aria-expanded="false">
 				<span class="hat-portfolio__more-label" data-portfolio-more-label><?php echo esc_html( $portfolio_cta ); ?></span>
 				<img class="hat-portfolio__more-arrow" src="<?php echo esc_url( get_template_directory_uri() . '/assets/images/voir-plus.svg' ); ?>" alt="" aria-hidden="true" width="22" height="23">
-			</a>
+			</button>
 		</div>
 	</div>
+	<?php endif; ?>
 </section>

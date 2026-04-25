@@ -99,10 +99,10 @@
 	line-height: clamp(20px, 1.51vw, 29px);
 	letter-spacing: 0.01em;
 	text-transform: uppercase;
-	width: clamp(280px, 21.146vw, 406px);
+	width: clamp(267px, 21.146vw, 406px);
 	min-height: clamp(58px, 4.427vw, 85px);
-	padding: clamp(12px, 1.042vw, 20px) clamp(14px, 1.77vw, 34px) clamp(11px, 0.93vw, 18px) 34px;
-	gap: 20px;
+	padding: clamp(13px, 1.042vw, 20px) clamp(22px, 1.77vw, 34px) clamp(12px, 0.93vw, 18px) clamp(22px, 1.77vw, 34px);
+	gap: clamp(12px, 1.04vw, 20px);
 }
 
 .hat-idea__cta-label {
@@ -123,8 +123,8 @@
 
 .hat-idea__cta-arrow img {
 	display: block;
-	width: clamp(35px, 1.823vw, 35px);
-	height: clamp(35px, 1.823vw, 35px);
+	width: clamp(22px, 1.823vw, 35px);
+	height: clamp(22px, 1.823vw, 35px);
 }
 
 .hat-idea__strip {
@@ -247,39 +247,39 @@
 
 	.hat-idea__cta {
 		width: 100%;
-		height: 54px;
-		min-height: 54px;
+		height: auto;
+		min-height: clamp(45px, 13.74vw, 54px);
 		box-sizing: border-box;
 		justify-content: space-between;
 		align-items: center;
-		padding: 8px 10px 8px 24px;
-		gap: 10px;
-		border: 2px solid #fff;
-		font-size: 16px;
-		line-height: 19px;
+		padding: clamp(7px, 2.04vw, 8px) clamp(8px, 2.54vw, 10px);
+		gap: clamp(8px, 2.54vw, 10px);
+		border: clamp(1px, 0.51vw, 2px) solid #fff;
+		font-size: clamp(13px, 4.07vw, 16px);
+		line-height: clamp(16px, 4.83vw, 19px);
 		font-weight: 600;
 		letter-spacing: 0.01em;
 	}
 
 	.hat-idea__cta-label {
 		justify-content: center;
-		font-size: 16px;
-		line-height: 19px;
+		font-size: inherit;
+		line-height: inherit;
 		font-weight: 600;
 		text-align: center;
 		letter-spacing: 0.01em;
 	}
 
 	.hat-idea__cta-arrow {
-		width: 35.38px;
-		height: 36px;
-		flex: 0 0 35.38px;
-		padding: 6.82759px 6.82759px 7.44828px;
+		width: clamp(29px, 9vw, 35.38px);
+		height: clamp(30px, 9.16vw, 36px);
+		flex: 0 0 clamp(29px, 9vw, 35.38px);
+		padding: clamp(5.5px, 1.74vw, 6.82759px) clamp(5.5px, 1.74vw, 6.82759px) clamp(6px, 1.9vw, 7.44828px);
 	}
 
 	.hat-idea__cta-arrow img {
-		width: 21.72px;
-		height: 21.72px;
+		width: clamp(18px, 5.53vw, 21.72px);
+		height: clamp(18px, 5.53vw, 21.72px);
 		transform: none;
 	}
 
