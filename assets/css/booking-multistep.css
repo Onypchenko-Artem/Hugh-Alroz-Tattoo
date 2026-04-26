@@ -1910,6 +1910,20 @@
 	opacity: 0.85;
 }
 
+.hugh-ms__inner--step-8 .hugh-ms__pay-terms-line--html a {
+	color: inherit;
+	text-decoration: underline;
+	text-underline-offset: 3px;
+}
+
+.hugh-ms__inner--step-8 .hugh-ms__pay-terms-line--html a:hover {
+	opacity: 0.85;
+}
+
+.hugh-ms__inner--step-8 .hugh-ms__pay-terms-line--html p {
+	margin: 0;
+}
+
 .hugh-ms__inner--step-8 .hugh-ms__footer {
 	align-items: flex-end;
 	justify-content: space-between;

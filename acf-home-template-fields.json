@@ -462,6 +462,28 @@
                         "parent_repeater": "field_hat_home_pricing_cards"
                     },
                     {
+                        "key": "field_hat_home_pricing_card_tag",
+                        "label": "Tag",
+                        "name": "tag",
+                        "aria-label": "",
+                        "type": "text",
+                        "instructions": "Small label above card title (e.g. nouveau projet).",
+                        "required": 0,
+                        "conditional_logic": 0,
+                        "wrapper": {
+                            "width": "35",
+                            "class": "",
+                            "id": ""
+                        },
+                        "default_value": "",
+                        "maxlength": "",
+                        "allow_in_bindings": 0,
+                        "placeholder": "nouveau projet",
+                        "prepend": "",
+                        "append": "",
+                        "parent_repeater": "field_hat_home_pricing_cards"
+                    },
+                    {
                         "key": "field_hat_home_pricing_card_popular",
                         "label": "Popular",
                         "name": "popular",

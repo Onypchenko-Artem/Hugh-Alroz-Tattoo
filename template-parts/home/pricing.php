@@ -10,6 +10,99 @@ if ( ! defined( 'ABSPATH' ) ) {
 }
 
 if ( ! function_exists( 'hughalroztatoo_amelia_services_by_ids' ) ) {
+	if ( ! function_exists( 'hughalroztatoo_amelia_locale_candidates' ) ) {
+		/**
+		 * Build locale candidates to match Amelia translation keys.
+		 *
+		 * @return string[]
+		 */
+		function hughalroztatoo_amelia_locale_candidates() {
+			$candidates = array();
+
+			if ( function_exists( 'pll_current_language' ) ) {
+				$pll_locale = (string) pll_current_language( 'locale' );
+				$pll_slug   = (string) pll_current_language( 'slug' );
+				if ( '' !== $pll_locale ) {
+					$candidates[] = $pll_locale;
+				}
+				if ( '' !== $pll_slug ) {
+					$candidates[] = $pll_slug;
+				}
+			}
+
+			$wp_locale = (string) get_locale();
+			if ( '' !== $wp_locale ) {
+				$candidates[] = $wp_locale;
+			}
+
+			$expanded = array();
+			foreach ( $candidates as $candidate ) {
+				$candidate = trim( (string) $candidate );
+				if ( '' === $candidate ) {
+					continue;
+				}
+
+				$expanded[] = $candidate;
+				$expanded[] = str_replace( '-', '_', $candidate );
+				$expanded[] = str_replace( '_', '-', $candidate );
+				$expanded[] = strtolower( $candidate );
+
+				$short = strtok( str_replace( '-', '_', strtolower( $candidate ) ), '_' );
+				if ( is_string( $short ) && '' !== $short ) {
+					$expanded[] = $short;
+				}
+			}
+
+			return array_values( array_unique( array_filter( $expanded ) ) );
+		}
+	}
+
+	/**
+	 * Extract translated service field from Amelia translations payload.
+	 *
+	 * Supports both common Amelia shapes:
+	 * - {"name":{"en_US":"..."}, "description":{"en_US":"..."}}
+	 * - {"en_US":{"name":"...","description":"..."}}
+	 *
+	 * @param mixed    $translations_raw Raw JSON/text from Amelia translations column.
+	 * @param string   $field            Field name (name|description).
+	 * @param string[] $locale_candidates Ordered locale candidates.
+	 * @return string
+	 */
+	function hughalroztatoo_amelia_get_translated_service_field( $translations_raw, $field, $locale_candidates ) {
+		if ( '' === trim( (string) $translations_raw ) ) {
+			return '';
+		}
+
+		$translations = json_decode( (string) $translations_raw, true );
+		if ( ! is_array( $translations ) || empty( $translations ) ) {
+			return '';
+		}
+
+		foreach ( (array) $locale_candidates as $locale ) {
+			$locale = (string) $locale;
+			if ( '' === $locale ) {
+				continue;
+			}
+
+			if ( isset( $translations[ $field ][ $locale ] ) && is_string( $translations[ $field ][ $locale ] ) ) {
+				$value = trim( $translations[ $field ][ $locale ] );
+				if ( '' !== $value ) {
+					return $value;
+				}
+			}
+
+			if ( isset( $translations[ $locale ][ $field ] ) && is_string( $translations[ $locale ][ $field ] ) ) {
+				$value = trim( $translations[ $locale ][ $field ] );
+				if ( '' !== $value ) {
+					return $value;
+				}
+			}
+		}
+
+		return '';
+	}
+
 	/**
 	 * Load Amelia services by IDs.
 	 *
@@ -44,7 +137,7 @@ if ( ! function_exists( 'hughalroztatoo_amelia_services_by_ids' ) ) {
 
 		$placeholders = implode( ',', array_fill( 0, count( $ids ), '%d' ) );
 		$query        = $wpdb->prepare(
-			"SELECT id, name, duration, price, description FROM {$table_name} WHERE id IN ({$placeholders})", // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared
+			"SELECT id, name, duration, price, description, translations FROM {$table_name} WHERE id IN ({$placeholders})", // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared
 			$ids
 		);
 		$rows         = $wpdb->get_results( $query, ARRAY_A ); // phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching
@@ -53,11 +146,30 @@ if ( ! function_exists( 'hughalroztatoo_amelia_services_by_ids' ) ) {
 		}
 
 		$map = array();
+		$locale_candidates = hughalroztatoo_amelia_locale_candidates();
 		foreach ( $rows as $row ) {
 			$service_id = isset( $row['id'] ) ? (int) $row['id'] : 0;
 			if ( $service_id <= 0 ) {
 				continue;
 			}
+
+			$translated_name = hughalroztatoo_amelia_get_translated_service_field(
+				$row['translations'] ?? '',
+				'name',
+				$locale_candidates
+			);
+			$translated_description = hughalroztatoo_amelia_get_translated_service_field(
+				$row['translations'] ?? '',
+				'description',
+				$locale_candidates
+			);
+			if ( '' !== $translated_name ) {
+				$row['name'] = $translated_name;
+			}
+			if ( '' !== $translated_description ) {
+				$row['description'] = $translated_description;
+			}
+
 			$map[ $service_id ] = $row;
 		}
 
@@ -141,6 +253,49 @@ if ( ! function_exists( 'hughalroztatoo_service_description_to_features' ) ) {
 	}
 }
 
+if ( ! function_exists( 'hughalroztatoo_get_localized_field_fallback' ) ) {
+	/**
+	 * Read an ACF field from current post with translation fallback.
+	 *
+	 * @param string $field_name ACF field name.
+	 * @param int    $post_id Current post ID.
+	 * @return mixed
+	 */
+	function hughalroztatoo_get_localized_field_fallback( $field_name, $post_id ) {
+		if ( ! function_exists( 'get_field' ) ) {
+			return '';
+		}
+
+		$value = get_field( $field_name, $post_id );
+		if ( ! empty( $value ) ) {
+			return $value;
+		}
+
+		if ( ! function_exists( 'pll_get_post_translations' ) ) {
+			return $value;
+		}
+
+		$translations = pll_get_post_translations( (int) $post_id );
+		if ( ! is_array( $translations ) || empty( $translations ) ) {
+			return $value;
+		}
+
+		foreach ( $translations as $translation_post_id ) {
+			$translation_post_id = (int) $translation_post_id;
+			if ( $translation_post_id <= 0 || $translation_post_id === (int) $post_id ) {
+				continue;
+			}
+
+			$fallback_value = get_field( $field_name, $translation_post_id );
+			if ( ! empty( $fallback_value ) ) {
+				return $fallback_value;
+			}
+		}
+
+		return $value;
+	}
+}
+
 $home_post_id = get_queried_object_id();
 
 $pricing_eyebrow       = function_exists( 'get_field' ) ? (string) get_field( 'home_pricing_eyebrow', $home_post_id ) : '';
@@ -151,7 +306,7 @@ $pricing_title_prefix2 = function_exists( 'get_field' ) ? (string) get_field( 'h
 $pricing_title_main_3  = function_exists( 'get_field' ) ? (string) get_field( 'home_pricing_title_main_3', $home_post_id ) : '';
 
 $pricing_cards = array();
-$booking_base_url_raw = function_exists( 'get_field' ) ? get_field( 'home_hero_cta_url', $home_post_id ) : '';
+$booking_base_url_raw = hughalroztatoo_get_localized_field_fallback( 'home_hero_cta_url', $home_post_id );
 $booking_base_url = is_array( $booking_base_url_raw ) ? (string) ( $booking_base_url_raw['url'] ?? '' ) : (string) $booking_base_url_raw;
 
 if ( function_exists( 'get_field' ) ) {

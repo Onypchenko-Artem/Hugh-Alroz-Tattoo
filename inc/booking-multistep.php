@@ -11,10 +11,6 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
 
-/**
- * Option key for custom category descriptions.
- */
-const HUGHALROZTATOO_BOOKING_CATEGORY_DESCRIPTIONS_OPTION = 'hughalroztatoo_booking_category_descriptions';
 
 /**
  * Whether Amelia is active.
@@ -33,135 +29,262 @@ function hughalroztatoo_content_has_amelia_booking_shortcode( $content ) {
 	return is_string( $content ) && has_shortcode( $content, 'hugh_amelia_booking' );
 }
 
+if ( ! function_exists( 'hughalroztatoo_amelia_locale_candidates' ) ) {
+	/**
+	 * Locales to match Amelia `translations` keys (same logic as home pricing block).
+	 *
+	 * @return string[]
+	 */
+	function hughalroztatoo_amelia_locale_candidates() {
+		$candidates = array();
+		if ( function_exists( 'pll_current_language' ) ) {
+			$pll_locale = (string) pll_current_language( 'locale' );
+			$pll_slug   = (string) pll_current_language( 'slug' );
+			if ( '' !== $pll_locale ) {
+				$candidates[] = $pll_locale;
+			}
+			if ( '' !== $pll_slug ) {
+				$candidates[] = $pll_slug;
+			}
+		}
+		$wp_locale = (string) get_locale();
+		if ( '' !== $wp_locale ) {
+			$candidates[] = $wp_locale;
+		}
+		$expanded = array();
+		foreach ( $candidates as $candidate ) {
+			$candidate = trim( (string) $candidate );
+			if ( '' === $candidate ) {
+				continue;
+			}
+			$expanded[]   = $candidate;
+			$expanded[]   = str_replace( '-', '_', $candidate );
+			$expanded[]   = str_replace( '_', '-', $candidate );
+			$expanded[]   = strtolower( $candidate );
+			$short        = strtok( str_replace( '-', '_', strtolower( $candidate ) ), '_' );
+			if ( is_string( $short ) && '' !== $short ) {
+				$expanded[] = $short;
+			}
+		}
+		return array_values( array_unique( array_filter( $expanded ) ) );
+	}
+}
+
 /**
- * Get saved booking category descriptions.
+ * Polylang string group (Languages → String translations in admin).
+ */
+const HUGHALROZTATOO_PLL_BOOKING_GROUP = 'Amelia booking';
+
+/**
+ * Strings registered in Polylang only when they have no ACF field on the Booking template.
+ *
+ * @return array<string, string> Key => default-language source string.
+ */
+function hughalroztatoo_booking_pll_strings() {
+	return array(
+		'loading'            => 'Chargement…',
+		'errorGeneric'       => 'Une erreur est survenue. Réessayez.',
+		'errorNoServices'    => 'Aucun service Amelia disponible. Vérifiez les catégories et la visibilité des services.',
+		'errorSlots'         => 'Impossible de charger les créneaux pour cette date.',
+		'errorBooking'       => 'La réservation a échoué.',
+		'recaptcha'          => 'Vérification anti-robot requise.',
+		'labelFirstName'     => 'Prénom',
+		'labelLastName'      => 'Nom',
+		'labelEmail'         => 'Email',
+		'labelPhone'         => 'Téléphone',
+		'labelProjectNote'   => 'Note sur le projet',
+		'phEmail'            => 'email@gmail.com',
+		'phPhone'            => '+1 (XXX) XXX-XXXX',
+		'phNote'             => 'Note',
+		'errorPhone'         => 'Veuillez indiquer votre numéro de téléphone.',
+		'errorAge'           => 'Veuillez confirmer que vous avez 18 ans ou plus.',
+		'payRowFormat'       => 'Format',
+		'payRowDate'         => 'Date',
+		'payRowSlot'         => 'Créneau',
+		'payRowTotal'        => 'Total séance',
+		'payRowDepositFmt'   => 'Acompte %d%%',
+		'payConsentBefore'   => 'En validant, j’accepte les ',
+		'payConsentMid'      => ', la ',
+		'payConsentAnd'      => ' et la ',
+		'payConsentAfter'    => ' relatives à cette réservation.',
+		'payTermsConditions' => 'Conditions',
+		'payTermsPrivacy'    => 'Politique de confidentialité',
+		'payTermsRefund'     => 'Politique de remboursement',
+		'paySecureLine'      => 'Paiement sécurisé · CAD',
+		'payViaStripe'       => 'Payer %s via Stripe',
+		'errorPayTerms'      => 'Veuillez accepter les conditions pour continuer.',
+		'doneRowFormat'      => 'Format',
+		'doneRowDate'        => 'Date',
+		'doneRowSlot'        => 'Créneau',
+		'doneRowPaid'        => 'Acompte payé',
+		'doneClose'          => 'Fermer',
+		'next'               => 'continuer',
+		'back'               => 'Retour',
+		'submit'             => 'Confirmer la réservation',
+		'photoUploadStatus'    => 'Fichier(s) chargé(s).',
+		'tattooDurationHours'  => '%sh de tatouage',
+		'tattooDurationMinutes'=> '%s min de tatouage',
+		'photoRequired'      => 'Veuillez joindre au moins une photo.',
+		'photoErrorZoneMin'  => 'Veuillez ajouter au moins 3 photos de la zone à tatouer.',
+		'photoErrorRefMin'   => 'Veuillez ajouter au moins 1 photo de référence (style).',
+		'photoNoField'       => 'Aucun champ « fichier » Amelia n’est lié à ce service : ajoutez-en un dans Amelia (Personnalisé → champs du service) ou précisez l’ID du champ dans le shortcode : photo_field="ID".',
+		'photoClear'         => 'Retirer les fichiers',
+		'photoChoose'        => 'Choisir des images',
+		'paySummary'         => 'Récapitulatif',
+		'payOnSite'          => 'Paiement sur place (réglé dans Amelia : acompte en ligne si activé).',
+		'noExtras'           => 'Aucune option de format pour ce service — étape ignorée.',
+		'pickService'        => 'Choisissez une prestation',
+		'pickCategory'       => 'Choisissez une catégorie',
+		'pickDate'           => 'Sélectionnez un jour disponible',
+		'pickTime'           => 'Sélectionnez une heure',
+		'pickFormat'         => 'Choisissez un format / taille',
+		'ameliaInactive'     => 'Amelia n’est pas activé.',
+		// Mois 1…12, séparés par des virgules (même ordre que calWeekdays : traductible).
+		'monthsLong'         => 'janvier,février,mars,avril,mai,juin,juillet,août,septembre,octobre,novembre,décembre',
+		'monthsShort'        => 'janv.,févr.,mars,avr.,mai,juin,juil.,août,sept.,oct.,nov.,déc.',
+	);
+}
+
+/**
+ * Translate a Polylang-registered booking string (not covered by ACF). Else gettext.
+ *
+ * @param string $key Key from hughalroztatoo_booking_pll_strings().
+ * @return string
+ */
+function hughalroztatoo_booking_t( $key ) {
+	$d = hughalroztatoo_booking_pll_strings();
+	if ( ! isset( $d[ $key ] ) ) {
+		return '';
+	}
+	$s = $d[ $key ];
+	if ( function_exists( 'pll__' ) ) {
+		return pll__( $s );
+	}
+	return __( $s, 'hughalroztatoo' );
+}
+
+/**
+ * Register Polylang strings that are not covered by the Booking ACF template fields.
+ */
+function hughalroztatoo_register_booking_polylang_strings() {
+	if ( ! function_exists( 'pll_register_string' ) ) {
+		return;
+	}
+	$group = HUGHALROZTATOO_PLL_BOOKING_GROUP;
+	$d     = hughalroztatoo_booking_pll_strings();
+	foreach ( $d as $key => $string ) {
+		pll_register_string( 'hugh_amelia_booking_' . $key, $string, $group, false );
+	}
+}
+add_action( 'init', 'hughalroztatoo_register_booking_polylang_strings', 20 );
+
+/**
+ * Read a booking ACF text field from the current post.
+ *
+ * @param string $field_name ACF field name.
+ * @param string $default    Fallback value.
+ * @return string
+ */
+function hughalroztatoo_booking_field( $field_name, $default = '' ) {
+	if ( ! function_exists( 'get_field' ) ) {
+		return $default;
+	}
+	$post_id = get_the_ID();
+	if ( ! $post_id ) {
+		return $default;
+	}
+	$value = get_field( $field_name, $post_id );
+	if ( is_string( $value ) && '' !== trim( $value ) ) {
+		return trim( $value );
+	}
+	return $default;
+}
+
+/**
+ * Read a booking ACF WYSIWYG field (for HTML allowed in front output).
+ *
+ * @param string $field_name ACF field name.
+ * @param string $default    Fallback value.
+ * @return string
+ */
+function hughalroztatoo_booking_field_wysiwyg( $field_name, $default = '' ) {
+	if ( ! function_exists( 'get_field' ) ) {
+		return $default;
+	}
+	$post_id = get_the_ID();
+	if ( ! $post_id ) {
+		return $default;
+	}
+	$value = get_field( $field_name, $post_id );
+	if ( ! is_string( $value ) || '' === trim( $value ) ) {
+		return $default;
+	}
+	return wp_kses_post( $value );
+}
+
+/**
+ * Get booking category descriptions for step 1.
  *
  * @return array<int, string>
  */
 function hughalroztatoo_get_booking_category_descriptions() {
-	$raw = get_option( HUGHALROZTATOO_BOOKING_CATEGORY_DESCRIPTIONS_OPTION, array() );
-	if ( ! is_array( $raw ) ) {
-		return array();
-	}
-
 	$out = array();
-	foreach ( $raw as $cat_id => $description ) {
-		$id = absint( $cat_id );
-		if ( ! $id ) {
+	if ( ! function_exists( 'get_field' ) ) {
+		return $out;
+	}
+	$post_id = get_the_ID();
+	if ( ! $post_id ) {
+		return $out;
+	}
+	$rows = get_field( 'booking_step1_categories', $post_id );
+	if ( ! is_array( $rows ) ) {
+		return $out;
+	}
+	foreach ( $rows as $row ) {
+		if ( ! is_array( $row ) ) {
 			continue;
 		}
-		$text = is_string( $description ) ? trim( $description ) : '';
-		if ( '' !== $text ) {
-			$out[ $id ] = $text;
+		$cat_id = isset( $row['category_id'] ) ? absint( $row['category_id'] ) : 0;
+		$desc   = isset( $row['description'] ) && is_string( $row['description'] ) ? trim( $row['description'] ) : '';
+		if ( $cat_id && '' !== $desc ) {
+			$out[ $cat_id ] = $desc;
 		}
 	}
-
 	return $out;
 }
 
 /**
- * Load Amelia categories for admin settings page.
+ * Get zone options repeater for step 5.
  *
- * @return array<int, array<string, mixed>>
+ * @return array
  */
-function hughalroztatoo_get_amelia_categories_for_admin() {
-	global $wpdb;
-
-	$table = $wpdb->prefix . 'amelia_categories';
-	$like  = $wpdb->esc_like( $table );
-	$exists = $wpdb->get_var( $wpdb->prepare( 'SHOW TABLES LIKE %s', $like ) );
-	if ( $exists !== $table ) {
-		return array();
+function hughalroztatoo_get_booking_zone_options() {
+	$out = array();
+	if ( ! function_exists( 'get_field' ) ) {
+		return $out;
 	}
-
-	$rows = $wpdb->get_results( "SELECT id, name, status FROM {$table} ORDER BY position ASC, id ASC", ARRAY_A ); // phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared
-	return is_array( $rows ) ? $rows : array();
-}
-
-/**
- * Register admin page for booking category descriptions.
- */
-function hughalroztatoo_register_booking_category_descriptions_page() {
-	add_submenu_page(
-		'themes.php',
-		__( 'Booking Categories', 'hughalroztatoo' ),
-		__( 'Booking Categories', 'hughalroztatoo' ),
-		'manage_options',
-		'hughalroztatoo-booking-categories',
-		'hughalroztatoo_render_booking_category_descriptions_page'
-	);
-}
-add_action( 'admin_menu', 'hughalroztatoo_register_booking_category_descriptions_page' );
-
-/**
- * Render admin page for booking category descriptions.
- */
-function hughalroztatoo_render_booking_category_descriptions_page() {
-	if ( ! current_user_can( 'manage_options' ) ) {
-		return;
+	$post_id = get_the_ID();
+	if ( ! $post_id ) {
+		return $out;
 	}
-
-	if (
-		isset( $_POST['hughalroztatoo_booking_category_descriptions_nonce'] ) &&
-		wp_verify_nonce( sanitize_text_field( wp_unslash( $_POST['hughalroztatoo_booking_category_descriptions_nonce'] ) ), 'hughalroztatoo_save_booking_category_descriptions' )
-	) {
-		$descriptions = array();
-		$incoming     = isset( $_POST['category_descriptions'] ) ? (array) wp_unslash( $_POST['category_descriptions'] ) : array();
-
-		foreach ( $incoming as $cat_id => $description ) {
-			$id   = absint( $cat_id );
-			$text = is_string( $description ) ? sanitize_textarea_field( $description ) : '';
-			if ( $id && '' !== trim( $text ) ) {
-				$descriptions[ $id ] = $text;
-			}
+	$rows = get_field( 'booking_step5_zone_options', $post_id );
+	if ( ! is_array( $rows ) ) {
+		return $out;
+	}
+	foreach ( $rows as $row ) {
+		if ( ! is_array( $row ) ) {
+			continue;
 		}
-
-		update_option( HUGHALROZTATOO_BOOKING_CATEGORY_DESCRIPTIONS_OPTION, $descriptions );
-		echo '<div class="notice notice-success is-dismissible"><p>' . esc_html__( 'Booking category descriptions saved.', 'hughalroztatoo' ) . '</p></div>';
+		$value = isset( $row['value'] ) && is_string( $row['value'] ) ? trim( $row['value'] ) : '';
+		$label = isset( $row['label'] ) && is_string( $row['label'] ) ? trim( $row['label'] ) : '';
+		if ( '' !== $value && '' !== $label ) {
+			$out[] = array(
+				'value' => $value,
+				'label' => $label,
+			);
+		}
 	}
-
-	$categories   = hughalroztatoo_get_amelia_categories_for_admin();
-	$descriptions = hughalroztatoo_get_booking_category_descriptions();
-	?>
-	<div class="wrap">
-		<h1><?php esc_html_e( 'Booking Categories', 'hughalroztatoo' ); ?></h1>
-		<p><?php esc_html_e( 'Add custom descriptions for Amelia categories shown on step 1 of booking.', 'hughalroztatoo' ); ?></p>
-		<?php if ( empty( $categories ) ) : ?>
-			<p><?php esc_html_e( 'No Amelia categories found.', 'hughalroztatoo' ); ?></p>
-		<?php else : ?>
-			<form method="post">
-				<?php wp_nonce_field( 'hughalroztatoo_save_booking_category_descriptions', 'hughalroztatoo_booking_category_descriptions_nonce' ); ?>
-				<table class="form-table" role="presentation">
-					<tbody>
-						<?php foreach ( $categories as $category ) : ?>
-							<?php
-							$cat_id   = isset( $category['id'] ) ? absint( $category['id'] ) : 0;
-							$name     = isset( $category['name'] ) ? (string) $category['name'] : '';
-							$status   = isset( $category['status'] ) ? (string) $category['status'] : '';
-							$current  = isset( $descriptions[ $cat_id ] ) ? $descriptions[ $cat_id ] : '';
-							$field_id = 'hat_booking_cat_desc_' . $cat_id;
-							?>
-							<tr>
-								<th scope="row">
-									<label for="<?php echo esc_attr( $field_id ); ?>">
-										<?php echo esc_html( $name ); ?>
-										<?php if ( $status ) : ?>
-											<small style="display:block;color:#777;"><?php echo esc_html( $status ); ?></small>
-										<?php endif; ?>
-									</label>
-								</th>
-								<td>
-									<textarea id="<?php echo esc_attr( $field_id ); ?>" name="category_descriptions[<?php echo esc_attr( (string) $cat_id ); ?>]" rows="4" class="large-text"><?php echo esc_textarea( $current ); ?></textarea>
-								</td>
-							</tr>
-						<?php endforeach; ?>
-					</tbody>
-				</table>
-				<?php submit_button( __( 'Save descriptions', 'hughalroztatoo' ) ); ?>
-			</form>
-		<?php endif; ?>
-	</div>
-	<?php
+	return $out;
 }
 
 /**
@@ -232,74 +355,95 @@ function hughalroztatoo_localize_amelia_multistep_script() {
 				'privacy'    => (string) apply_filters( 'hughalroztatoo_booking_pay_url_privacy', function_exists( 'get_privacy_policy_url' ) ? get_privacy_policy_url() : '' ),
 				'refund'     => (string) apply_filters( 'hughalroztatoo_booking_pay_url_refund', '' ),
 			),
-			'strings'          => array(
-				'loading'         => __( 'Chargement…', 'hughalroztatoo' ),
-				'errorGeneric'    => __( 'Une erreur est survenue. Réessayez.', 'hughalroztatoo' ),
-				'errorNoServices' => __( 'Aucun service Amelia disponible. Vérifiez les catégories et la visibilité des services.', 'hughalroztatoo' ),
-				'errorSlots'      => __( 'Impossible de charger les créneaux pour cette date.', 'hughalroztatoo' ),
-				'errorBooking'    => __( 'La réservation a échoué.', 'hughalroztatoo' ),
-				'recaptcha'       => __( 'Vérification anti-robot requise.', 'hughalroztatoo' ),
-				'stepType'        => __( 'Type de visite', 'hughalroztatoo' ),
-				'stepCategory'    => __( 'Type de visite', 'hughalroztatoo' ),
-				'stepCategoryHint'=> __( 'Nouveau projet ou suite ?', 'hughalroztatoo' ),
-				'stepDate'        => __( 'Choisir une date', 'hughalroztatoo' ),
-				'stepService'     => __( 'Choisir un format', 'hughalroztatoo' ),
-				'stepFormat'      => __( 'Choisir un format', 'hughalroztatoo' ),
-				'stepTime'        => __( 'Choisir un créneau', 'hughalroztatoo' ),
-				'stepPhoto'       => __( 'Photos & références', 'hughalroztatoo' ),
-				'stepInfo'        => __( 'Vos informations', 'hughalroztatoo' ),
-				'labelFirstName'  => __( 'Prénom', 'hughalroztatoo' ),
-				'labelLastName'   => __( 'Nom', 'hughalroztatoo' ),
-				'labelEmail'      => __( 'Email', 'hughalroztatoo' ),
-				'labelPhone'      => __( 'Téléphone', 'hughalroztatoo' ),
-				'labelProjectNote'=> __( 'Note sur le projet', 'hughalroztatoo' ),
-				'phEmail'         => __( 'email@gmail.com', 'hughalroztatoo' ),
-				'phPhone'         => __( '+1 (XXX) XXX-XXXX', 'hughalroztatoo' ),
-				'phNote'          => __( 'Note', 'hughalroztatoo' ),
-				'ageCheckbox'     => __( 'Je confirme avoir 18 ans ou plus et accepte les conditions du studio.', 'hughalroztatoo' ),
-				'errorPhone'      => __( 'Veuillez indiquer votre numéro de téléphone.', 'hughalroztatoo' ),
-				'errorAge'        => __( 'Veuillez confirmer que vous avez 18 ans ou plus.', 'hughalroztatoo' ),
-				'stepPay'         => __( 'Paiement de l\'acompte', 'hughalroztatoo' ),
-				'payRowFormat'    => __( 'Format', 'hughalroztatoo' ),
-				'payRowDate'      => __( 'Date', 'hughalroztatoo' ),
-				'payRowSlot'      => __( 'Créneau', 'hughalroztatoo' ),
-				'payRowTotal'     => __( 'Total séance', 'hughalroztatoo' ),
-				'payRowDepositFmt'=> __( 'Acompte %d%%', 'hughalroztatoo' ),
-				'payDisclaimer'   => __( 'Le paiement de l’acompte confirme votre créneau. Les montants sont traités de façon sécurisée. Pour toute question, contactez le studio avant de valider.', 'hughalroztatoo' ),
-				'payConsentBefore'=> __( 'En validant, j’accepte les ', 'hughalroztatoo' ),
-				'payConsentMid'   => __( ', la ', 'hughalroztatoo' ),
-				'payConsentAnd'   => __( ' et la ', 'hughalroztatoo' ),
-				'payConsentAfter' => __( ' relatives à cette réservation.', 'hughalroztatoo' ),
-				'payTermsConditions' => __( 'Conditions', 'hughalroztatoo' ),
-				'payTermsPrivacy' => __( 'Politique de confidentialité', 'hughalroztatoo' ),
-				'payTermsRefund'  => __( 'Politique de remboursement', 'hughalroztatoo' ),
-				'paySecureLine'   => __( 'Paiement sécurisé · CAD', 'hughalroztatoo' ),
-				'payViaStripe'    => __( 'Payer %s via Stripe', 'hughalroztatoo' ),
-				'errorPayTerms'   => __( 'Veuillez accepter les conditions pour continuer.', 'hughalroztatoo' ),
-				'stepDone'        => __( 'Réservation confirmée', 'hughalroztatoo' ),
-				'doneRowFormat'   => __( 'Format', 'hughalroztatoo' ),
-				'doneRowDate'     => __( 'Date', 'hughalroztatoo' ),
-				'doneRowSlot'     => __( 'Créneau', 'hughalroztatoo' ),
-				'doneRowPaid'     => __( 'Acompte payé', 'hughalroztatoo' ),
-				'doneMessage'     => __( 'Confirmation envoyée par email. Rappel automatique 24h avant la séance.', 'hughalroztatoo' ),
-				'doneClose'       => __( 'Fermer', 'hughalroztatoo' ),
-				'next'            => __( 'continuer', 'hughalroztatoo' ),
-				'back'            => __( 'Retour', 'hughalroztatoo' ),
-				'submit'          => __( 'Confirmer la réservation', 'hughalroztatoo' ),
-				'photoHint'       => __( 'Photos claires, sans filtre, cadrage large. Demandez de l\'aide pour les prendre. Minimum 4 fichiers requis.', 'hughalroztatoo' ),
-				'photoUploaded'   => __( 'Fichier(s) chargé(s).', 'hughalroztatoo' ),
-				'photoRequired'   => __( 'Veuillez joindre au moins une photo.', 'hughalroztatoo' ),
-				'photoNoField'    => __( 'Aucun champ « fichier » Amelia n’est lié à ce service : ajoutez-en un dans Amelia (Personnalisé → champs du service) ou précisez l’ID du champ dans le shortcode : photo_field="ID".', 'hughalroztatoo' ),
-				'photoClear'      => __( 'Retirer les fichiers', 'hughalroztatoo' ),
-				'photoChoose'     => __( 'Choisir des images', 'hughalroztatoo' ),
-				'paySummary'      => __( 'Récapitulatif', 'hughalroztatoo' ),
-				'payOnSite'       => __( 'Paiement sur place (réglé dans Amelia : acompte en ligne si activé).', 'hughalroztatoo' ),
-				'noExtras'        => __( 'Aucune option de format pour ce service — étape ignorée.', 'hughalroztatoo' ),
-				'pickService'     => __( 'Choisissez une prestation', 'hughalroztatoo' ),
-				'pickCategory'    => __( 'Choisissez une catégorie', 'hughalroztatoo' ),
-				'pickDate'        => __( 'Sélectionnez un jour disponible', 'hughalroztatoo' ),
-				'pickTime'        => __( 'Sélectionnez une heure', 'hughalroztatoo' ),
-				'pickFormat'      => __( 'Choisissez un format / taille', 'hughalroztatoo' ),
+			'zoneOptions'            => hughalroztatoo_get_booking_zone_options(),
+			/**
+			 * Amelia custom field id for “Note sur le projet” (textarea in step 6).
+			 *
+			 * @since 1.0
+			 */
+			'projectNoteFieldId'     => (int) apply_filters( 'hughalroztatoo_booking_project_note_field_id', 4 ),
+			'ameliaLocaleCandidates' => hughalroztatoo_amelia_locale_candidates(),
+			'payConsentHtml'         => hughalroztatoo_booking_field_wysiwyg( 'booking_step7_pay_consent', '' ),
+			'strings'                => array(
+				'loading'         => hughalroztatoo_booking_t( 'loading' ),
+				'errorGeneric'    => hughalroztatoo_booking_t( 'errorGeneric' ),
+				'errorNoServices' => hughalroztatoo_booking_t( 'errorNoServices' ),
+				'errorSlots'      => hughalroztatoo_booking_t( 'errorSlots' ),
+				'errorBooking'    => hughalroztatoo_booking_t( 'errorBooking' ),
+				'recaptcha'       => hughalroztatoo_booking_t( 'recaptcha' ),
+				'stepType'        => hughalroztatoo_booking_field( 'booking_step1_title', __( 'Type de visite', 'hughalroztatoo' ) ),
+				'stepCategory'    => hughalroztatoo_booking_field( 'booking_step1_title', __( 'Type de visite', 'hughalroztatoo' ) ),
+				'stepCategoryHint'=> hughalroztatoo_booking_field( 'booking_step1_lead', __( 'Nouveau projet ou suite ?', 'hughalroztatoo' ) ),
+				'stepDate'        => hughalroztatoo_booking_field( 'booking_step2_title', __( 'Choisir une date', 'hughalroztatoo' ) ),
+				'calWeekdays'     => hughalroztatoo_booking_field( 'booking_step2_weekdays', 'L,M,M,J,V,S,D' ),
+				'stepService'     => hughalroztatoo_booking_field( 'booking_step3_title', __( 'Choisir un format', 'hughalroztatoo' ) ),
+				'stepFormat'      => hughalroztatoo_booking_field( 'booking_step4_title', __( 'Choisir un format', 'hughalroztatoo' ) ),
+				'stepTime'        => hughalroztatoo_booking_field( 'booking_step4_time_title', __( 'Choisir un créneau', 'hughalroztatoo' ) ),
+				'timeSub'         => hughalroztatoo_booking_field( 'booking_step4_time_sub', __( 'Créneaux', 'hughalroztatoo' ) ),
+				'stepPhoto'       => hughalroztatoo_booking_field( 'booking_step5_title', __( 'Photos & références', 'hughalroztatoo' ) ),
+				'stepInfo'        => hughalroztatoo_booking_field( 'booking_step6_title', __( 'Vos informations', 'hughalroztatoo' ) ),
+				'labelFirstName'  => hughalroztatoo_booking_t( 'labelFirstName' ),
+				'labelLastName'   => hughalroztatoo_booking_t( 'labelLastName' ),
+				'labelEmail'      => hughalroztatoo_booking_t( 'labelEmail' ),
+				'labelPhone'      => hughalroztatoo_booking_t( 'labelPhone' ),
+				'labelProjectNote'=> hughalroztatoo_booking_t( 'labelProjectNote' ),
+				'phEmail'         => hughalroztatoo_booking_t( 'phEmail' ),
+				'phPhone'         => hughalroztatoo_booking_t( 'phPhone' ),
+				'phNote'          => hughalroztatoo_booking_t( 'phNote' ),
+				'ageCheckbox'     => hughalroztatoo_booking_field( 'booking_step6_age_text', __( 'Je confirme avoir 18 ans ou plus et accepte les conditions du studio.', 'hughalroztatoo' ) ),
+				'errorPhone'      => hughalroztatoo_booking_t( 'errorPhone' ),
+				'errorAge'        => hughalroztatoo_booking_t( 'errorAge' ),
+				'stepPay'         => hughalroztatoo_booking_field( 'booking_step7_title', __( 'Paiement de l\'acompte', 'hughalroztatoo' ) ),
+				'payRowFormat'    => hughalroztatoo_booking_t( 'payRowFormat' ),
+				'payRowDate'      => hughalroztatoo_booking_t( 'payRowDate' ),
+				'payRowSlot'      => hughalroztatoo_booking_t( 'payRowSlot' ),
+				'payRowTotal'     => hughalroztatoo_booking_t( 'payRowTotal' ),
+				'payRowDepositFmt'=> hughalroztatoo_booking_t( 'payRowDepositFmt' ),
+				'payDisclaimer'   => hughalroztatoo_booking_field( 'booking_step7_disclaimer', __( 'Le paiement de l’acompte confirme votre créneau. Les montants sont traités de façon sécurisée. Pour toute question, contactez le studio avant de valider.', 'hughalroztatoo' ) ),
+				'payConsentBefore'=> hughalroztatoo_booking_t( 'payConsentBefore' ),
+				'payConsentMid'   => hughalroztatoo_booking_t( 'payConsentMid' ),
+				'payConsentAnd'   => hughalroztatoo_booking_t( 'payConsentAnd' ),
+				'payConsentAfter' => hughalroztatoo_booking_t( 'payConsentAfter' ),
+				'payTermsConditions' => hughalroztatoo_booking_t( 'payTermsConditions' ),
+				'payTermsPrivacy' => hughalroztatoo_booking_t( 'payTermsPrivacy' ),
+				'payTermsRefund'  => hughalroztatoo_booking_t( 'payTermsRefund' ),
+				'paySecureLine'   => hughalroztatoo_booking_t( 'paySecureLine' ),
+				'payViaStripe'    => hughalroztatoo_booking_t( 'payViaStripe' ),
+				'errorPayTerms'   => hughalroztatoo_booking_t( 'errorPayTerms' ),
+				'stepDone'        => hughalroztatoo_booking_field( 'booking_step8_title', __( 'Réservation confirmée', 'hughalroztatoo' ) ),
+				'doneRowFormat'   => hughalroztatoo_booking_t( 'doneRowFormat' ),
+				'doneRowDate'     => hughalroztatoo_booking_t( 'doneRowDate' ),
+				'doneRowSlot'     => hughalroztatoo_booking_t( 'doneRowSlot' ),
+				'doneRowPaid'     => hughalroztatoo_booking_t( 'doneRowPaid' ),
+				'doneMessage'     => hughalroztatoo_booking_field( 'booking_step8_message', __( 'Confirmation envoyée par email. Rappel automatique 24h avant la séance.', 'hughalroztatoo' ) ),
+				'doneClose'       => hughalroztatoo_booking_t( 'doneClose' ),
+				'next'            => hughalroztatoo_booking_t( 'next' ),
+				'back'            => hughalroztatoo_booking_t( 'back' ),
+				'submit'          => hughalroztatoo_booking_t( 'submit' ),
+				'photoHint'       => hughalroztatoo_booking_field( 'booking_step5_guidelines', __( 'Photos claires, sans filtre, cadrage large. Demandez de l\'aide pour les prendre. Minimum 4 fichiers requis.', 'hughalroztatoo' ) ),
+				'photoUploadZone' => hughalroztatoo_booking_field( 'booking_step5_upload_zone_text', __( '3 photos de la zone à tatouer', 'hughalroztatoo' ) ),
+				'photoUploadRef'  => hughalroztatoo_booking_field( 'booking_step5_upload_ref_text', __( '1+ photo de référence ( style )', 'hughalroztatoo' ) ),
+				'photoZoneLabel'  => hughalroztatoo_booking_field( 'booking_step5_zone_label', __( 'Zone à tatouer', 'hughalroztatoo' ) ),
+				'photoZonePh'     => hughalroztatoo_booking_field( 'booking_step5_zone_placeholder', __( 'Sélectionner...', 'hughalroztatoo' ) ),
+				'photoUploadStatus'  => hughalroztatoo_booking_t( 'photoUploadStatus' ),
+				'tattooDurationHours' => hughalroztatoo_booking_t( 'tattooDurationHours' ),
+				'tattooDurationMinutes' => hughalroztatoo_booking_t( 'tattooDurationMinutes' ),
+				'photoRequired'   => hughalroztatoo_booking_t( 'photoRequired' ),
+				'photoErrorZoneMin' => hughalroztatoo_booking_t( 'photoErrorZoneMin' ),
+				'photoErrorRefMin'  => hughalroztatoo_booking_t( 'photoErrorRefMin' ),
+				'photoNoField'    => hughalroztatoo_booking_t( 'photoNoField' ),
+				'photoClear'      => hughalroztatoo_booking_t( 'photoClear' ),
+				'photoChoose'     => hughalroztatoo_booking_t( 'photoChoose' ),
+				'paySummary'      => hughalroztatoo_booking_t( 'paySummary' ),
+				'payOnSite'       => hughalroztatoo_booking_t( 'payOnSite' ),
+				'noExtras'        => hughalroztatoo_booking_t( 'noExtras' ),
+				'pickService'     => hughalroztatoo_booking_t( 'pickService' ),
+				'pickCategory'    => hughalroztatoo_booking_t( 'pickCategory' ),
+				'pickDate'        => hughalroztatoo_booking_t( 'pickDate' ),
+				'pickTime'        => hughalroztatoo_booking_t( 'pickTime' ),
+				'pickFormat'      => hughalroztatoo_booking_t( 'pickFormat' ),
+				'monthsLong'      => hughalroztatoo_booking_t( 'monthsLong' ),
+				'monthsShort'     => hughalroztatoo_booking_t( 'monthsShort' ),
 			),
 		)
 	);
@@ -341,24 +485,65 @@ function hughalroztatoo_maybe_enqueue_amelia_multistep() {
 add_action( 'wp_enqueue_scripts', 'hughalroztatoo_maybe_enqueue_amelia_multistep', 20 );
 
 /**
+ * Map multistep visit type (category) to Amelia appointment internal notes. Project note stays in
+ * the dedicated Amelia custom field; it is not duplicated here.
+ *
+ * The public /bookings endpoint does not set internalNotes; staff often read this field as «Заметка».
+ *
+ * @param array $appointment_data Appointment payload after BookingApplicationService::getAppointmentData().
+ * @return array
+ */
+function hughalroztatoo_amelia_multistep_internal_notes( $appointment_data ) {
+	if ( ! is_array( $appointment_data ) || empty( $appointment_data['bookings'][0] ) || ! is_array( $appointment_data['bookings'][0] ) ) {
+		return $appointment_data;
+	}
+	$customer = isset( $appointment_data['bookings'][0]['customer'] ) && is_array( $appointment_data['bookings'][0]['customer'] )
+		? $appointment_data['bookings'][0]['customer']
+		: array();
+
+	$category = '';
+	if ( isset( $customer['hughCategoryName'] ) && is_string( $customer['hughCategoryName'] ) ) {
+		$category = trim( $customer['hughCategoryName'] );
+		$category = '' !== $category ? sanitize_text_field( $category ) : '';
+	}
+	unset( $appointment_data['bookings'][0]['customer']['hughCategoryName'] );
+
+	if ( '' === $category ) {
+		return $appointment_data;
+	}
+	$block = __( 'Type de visite :', 'hughalroztatoo' ) . ' ' . $category;
+	$prev  = ! empty( $appointment_data['internalNotes'] ) ? (string) $appointment_data['internalNotes'] : '';
+	if ( '' !== $prev ) {
+		$block = $prev . "\n\n" . $block;
+	}
+	$appointment_data['internalNotes'] = $block;
+	return $appointment_data;
+}
+add_filter( 'amelia_before_booking_added_filter', 'hughalroztatoo_amelia_multistep_internal_notes', 10, 1 );
+
+/**
  * Shortcode callback.
  *
  * Attributes:
  * - category: comma-separated Amelia category IDs to limit the list (optional).
- * - photo_field: Amelia custom field ID (type « fichier ») if it cannot be detected automatically (optional).
+ * - photo_field: ID du champ fichier « zone » (1er bloc), optionnel si un seul champ ou couple auto.
+ * - photo_ref_field: ID du champ « référence (style) » (2e bloc). Si absent et la prestation a exactement 2 champs fichier Amelia, couplage auto (ids croissants : zone puis ref).
+ * - project_note_field: ID du champ personnalisé « Note sur le projet » (défaut: filtre hughalroztatoo_booking_project_note_field_id, 4).
  *
  * @param array $atts Shortcode attributes.
  * @return string
  */
 function hughalroztatoo_shortcode_amelia_booking( $atts ) {
 	if ( ! hughalroztatoo_amelia_active() ) {
-		return '<p class="hugh-ms-booking__notice">' . esc_html__( 'Amelia n’est pas activé.', 'hughalroztatoo' ) . '</p>';
+		return '<p class="hugh-ms-booking__notice">' . esc_html( hughalroztatoo_booking_t( 'ameliaInactive' ) ) . '</p>';
 	}
 
 	$atts = shortcode_atts(
 		array(
-			'category'    => '',
-			'photo_field' => '',
+			'category'           => '',
+			'photo_field'        => '',
+			'photo_ref_field'    => '',
+			'project_note_field' => '',
 		),
 		$atts,
 		'hugh_amelia_booking'
@@ -366,7 +551,9 @@ function hughalroztatoo_shortcode_amelia_booking( $atts ) {
 
 	$ids = array_filter( array_map( 'absint', array_map( 'trim', explode( ',', (string) $atts['category'] ) ) ) );
 
-	$photo_field_id = absint( $atts['photo_field'] );
+	$photo_field_id     = absint( $atts['photo_field'] );
+	$photo_ref_field_id = absint( $atts['photo_ref_field'] );
+	$project_note_fid   = absint( $atts['project_note_field'] );
 
 	if ( wp_style_is( 'hughalroztatoo-booking-ms', 'registered' ) ) {
 		wp_enqueue_style( 'hughalroztatoo-booking-ms' );
@@ -376,11 +563,14 @@ function hughalroztatoo_shortcode_amelia_booking( $atts ) {
 		hughalroztatoo_localize_amelia_multistep_script();
 	}
 
-	$data = wp_json_encode(
+	$default_note_id = (int) apply_filters( 'hughalroztatoo_booking_project_note_field_id', 4 );
+	$data            = wp_json_encode(
 		array(
 			'categoryIds'          => $ids,
 			'categoryDescriptions' => hughalroztatoo_get_booking_category_descriptions(),
 			'photoFieldId'         => $photo_field_id ? $photo_field_id : null,
+			'photoRefFieldId'      => $photo_ref_field_id ? $photo_ref_field_id : null,
+			'projectNoteFieldId'   => $project_note_fid > 0 ? $project_note_fid : $default_note_id,
 		)
 	);
 

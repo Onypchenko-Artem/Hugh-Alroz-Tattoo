@@ -31,6 +31,59 @@
 	}
 
 	const calendarLocale = intlLocaleTag(cfg.calendarLocale) || 'fr-FR';
+	const ameliaLocaleCandidates = Array.isArray(cfg.ameliaLocaleCandidates) ? cfg.ameliaLocaleCandidates : [];
+
+	/** 12 noms de mois (ordre janvier…décembre) depuis Polylang / traduction. */
+	function parseMonthCsv(s) {
+		if (!s || typeof s !== 'string') {
+			return null;
+		}
+		const arr = s.split(',').map(function (x) {
+			return x.trim();
+		});
+		return arr.length === 12 ? arr : null;
+	}
+
+	/**
+	 * Resolve Amelia translations JSON (same shapes as home pricing: field→locale and locale→field).
+	 */
+	function ameliaPickTranslatedField(entity, field, fallback) {
+		if (!entity) {
+			return fallback || '';
+		}
+		let tr = entity.translations;
+		if (tr == null || tr === '') {
+			return fallback || '';
+		}
+		if (typeof tr === 'string') {
+			try {
+				tr = JSON.parse(tr);
+			} catch (e) {
+				return fallback || '';
+			}
+		}
+		if (!tr || typeof tr !== 'object') {
+			return fallback || '';
+		}
+		for (let i = 0; i < ameliaLocaleCandidates.length; i++) {
+			const loc = String(ameliaLocaleCandidates[i] || '');
+			if (!loc) {
+				continue;
+			}
+			if (tr[field] && tr[field][loc] != null && String(tr[field][loc]).trim() !== '') {
+				return String(tr[field][loc]).trim();
+			}
+			if (tr[loc] && tr[loc][field] != null && String(tr[loc][field]).trim() !== '') {
+				return String(tr[loc][field]).trim();
+			}
+		}
+		return fallback || '';
+	}
+
+	function ameliaEntityName(entity) {
+		const fb = entity && entity.name != null ? String(entity.name) : '';
+		return ameliaPickTranslatedField(entity, 'name', fb) || fb;
+	}
 
 	function apiUrl(path, query) {
 		// Amelia parses `call` from the raw query: the value must be a real path like /entities.
@@ -230,10 +283,110 @@
 				categoryIds: o.categoryIds || [],
 				categoryDescriptions: o.categoryDescriptions || {},
 				photoFieldId: o.photoFieldId != null && o.photoFieldId !== '' ? o.photoFieldId : null,
+				photoRefFieldId: o.photoRefFieldId != null && o.photoRefFieldId !== '' ? o.photoRefFieldId : null,
+				projectNoteFieldId: o.projectNoteFieldId != null && o.projectNoteFieldId !== '' ? o.projectNoteFieldId : null,
 			};
 		} catch (e) {
-			return { categoryIds: [], categoryDescriptions: {}, photoFieldId: null };
+			return { categoryIds: [], categoryDescriptions: {}, photoFieldId: null, photoRefFieldId: null, projectNoteFieldId: null };
 		}
+	}
+
+	/**
+	 * Champs « fichier » liés à la prestation, triés par id (pour couple zone / référence).
+	 */
+	function getFileCustomFieldsForService(serviceId, customFieldsList) {
+		const sid = parseInt(serviceId, 10);
+		if (isNaN(sid)) {
+			return [];
+		}
+		const list = customFieldsList || [];
+		const out = [];
+		const seen = Object.create(null);
+		for (let j = 0; j < list.length; j++) {
+			const f = list[j];
+			if (!f || f.type !== 'file') {
+				continue;
+			}
+			const fid = parseInt(f.id, 10);
+			if (isNaN(fid) || seen[fid]) {
+				continue;
+			}
+			if (f.allServices) {
+				seen[fid] = true;
+				out.push(f);
+				continue;
+			}
+			const svcs = valuesMap(f.services || f.serviceList);
+			let forService = false;
+			for (let k = 0; k < svcs.length; k++) {
+				if (parseInt(svcs[k].id, 10) === sid) {
+					forService = true;
+					break;
+				}
+			}
+			if (forService) {
+				seen[fid] = true;
+				out.push(f);
+			}
+		}
+		out.sort(function (a, b) {
+			return parseInt(a.id, 10) - parseInt(b.id, 10);
+		});
+		return out;
+	}
+
+	/**
+	 * Couple zone / référence Amelia, ou un seul champ fichier.
+	 * - Si photo_ref_field est défini : zone = photo_field ou l’autre champ fichier que le ref.
+	 * - Si exactement 2 champs fichier pour la prestation (sans ref en shortcode) : split auto (ids triés).
+	 * - Sinon : un seul envoi (comportement historique).
+	 */
+	function resolveAmeliaFileFieldsForBooking(serviceId, customFieldsList, ui) {
+		const fileFields = getFileCustomFieldsForService(serviceId, customFieldsList);
+		const refIdRaw = ui && ui.photoRefFieldId != null && ui.photoRefFieldId !== '' ? parseInt(String(ui.photoRefFieldId), 10) : NaN;
+		const zoneIdRaw = ui && ui.photoFieldId != null && ui.photoFieldId !== '' ? parseInt(String(ui.photoFieldId), 10) : NaN;
+
+		if (!isNaN(refIdRaw) && refIdRaw > 0) {
+			const refCf = customFieldById(customFieldsList, refIdRaw);
+			if (!refCf || refCf.type !== 'file') {
+				return { split: false, zoneCf: null, refCf: null, singleCf: null };
+			}
+			let zoneCf = null;
+			if (!isNaN(zoneIdRaw) && zoneIdRaw > 0 && zoneIdRaw !== refIdRaw) {
+				const z = customFieldById(customFieldsList, zoneIdRaw);
+				if (z && z.type === 'file') {
+					zoneCf = z;
+				}
+			}
+			if (!zoneCf) {
+				for (let i = 0; i < fileFields.length; i++) {
+					if (parseInt(fileFields[i].id, 10) !== refIdRaw) {
+						zoneCf = fileFields[i];
+						break;
+					}
+				}
+			}
+			if (!zoneCf) {
+				return { split: false, zoneCf: null, refCf: null, singleCf: null };
+			}
+			return { split: true, zoneCf: zoneCf, refCf: refCf, singleCf: null };
+		}
+
+		if (fileFields.length === 2) {
+			return {
+				split: true,
+				zoneCf: fileFields[0],
+				refCf: fileFields[1],
+				singleCf: null,
+			};
+		}
+
+		return {
+			split: false,
+			zoneCf: null,
+			refCf: null,
+			singleCf: photoFileCustomField(serviceId, customFieldsList, ui && ui.photoFieldId ? ui.photoFieldId : null),
+		};
 	}
 
 	/** Amelia JSON often uses objects { "1": row, "2": row } instead of arrays. */
@@ -263,7 +416,7 @@
 			if (allow && !allow.has(cid)) {
 				return;
 			}
-			const name = cat.name || '';
+			const name = ameliaEntityName(cat);
 			const services = valuesMap(cat.serviceList || cat.services);
 			services.forEach(function (svc) {
 				if (!svc) {
@@ -305,7 +458,27 @@
 		if (isNaN(y) || isNaN(m) || isNaN(d)) {
 			return ymd;
 		}
-		return new Date(y, m, d).toLocaleDateString(calendarLocale, {
+		const dObj = new Date(y, m, d);
+		const customMonths = parseMonthCsv(S.monthsShort);
+		if (customMonths) {
+			try {
+				const fParts = new Intl.DateTimeFormat(calendarLocale, {
+					day: 'numeric',
+					month: 'short',
+				}).formatToParts(dObj);
+				return fParts
+					.map(function (p) {
+						if (p.type === 'month') {
+							return customMonths[m];
+						}
+						return p.value;
+					})
+					.join('');
+			} catch (e) {
+				// fallback: toLocaleDateString
+			}
+		}
+		return dObj.toLocaleDateString(calendarLocale, {
 			day: 'numeric',
 			month: 'short',
 		});
@@ -324,9 +497,13 @@
 			return '';
 		}
 		if (minutes >= 60 && minutes % 60 === 0) {
-			return String(minutes / 60) + 'h de tatouage';
+			const h = String(minutes / 60);
+			return (S.tattooDurationHours || '%sh de tatouage').replace(/%s/g, h);
 		}
-		return String(minutes) + ' min de tatouage';
+		return (S.tattooDurationMinutes || '%s min de tatouage').replace(
+			/%s/g,
+			String(minutes)
+		);
 	}
 
 	function parsePriceNumber(raw) {
@@ -428,7 +605,7 @@
 			if (!entry || !entry.service) {
 				return;
 			}
-			const svcName = normalizeLookupToken(entry.service.name || '');
+			const svcName = normalizeLookupToken(ameliaEntityName(entry.service) || '');
 			const svcDuration = normalizeLookupToken(durationShortH(entry.service));
 			let score = 0;
 			if (preselected.serviceName) {
@@ -564,6 +741,12 @@
 
 	function initRoot(el) {
 		const ui = parseConfig(el);
+		const projectNoteFieldId = (function () {
+			const fromUi = ui.projectNoteFieldId != null && ui.projectNoteFieldId !== '' ? parseInt(ui.projectNoteFieldId, 10) : NaN;
+			const fromCfg = cfg && cfg.projectNoteFieldId != null && cfg.projectNoteFieldId !== '' ? parseInt(cfg.projectNoteFieldId, 10) : NaN;
+			const n = !isNaN(fromUi) && fromUi > 0 ? fromUi : !isNaN(fromCfg) && fromCfg > 0 ? fromCfg : 4;
+			return n > 0 ? n : 4;
+		})();
 		const state = {
 			step: 1,
 			categories: [],
@@ -601,6 +784,30 @@
 			return state.photoFilesZone.concat(state.photoFilesReference);
 		}
 
+		/** Dédoublonnage par nom+taille+lastModified, puis union (zone : ajouts successifs). */
+		function fileIdentity(f) {
+			if (!f) {
+				return '';
+			}
+			return String(f.name || '') + '\u0000' + String(f.size) + '\u0000' + String(f.lastModified);
+		}
+		function mergeZonePhotoFiles(existing, added) {
+			const seen = Object.create(null);
+			const out = [];
+			function pushUnique(arr) {
+				(arr || []).forEach(function (f) {
+					const id = fileIdentity(f);
+					if (id && !seen[id]) {
+						seen[id] = true;
+						out.push(f);
+					}
+				});
+			}
+			pushUnique(existing);
+			pushUnique(added);
+			return out;
+		}
+
 		function renderPhotoSlotFeedback(files) {
 			if (!files || !files.length) {
 				return '';
@@ -613,7 +820,7 @@
 			return (
 				'<div class="hugh-ms__photo-upload-feedback">' +
 				'<p class="hugh-ms__photo-upload-status">' +
-				esc(S.photoUploaded || 'Fichier(s) chargé(s).') +
+				esc(S.photoUploadStatus || 'Fichier(s) chargé(s).') +
 				'</p>' +
 				'<ul class="hugh-ms__photo-upload-names">' +
 				names +
@@ -709,13 +916,30 @@
 				return;
 			}
 			if (state.step === 6) {
-				const cf = photoFileCustomField(state.service.id, state.customFields, ui.photoFieldId);
-				if (cf && !allPhotoFiles().length) {
-					setError(S.photoRequired || S.errorGeneric);
+				const nZone = state.photoFilesZone.length;
+				const nRef = state.photoFilesReference.length;
+				if (nZone < 3) {
+					setError(S.photoErrorZoneMin || S.errorGeneric);
 					render();
 					return;
 				}
-				if (!cf && allPhotoFiles().length) {
+				if (nRef < 1) {
+					setError(S.photoErrorRefMin || S.errorGeneric);
+					render();
+					return;
+				}
+				const ameliaFiles = resolveAmeliaFileFieldsForBooking(
+					state.service.id,
+					state.customFields,
+					ui
+				);
+				if (ameliaFiles.split) {
+					if (!ameliaFiles.zoneCf || !ameliaFiles.refCf) {
+						setError(S.photoNoField || S.errorGeneric);
+						render();
+						return;
+					}
+				} else if (!ameliaFiles.singleCf) {
 					setError(S.photoNoField || S.errorGeneric);
 					render();
 					return;
@@ -799,15 +1023,15 @@
 				bookings: [
 					{
 						customer: (function () {
+							const cat = state.categoryName != null && String(state.categoryName).trim();
 							const cust = {
 								firstName: state.customer.firstName,
 								lastName: state.customer.lastName,
 								email: state.customer.email,
 								phone: state.customer.phone || null,
 							};
-							const nt = state.customer.note != null && String(state.customer.note).trim();
-							if (nt) {
-								cust.note = String(state.customer.note).trim();
+							if (cat) {
+								cust.hughCategoryName = String(state.categoryName).trim();
 							}
 							return cust;
 						})(),
@@ -820,7 +1044,14 @@
 			if (loc != null && loc !== '' && parseInt(loc, 10) > 0) {
 				body.locationId = parseInt(loc, 10);
 			}
-			const cfSubmit = photoFileCustomField(state.service.id, state.customFields, ui.photoFieldId);
+			const ameliaFiles = resolveAmeliaFileFieldsForBooking(
+				state.service.id,
+				state.customFields,
+				ui
+			);
+			const splitAmelia = ameliaFiles.split;
+			const cfSubmit = splitAmelia ? ameliaFiles.zoneCf : ameliaFiles.singleCf;
+			const cfSubmitRef = splitAmelia ? ameliaFiles.refCf : null;
 			const zoneFieldSubmit = customFieldById(state.customFields, 3);
 			const bookingCustomFields = {};
 			if (zoneFieldSubmit && state.tattooZone) {
@@ -831,30 +1062,77 @@
 					value: state.tattooZone,
 				};
 			}
+			const noteRaw = state.customer.note != null && String(state.customer.note).trim();
+			if (noteRaw) {
+				const nField = customFieldById(state.customFields, projectNoteFieldId);
+				bookingCustomFields[String(projectNoteFieldId)] = {
+					type: nField && nField.type ? nField.type : 'text-area',
+					label: nField && nField.label != null ? String(nField.label) : (S.labelProjectNote || 'Note sur le projet'),
+					value: String(state.customer.note).trim(),
+				};
+			}
+			const zonePhotos = state.photoFilesZone;
+			const refPhotos = state.photoFilesReference;
 			const photosForSubmit = allPhotoFiles();
-			const useMultipart = cfSubmit && photosForSubmit.length > 0;
+			const useMultipart = splitAmelia
+				? (cfSubmit && zonePhotos.length > 0) || (cfSubmitRef && refPhotos.length > 0)
+				: cfSubmit && photosForSubmit.length > 0;
 			let ok;
 			let json;
 			if (useMultipart) {
-				const fid = String(cfSubmit.id);
-				const label = cfSubmit.label != null ? String(cfSubmit.label) : '';
-				const cfPayload = {
-					type: 'file',
-					label: label,
-					value: photosForSubmit.map(function (file) {
-						return { name: file.name };
-					}),
-				};
-				bookingCustomFields[fid] = cfPayload;
+				if (splitAmelia) {
+					if (cfSubmit && zonePhotos.length > 0) {
+						bookingCustomFields[String(cfSubmit.id)] = {
+							type: 'file',
+							label: cfSubmit.label != null ? String(cfSubmit.label) : '',
+							value: zonePhotos.map(function (file) {
+								return { name: file.name };
+							}),
+						};
+					}
+					if (cfSubmitRef && refPhotos.length > 0) {
+						bookingCustomFields[String(cfSubmitRef.id)] = {
+							type: 'file',
+							label: cfSubmitRef.label != null ? String(cfSubmitRef.label) : '',
+							value: refPhotos.map(function (file) {
+								return { name: file.name };
+							}),
+						};
+					}
+				} else {
+					const fid = String(cfSubmit.id);
+					const label = cfSubmit.label != null ? String(cfSubmit.label) : '';
+					bookingCustomFields[fid] = {
+						type: 'file',
+						label: label,
+						value: photosForSubmit.map(function (file) {
+							return { name: file.name };
+						}),
+					};
+				}
 				body.bookings[0].customFields = bookingCustomFields;
 				if (token) {
 					body.recaptcha = token;
 				}
 				const fd = new FormData();
 				appendFormData(fd, body, '');
-				photosForSubmit.forEach(function (file, idx) {
-					fd.append('files[' + fid + '][' + idx + ']', file, file.name);
-				});
+				if (splitAmelia) {
+					if (cfSubmit) {
+						zonePhotos.forEach(function (file, idx) {
+							fd.append('files[' + String(cfSubmit.id) + '][' + idx + ']', file, file.name);
+						});
+					}
+					if (cfSubmitRef) {
+						refPhotos.forEach(function (file, idx) {
+							fd.append('files[' + String(cfSubmitRef.id) + '][' + idx + ']', file, file.name);
+						});
+					}
+				} else {
+					const fid = String(cfSubmit.id);
+					photosForSubmit.forEach(function (file, idx) {
+						fd.append('files[' + fid + '][' + idx + ']', file, file.name);
+					});
+				}
 				const postRes = await ameliaPostForm('/bookings', fd);
 				ok = postRes.ok;
 				json = postRes.json;
@@ -952,7 +1230,7 @@
 						esc(String(entry.service.id)) +
 						'">' +
 						'<span class="hugh-ms__card-title">' +
-						esc(entry.service.name) +
+						esc(ameliaEntityName(entry.service)) +
 						'</span>' +
 						'<span class="hugh-ms__card-meta hugh-ms__card-meta--price">' +
 						metaLine +
@@ -984,14 +1262,17 @@
 			const y = state.slotsMonth.getFullYear();
 			const m = state.slotsMonth.getMonth();
 			const todayYmd = formatYmd(new Date());
-			const monthLabel = new Date(y, m, 1)
-				.toLocaleString(calendarLocale, { month: 'long', year: 'numeric' })
-				.toUpperCase();
+			const monthsL = parseMonthCsv(S.monthsLong);
+			const monthLabel = monthsL
+				? (monthsL[m] + ' ' + y).toUpperCase()
+				: new Date(y, m, 1)
+						.toLocaleString(calendarLocale, { month: 'long', year: 'numeric' })
+						.toUpperCase();
 			const first = new Date(y, m, 1);
 			const startWeekday = (first.getDay() + 6) % 7;
 			const daysInMonth = new Date(y, m + 1, 0).getDate();
 			const daysInPrevMonth = new Date(y, m, 0).getDate();
-			const weekdays = ['L', 'M', 'M', 'J', 'V', 'S', 'D'];
+			const weekdays = S.calWeekdays ? S.calWeekdays.split(',').map(function (s) { return s.trim(); }) : ['L', 'M', 'M', 'J', 'V', 'S', 'D'];
 			let cells = '';
 
 			// Leading cells from previous month.
@@ -1081,7 +1362,7 @@
 						idx +
 						'">' +
 						'<span class="hugh-ms__card-title">' +
-						esc(x.name) +
+						esc(ameliaEntityName(x)) +
 						'</span>' +
 						(x.description ? '<span class="hugh-ms__card-meta">' + esc(x.description) + '</span>' : '') +
 						'</button>'
@@ -1101,7 +1382,11 @@
 			const daySlots = state.slotsFinal[state.date] || {};
 			const times = displayTimesForDate(state.slotsFinal, state.date);
 			const dateLabel = formatDateLabel(state.date);
-			const formatLabel = state.selectedExtra ? state.selectedExtra.name : state.service && state.service.name;
+			const formatLabel = state.selectedExtra
+				? ameliaEntityName(state.selectedExtra)
+				: state.service
+					? ameliaEntityName(state.service)
+					: '';
 			const metaHtml = dateLabel || formatLabel
 				? '<p class="hugh-ms__time-meta">' +
 					(dateLabel ? '<span class="hugh-ms__time-meta-date">' + esc(dateLabel) + '</span>' : '') +
@@ -1148,7 +1433,7 @@
 				'</div>' +
 				metaHtml +
 				'<h3 class="hugh-ms__time-sub">' +
-				esc('Créneaux' + (durationLabel ? ' — ' + durationLabel : '')) +
+				esc((S.timeSub || 'Créneaux') + (durationLabel ? ' — ' + durationLabel : '')) +
 				'</h3><div class="hugh-ms__slots">' +
 				(buttons || '<p class="hugh-ms__muted">' + esc(S.errorSlots) + '</p>') +
 				'</div></div>'
@@ -1156,10 +1441,18 @@
 		}
 
 		function renderPhoto() {
-			const cf = photoFileCustomField(state.service.id, state.customFields, ui.photoFieldId);
+			const ameliaF = resolveAmeliaFileFieldsForBooking(
+				state.service.id,
+				state.customFields,
+				ui
+			);
+			const photoCfsOk = ameliaF.split
+				? !!(ameliaF.zoneCf && ameliaF.refCf)
+				: !!ameliaF.singleCf;
 			const zoneField = customFieldById(state.customFields, 3);
-			const zoneFieldLabel = zoneField && zoneField.label ? String(zoneField.label) : 'Zone à tatouer';
+			const zoneFieldLabel = S.photoZoneLabel || (zoneField && zoneField.label ? String(zoneField.label) : 'Zone à tatouer');
 			const zoneOptions = customFieldOptions(zoneField);
+			const acfZoneOptions = Array.isArray(cfg.zoneOptions) && cfg.zoneOptions.length ? cfg.zoneOptions : [];
 			const fallbackZoneOptions = [
 				{ value: 'bras', label: 'Bras' },
 				{ value: 'jambe', label: 'Jambe' },
@@ -1168,11 +1461,11 @@
 				{ value: 'cou', label: 'Cou' },
 				{ value: 'autre', label: 'Autre' },
 			];
-			const usableZoneOptions = zoneOptions.length ? zoneOptions : fallbackZoneOptions;
+			const usableZoneOptions = acfZoneOptions.length ? acfZoneOptions : (zoneOptions.length ? zoneOptions : fallbackZoneOptions);
 			const selectedZone = usableZoneOptions.find(function (opt) {
 				return state.tattooZone === opt.value;
 			});
-			const zoneLabel = selectedZone ? selectedZone.label : 'Sélectionner...';
+			const zoneLabel = selectedZone ? selectedZone.label : (S.photoZonePh || 'Sélectionner...');
 			const zoneOptionsHtml = usableZoneOptions
 				.map(function (opt) {
 					const selected = state.tattooZone === opt.value ? ' is-selected' : '';
@@ -1187,7 +1480,8 @@
 					);
 				})
 				.join('');
-			const warn = cf ? '' : '<p class="hugh-ms__warn">' + esc(S.photoNoField) + '</p>';
+			const warn = photoCfsOk ? '' : '<p class="hugh-ms__warn">' + esc(S.photoNoField) + '</p>';
+			const reqMark = ' <span class="hugh-ms__req" aria-hidden="true">*</span>';
 			const zoneFeedback = renderPhotoSlotFeedback(state.photoFilesZone);
 			const refFeedback = renderPhotoSlotFeedback(state.photoFilesReference);
 			return (
@@ -1211,13 +1505,19 @@
 				'<label class="hugh-ms__photo-upload-card">' +
 				'<input type="file" class="hugh-ms__file-input" name="bookingPhotos" data-photo-slot="zone" accept="image/*" multiple>' +
 				'<span class="hugh-ms__photo-upload-icon" aria-hidden="true"></span>' +
-				'<span class="hugh-ms__photo-upload-text">3 photos de la zone à tatouer</span>' +
+				'<span class="hugh-ms__photo-upload-text">' +
+				esc(S.photoUploadZone || '3 photos de la zone à tatouer') +
+				reqMark +
+				'</span>' +
 				zoneFeedback +
 				'</label>' +
 				'<label class="hugh-ms__photo-upload-card">' +
 				'<input type="file" class="hugh-ms__file-input" name="bookingPhotos" data-photo-slot="reference" accept="image/*" multiple>' +
 				'<span class="hugh-ms__photo-upload-icon" aria-hidden="true"></span>' +
-				'<span class="hugh-ms__photo-upload-text">1+ photo de référence ( style )</span>' +
+				'<span class="hugh-ms__photo-upload-text">' +
+				esc(S.photoUploadRef || '1+ photo de référence ( style )') +
+				reqMark +
+				'</span>' +
 				refFeedback +
 				'</label>' +
 				'</div>' +
@@ -1337,7 +1637,7 @@
 				const u = urls[key];
 				return u && String(u).trim() ? String(u).trim() : '#';
 			}
-			const formatName = extra ? extra.name : svc ? svc.name : '';
+			const formatName = extra ? ameliaEntityName(extra) : svc ? ameliaEntityName(svc) : '';
 			const dh = durationShortH(svc);
 			const formatVal =
 				formatName && dh ? formatName + ' — ' + dh : formatName || dh || '—';
@@ -1367,28 +1667,37 @@
 					'</div>'
 				);
 			}
-			const consentHtml =
-				'<span class="hugh-ms__pay-terms-line">' +
-				esc(S.payConsentBefore || '') +
-				'<a href="' +
-				esc(payUrl('conditions')) +
-				'" class="hugh-ms__pay-link" target="_blank" rel="noopener noreferrer">' +
-				esc(S.payTermsConditions || '') +
-				'</a>' +
-				esc(S.payConsentMid || '') +
-				'<a href="' +
-				esc(payUrl('privacy')) +
-				'" class="hugh-ms__pay-link" target="_blank" rel="noopener noreferrer">' +
-				esc(S.payTermsPrivacy || '') +
-				'</a>' +
-				esc(S.payConsentAnd || '') +
-				'<a href="' +
-				esc(payUrl('refund')) +
-				'" class="hugh-ms__pay-link" target="_blank" rel="noopener noreferrer">' +
-				esc(S.payTermsRefund || '') +
-				'</a>' +
-				esc(S.payConsentAfter || '') +
-				'</span>';
+			const customConsent =
+				typeof cfg.payConsentHtml === 'string' && String(cfg.payConsentHtml).trim() !== ''
+					? String(cfg.payConsentHtml).trim()
+					: '';
+			const consentHtml = customConsent
+				? '<div class="hugh-ms__pay-terms-line hugh-ms__pay-terms-line--html">' +
+				  customConsent +
+				  '</div>'
+				: '<span class="hugh-ms__pay-terms-line">' +
+				  esc(S.payConsentBefore || '') +
+				  '<a href="' +
+				  esc(payUrl('conditions')) +
+				  '" class="hugh-ms__pay-link" target="_blank" rel="noopener noreferrer">' +
+				  esc(S.payTermsConditions || '') +
+				  '</a>' +
+				  esc(S.payConsentMid || '') +
+				  '<a href="' +
+				  esc(payUrl('privacy')) +
+				  '" class="hugh-ms__pay-link" target="_blank" rel="noopener noreferrer">' +
+				  esc(S.payTermsPrivacy || '') +
+				  '</a>' +
+				  esc(S.payConsentAnd || '') +
+				  '<a href="' +
+				  esc(payUrl('refund')) +
+				  '" class="hugh-ms__pay-link" target="_blank" rel="noopener noreferrer">' +
+				  esc(S.payTermsRefund || '') +
+				  '</a>' +
+				  esc(S.payConsentAfter || '') +
+				  '</span>';
+			const payTermsTextTagOpen = customConsent ? '<div class="hugh-ms__pay-terms-text">' : '<span class="hugh-ms__pay-terms-text">';
+			const payTermsTextTagClose = customConsent ? '</div>' : '</span>';
 			return (
 				'<div class="hugh-ms__panel hugh-ms__panel--pay">' +
 				'<div class="hugh-ms__step2-head">' +
@@ -1414,13 +1723,15 @@
 				'<p class="hugh-ms__pay-disclaimer">' +
 				esc(S.payDisclaimer || '') +
 				'</p>' +
-				'<label class="hugh-ms__pay-terms">' +
+				'<label class="hugh-ms__pay-terms' +
+				(customConsent ? ' hugh-ms__pay-terms--consent-html' : '') +
+				'">' +
 				'<input type="checkbox" class="hugh-ms__cb-outline hugh-ms__pay-terms-input" name="payTerms" value="1"' +
 				(state.payTermsAccepted ? ' checked' : '') +
 				'>' +
-				'<span class="hugh-ms__pay-terms-text">' +
+				payTermsTextTagOpen +
 				consentHtml +
-				'</span>' +
+				payTermsTextTagClose +
 				'</label>' +
 				'</div>' +
 				'</div>'
@@ -1430,7 +1741,7 @@
 		function renderDone() {
 			const svc = state.service;
 			const extra = state.selectedExtra;
-			const formatName = extra ? extra.name : svc ? svc.name : '';
+			const formatName = extra ? ameliaEntityName(extra) : svc ? ameliaEntityName(svc) : '';
 			const dh = durationShortH(svc);
 			const formatVal = formatName && dh ? formatName + '- ' + dh : formatName || dh || '—';
 			const dateVal = formatDateLabel(state.date) || '—';
@@ -1532,7 +1843,10 @@
 				const tmpl = S.payViaStripe || 'Payer %s via Stripe';
 				nextLabel = tmpl.indexOf('%s') !== -1 ? tmpl.replace('%s', depStr) : tmpl + ' ' + depStr;
 			}
-			const nextDisabled = state.step === 2 && !state.date;
+			const nextDisabled =
+				(state.step === 2 && !state.date) ||
+				(state.step === 6 &&
+					(state.photoFilesZone.length < 3 || state.photoFilesReference.length < 1));
 			const nextBtn =
 				showNext ?
 					'<button type="button" class="hugh-ms__btn hugh-ms__btn--primary" data-act="next"' +
@@ -1720,8 +2034,9 @@
 						if (slot === 'reference') {
 							state.photoFilesReference = list;
 						} else {
-							state.photoFilesZone = list;
+							state.photoFilesZone = mergeZonePhotoFiles(state.photoFilesZone, list);
 						}
+						t.value = '';
 						render();
 						return;
 					}
@@ -1744,11 +2059,8 @@
 		}
 
 		function syncFieldsFromDom() {
-			const zIn = el.querySelector('input[name="bookingPhotos"][data-photo-slot="zone"]');
 			const rIn = el.querySelector('input[name="bookingPhotos"][data-photo-slot="reference"]');
-			if (zIn && zIn.files && zIn.files.length) {
-				state.photoFilesZone = Array.prototype.slice.call(zIn.files, 0);
-			}
+			// Zone : l’input est vidé à chaque render / après choix; la pile est dans state (merge au change).
 			if (rIn && rIn.files && rIn.files.length) {
 				state.photoFilesReference = Array.prototype.slice.call(rIn.files, 0);
 			}
@@ -1828,7 +2140,7 @@
 							return null;
 						}
 						const description = ui.categoryDescriptions && ui.categoryDescriptions[cid] ? String(ui.categoryDescriptions[cid]) : '';
-						return { id: cid, name: cat.name || '', description: description, servicesCount: servicesCount };
+						return { id: cid, name: ameliaEntityName(cat) || '', description: description, servicesCount: servicesCount };
 					})
 					.filter(Boolean);
 				if (!state.selectedCategoryId && state.categoryEntries.length) {
