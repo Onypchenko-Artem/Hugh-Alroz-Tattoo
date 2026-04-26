@@ -72,6 +72,10 @@ img {
 	padding: clamp(37px, 2.917vw, 56px) 0;
 }
 
+.hat-page-account .hat-section {
+	padding: 0;
+}
+
 .hat-section--alt {
 	background: var(--hat-color-muted);
 }

@@ -167,6 +167,7 @@ function hughalroztatoo_register_site_settings_fields() {
 					'label'        => __( 'Legal links', 'hughalroztatoo' ),
 					'name'         => 'footer_legal_links',
 					'type'         => 'repeater',
+					'instructions' => __( 'Used only when no menu is assigned to “Footer Menu” in Appearance → Menus.', 'hughalroztatoo' ),
 					'layout'       => 'table',
 					'button_label' => __( 'Add link', 'hughalroztatoo' ),
 					'sub_fields'   => array(

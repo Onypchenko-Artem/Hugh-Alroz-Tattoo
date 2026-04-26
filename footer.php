@@ -30,6 +30,9 @@ $footer_has_contact = '' !== $footer_contact_title || '' !== $footer_phone || ''
 $footer_has_social  = '' !== $footer_social_title || ( '' !== $footer_instagram_label && '' !== $footer_instagram_url ) || ( '' !== $footer_facebook_label && '' !== $footer_facebook_url );
 $footer_has_top     = $footer_has_contact || $footer_has_social || '' !== $footer_to_top_label;
 $footer_copy_parts  = array_filter( array( $footer_copyright_name, $footer_copyright_text ) );
+
+$footer_legal_has_menu = has_nav_menu( 'footer' );
+$footer_has_legal      = $footer_legal_has_menu || ! empty( $footer_legal_links );
 ?>
 </main><!-- #content -->
 
@@ -90,12 +93,26 @@ $footer_copy_parts  = array_filter( array( $footer_copyright_name, $footer_copyr
 		</div>
 		<?php endif; ?>
 
-		<?php if ( ! empty( $footer_copy_parts ) || ! empty( $footer_legal_links ) ) : ?>
+		<?php if ( ! empty( $footer_copy_parts ) || $footer_has_legal ) : ?>
 		<div class="hat-footer__bottom">
 			<?php if ( ! empty( $footer_copy_parts ) ) : ?>
 				<p class="hat-footer__copy">&copy; <?php echo esc_html( date( 'Y' ) ); ?> <?php echo esc_html( implode( ' - ', $footer_copy_parts ) ); ?></p>
 			<?php endif; ?>
-			<?php if ( ! empty( $footer_legal_links ) ) : ?>
+			<?php if ( $footer_legal_has_menu ) : ?>
+				<?php
+				wp_nav_menu(
+					array(
+						'theme_location'       => 'footer',
+						'container'            => 'nav',
+						'container_class'      => 'hat-footer__legal',
+						'container_aria_label' => esc_attr__( 'Informations légales', 'hughalroztatoo' ),
+						'menu_class'           => '',
+						'depth'                => 1,
+						'fallback_cb'          => false,
+					)
+				);
+				?>
+			<?php elseif ( ! empty( $footer_legal_links ) ) : ?>
 			<nav class="hat-footer__legal" aria-label="<?php esc_attr_e( 'Informations légales', 'hughalroztatoo' ); ?>">
 				<ul>
 					<?php foreach ( $footer_legal_links as $footer_legal_link ) : ?>

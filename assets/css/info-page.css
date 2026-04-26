@@ -1,0 +1,144 @@
+/**
+ * Info / legal pages (Template: Info page)
+ *
+ * @package Hugh_Alroz_Tattoo
+ */
+
+.page-template-template-info-page .hat-main {
+	background: #000000;
+}
+
+.page-template-template-info-page .hat-header__inner {
+	align-items: flex-end;
+}
+
+.hat-info-page {
+	display: flex;
+	flex-direction: column;
+	padding-top: clamp(16px, 2.5vw, 48px);
+	padding-bottom: clamp(80px, 13.542vw, 260px);
+}
+
+.hat-info-page__article {
+	margin: 0;
+	width: 100%;
+}
+
+.hat-info-page__header {
+	margin: 0 0 clamp(32px, 3.385vw, 65px);
+	max-width: 1015px;
+}
+
+.hat-info-page__title {
+	margin: 0;
+	max-width: 1015px;
+	font-family: var(--hat-font-family);
+	font-weight: 500;
+	font-size: clamp(36px, 5.208vw, 100px);
+	line-height: 1.05;
+	letter-spacing: 0.01em;
+	text-transform: uppercase;
+	background: linear-gradient(90deg, #ffffff 0%, #999999 100%);
+	-webkit-background-clip: text;
+	-webkit-text-fill-color: transparent;
+	background-clip: text;
+	color: transparent;
+}
+
+.hat-info-page__body {
+	max-width: 1015px;
+	font-family: var(--hat-font-family);
+	font-weight: 400;
+	font-size: clamp(16px, 1.25vw, 24px);
+	line-height: 1.05;
+	text-align: justify;
+	color: #ffffff;
+}
+
+.hat-info-page__updated {
+	margin: 0;
+}
+
+.hat-info-page__content {
+	margin-top: 50px;
+}
+
+.hat-info-page__content > *:first-child {
+	margin-top: 0;
+}
+
+.hat-info-page__content > *:last-child {
+	margin-bottom: 0;
+}
+
+.hat-info-page__content p {
+	margin: 25px 0 0;
+}
+
+.hat-info-page__content h2,
+.hat-info-page__content h3,
+.hat-info-page__content h4,
+.hat-info-page__content h5,
+.hat-info-page__content h6 {
+	margin: 50px 0 0;
+	font-family: var(--hat-font-family);
+	font-weight: 400;
+	font-size: clamp(16px, 1.25vw, 24px);
+	line-height: 1.05;
+	letter-spacing: 0.01em;
+}
+
+.hat-info-page__content ul,
+.hat-info-page__content ol {
+	margin: 0 0 1em;
+	padding-left: 1.25em;
+}
+
+.hat-info-page__content ul {
+	list-style: disc;
+}
+
+.hat-info-page__content ol {
+	list-style: decimal;
+}
+
+.hat-info-page__content li {
+	margin-top: 0.5em;
+}
+
+.hat-info-page__content a {
+	color: inherit;
+	text-decoration: underline;
+	text-underline-offset: 0.15em;
+	text-decoration-thickness: 1px;
+}
+
+.hat-info-page__content a:hover,
+.hat-info-page__content a:focus-visible {
+	color: #c8c8c8;
+}
+
+.hat-info-page__content strong,
+.hat-info-page__content b {
+	font-weight: 400;
+}
+
+@media (max-width: 1024px) {
+	.hat-info-page__body {
+		line-height: 1.25;
+	}
+}
+
+@media (max-width: 640px) {
+	.hat-info-page {
+		padding-bottom: clamp(64px, 18vw, 120px);
+	}
+
+	.hat-info-page__content h2:not(:first-child),
+	.hat-info-page__content h3:not(:first-child),
+	.hat-info-page__content h4:not(:first-child),
+	.hat-info-page__content h5:not(:first-child),
+	.hat-info-page__content h6:not(:first-child) {
+		margin-top: 1.5em;
+	}
+}

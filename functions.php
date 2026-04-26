@@ -102,6 +102,17 @@ function hughalroztatoo_assets() {
 		);
 	}
 
+	$info_css_path = get_template_directory() . '/assets/css/info-page.css';
+	if ( is_page_template( 'template-info-page.php' ) && file_exists( $info_css_path ) ) {
+		$info_deps = file_exists( $css_path ) ? array( 'hughalroztatoo-main' ) : array( 'hughalroztatoo-style' );
+		wp_enqueue_style(
+			'hughalroztatoo-info-page',
+			get_template_directory_uri() . '/assets/css/info-page.css',
+			$info_deps,
+			(string) filemtime( $info_css_path )
+		);
+	}
+
 	if ( is_front_page() ) {
 		$home_styles = array(
 			'hero-banner' => 'home-hero-banner.css',
