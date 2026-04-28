@@ -1264,6 +1264,26 @@
 	color: #fff;
 }
 
+.hugh-ms__photo-progress {
+	display: block;
+	width: 100%;
+	margin: clamp(10px, 0.9vw, 16px) auto 0;
+	font-family: "Helvetica Neue", "Inter Tight", sans-serif;
+	font-size: clamp(14px, 1.05vw, 17px);
+	line-height: 1.35;
+	font-weight: 400;
+	text-align: center;
+	color: rgba(255, 150, 150, 0.98);
+}
+
+.hugh-ms__photo-progress--pending {
+	color: rgba(255, 100, 100, 0.98);
+}
+
+.hugh-ms__photo-progress--ok {
+	color: rgba(255, 170, 170, 0.96);
+}
+
 .hugh-ms__photo-upload-feedback {
 	width: 100%;
 	margin-top: 12px;
@@ -2890,6 +2910,11 @@
 		font-weight: 300;
 		line-height: 18px;
 		letter-spacing: 0.02em;
+	}
+
+	.hugh-ms__inner--step-6 .hugh-ms__photo-progress {
+		font-size: 13px;
+		line-height: 1.38;
 	}
 
 	.hugh-ms__inner--step-6 .hugh-ms__photo-upload-grid {

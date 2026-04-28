@@ -102,7 +102,7 @@
 .hat-hero__cta {
 	display: inline-flex;
 	align-items: center;
-	justify-content: space-between;
+	justify-content: center;
 	background: #fff;
 	color: #000;
 	text-decoration: none;
@@ -228,8 +228,8 @@
 @media (max-width: 640px) {
 	.hat-hero {
 		min-height: 90vh;
-		max-height: 90vh;
-		padding: 0 0 10px;
+		max-height: none;
+		padding: 0 0 clamp(44px, 12vw, 56px);
 	}
 
 	.hat-hero__body {
@@ -362,8 +362,10 @@
 		position: absolute;
 		left: 0;
 		right: 0;
-		top: calc(99px + 590.81px + 150px);
+		top: auto;
+		bottom: clamp(10px, 3vw, 16px);
 		margin-top: 0;
+		z-index: 2;
 		font-size: 14px;
 		line-height: 17px;
 	}

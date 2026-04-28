@@ -53,10 +53,12 @@ if ( ! $experience_has_heading && empty( $conditions ) ) {
 				<h2 class="hat-experience__title" id="hat-experience-title">
 					<?php if ( '' !== $experience_title_1 ) : ?>
 					<span class="hat-experience__title-main hat-experience__title-main--first-row">
-						<span class="hat-experience__title-main-part hat-experience__title-main-part--with-start-blur">
-							<span class="hat-experience__title-blur hat-experience__title-blur--start" aria-hidden="true"></span>
-							<?php echo esc_html( $title_one_first ); ?>
-						</span><?php echo esc_html( $title_one_rest ); ?>
+						<span class="hat-experience__title-first-line-word">
+							<span class="hat-experience__title-main-part hat-experience__title-main-part--with-start-blur">
+								<span class="hat-experience__title-blur hat-experience__title-blur--start" aria-hidden="true"></span>
+								<?php echo esc_html( $title_one_first ); ?>
+							</span><?php echo esc_html( $title_one_rest ); ?>
+						</span>
 						<?php if ( '' !== $experience_tag ) : ?>
 							<span class="hat-experience__title-tag"><?php echo esc_html( $experience_tag ); ?></span>
 						<?php endif; ?>

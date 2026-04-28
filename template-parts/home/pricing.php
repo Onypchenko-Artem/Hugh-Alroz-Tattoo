@@ -441,7 +441,7 @@ if ( ! $pricing_has_heading && empty( $pricing_cards ) ) {
 						<?php if ( $popular ) : ?>
 							<p class="hat-pricing__badge">
 								<img class="hat-pricing__badge-icon" src="<?php echo esc_url( get_template_directory_uri() . '/assets/images/mdi_fire.svg' ); ?>" alt="" aria-hidden="true" width="20" height="20">
-								<span class="hat-pricing__badge-text"><?php esc_html_e( 'le plus populaire', 'hughalroztatoo' ); ?></span>
+								<span class="hat-pricing__badge-text"><?php echo esc_html( hughalroztatoo_pll__( 'le plus populaire' ) ); ?></span>
 							</p>
 						<?php endif; ?>
 						<span class="hat-pricing__bg-index" aria-hidden="true"><?php echo esc_html( str_pad( (string) ( $index + 1 ), 2, '0', STR_PAD_LEFT ) ); ?></span>
@@ -466,7 +466,7 @@ if ( ! $pricing_has_heading && empty( $pricing_cards ) ) {
 						<?php endif; ?>
 						<?php if ( '' !== $card_url ) : ?>
 							<span class="hat-pricing__cta" aria-hidden="true">
-								<span class="hat-pricing__cta-text"><?php esc_html_e( 'RÉSERVER CE FORMAT', 'hughalroztatoo' ); ?></span>
+								<span class="hat-pricing__cta-text"><?php echo esc_html( hughalroztatoo_pll__( 'RÉSERVER CE FORMAT' ) ); ?></span>
 								<span class="hat-pricing__cta-icon" aria-hidden="true">
 									<svg width="35" height="35" viewBox="0 0 35 35" fill="none" xmlns="http://www.w3.org/2000/svg" focusable="false">
 										<path d="M7 18.2083H25.8173M15.9342 28.4167L26.125 18.2083L15.9342 8" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"/>

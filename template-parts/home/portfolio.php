@@ -49,7 +49,7 @@ $portfolio_initial_count = 4;
 $portfolio_step_count    = 4;
 $portfolio_total_count   = count( $portfolio_entries );
 $portfolio_has_more      = $portfolio_total_count > $portfolio_initial_count;
-$portfolio_less_label    = __( 'VOIR MOINS', 'hughalroztatoo' );
+$portfolio_less_label    = hughalroztatoo_pll__( 'VOIR MOINS' );
 $portfolio_has_heading   = '' !== $portfolio_eyebrow || '' !== $portfolio_title_1 || '' !== $portfolio_title_2;
 $portfolio_has_cta       = $portfolio_has_more && '' !== $portfolio_cta;
 

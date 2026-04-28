@@ -16,6 +16,139 @@ require get_template_directory() . '/inc/booking-multistep.php';
 require get_template_directory() . '/inc/site-settings.php';
 
 /**
+ * Polylang theme string group (Languages → String translations).
+ */
+const HUGHALROZTATOO_PLL_THEME_GROUP = 'Theme';
+
+/**
+ * Polylang group for footer Site settings texts (excluding contact lines and social link labels).
+ */
+const HUGHALROZTATOO_PLL_FOOTER_GROUP = 'Footer';
+
+/**
+ * Translate a theme string registered for Polylang; falls back to gettext without Polylang.
+ *
+ * @param string $source Default-language string (must match pll_register_string).
+ * @return string
+ */
+function hughalroztatoo_pll__( $source ) {
+	if ( function_exists( 'pll__' ) ) {
+		return pll__( $source );
+	}
+	return __( $source, 'hughalroztatoo' );
+}
+
+/**
+ * Escape attribute text translated via Polylang string registry.
+ *
+ * @param string $source Default-language string (must match pll_register_string).
+ * @return string
+ */
+function hughalroztatoo_pll_esc_attr__( $source ) {
+	if ( function_exists( 'pll_esc_attr__' ) ) {
+		return pll_esc_attr__( $source );
+	}
+	return esc_attr( __( $source, 'hughalroztatoo' ) );
+}
+
+/**
+ * Translate a Site settings footer text value (same string must be registered for Polylang).
+ *
+ * @param string $stored Value from ACF options.
+ * @return string
+ */
+function hughalroztatoo_pll_footer_text( $stored ) {
+	$stored = (string) $stored;
+	if ( '' === $stored ) {
+		return '';
+	}
+	if ( function_exists( 'pll__' ) ) {
+		return pll__( $stored );
+	}
+	return $stored;
+}
+
+/**
+ * Register UI strings for Polylang String translations.
+ */
+function hughalroztatoo_register_theme_polylang_strings() {
+	if ( ! function_exists( 'pll_register_string' ) ) {
+		return;
+	}
+	pll_register_string(
+		'hat_portfolio_voir_moins',
+		'VOIR MOINS',
+		HUGHALROZTATOO_PLL_THEME_GROUP,
+		false
+	);
+	pll_register_string(
+		'hat_pricing_reserve_format',
+		'RÉSERVER CE FORMAT',
+		HUGHALROZTATOO_PLL_THEME_GROUP,
+		false
+	);
+	pll_register_string(
+		'hat_desktop_menu_close',
+		'FERMER',
+		HUGHALROZTATOO_PLL_THEME_GROUP,
+		false
+	);
+	pll_register_string(
+		'hat_pricing_popular_badge',
+		'le plus populaire',
+		HUGHALROZTATOO_PLL_THEME_GROUP,
+		false
+	);
+	pll_register_string(
+		'hat_footer_legal_nav_aria',
+		'Informations légales',
+		HUGHALROZTATOO_PLL_FOOTER_GROUP,
+		false
+	);
+}
+add_action( 'init', 'hughalroztatoo_register_theme_polylang_strings', 20 );
+
+/**
+ * Register current Site settings footer texts for Polylang (translations follow stored French/source strings).
+ */
+function hughalroztatoo_register_footer_option_polylang_strings() {
+	if ( ! function_exists( 'pll_register_string' ) ) {
+		return;
+	}
+
+	$group = HUGHALROZTATOO_PLL_FOOTER_GROUP;
+
+	$reg = static function ( $register_name, $string ) use ( $group ) {
+		$string = trim( (string) $string );
+		if ( '' === $string ) {
+			return;
+		}
+		pll_register_string( $register_name, $string, $group, false );
+	};
+
+	$reg( 'hat_footer_to_top_label', (string) hughalroztatoo_get_site_option( 'footer_to_top_label' ) );
+	$reg( 'hat_footer_social_title', (string) hughalroztatoo_get_site_option( 'footer_social_title' ) );
+	$reg( 'hat_footer_copyright_name', (string) hughalroztatoo_get_site_option( 'footer_copyright_name' ) );
+	$reg( 'hat_footer_copyright_text', (string) hughalroztatoo_get_site_option( 'footer_copyright_text' ) );
+
+	$legal_rows = hughalroztatoo_get_site_option( 'footer_legal_links', array() );
+	if ( is_array( $legal_rows ) ) {
+		$n = 0;
+		foreach ( $legal_rows as $row ) {
+			if ( ! is_array( $row ) ) {
+				continue;
+			}
+			$label = isset( $row['label'] ) ? trim( (string) $row['label'] ) : '';
+			if ( '' === $label ) {
+				continue;
+			}
+			$reg( 'hat_footer_legal_' . (++$n), $label );
+		}
+	}
+}
+add_action( 'init', 'hughalroztatoo_register_footer_option_polylang_strings', 25 );
+
+/**
  * Preconnect to Google Fonts (Inter Tight)
  *
  * @param array  $urls          URLs to print for resource hints.

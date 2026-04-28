@@ -97,7 +97,7 @@ $hat_bg_video_url   = esc_url( get_template_directory_uri() . '/assets/videos/ba
 						<span aria-hidden="true">
 							<img src="<?php echo esc_url( get_template_directory_uri() . '/assets/images/close.svg' ); ?>" alt="" width="13" height="13">
 						</span>
-						<?php esc_html_e( 'FERMER', 'hughalroztatoo' ); ?>
+						<?php echo esc_html( hughalroztatoo_pll__( 'FERMER' ) ); ?>
 					</button>
 				</div>
 			</div>

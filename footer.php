@@ -5,21 +5,22 @@
  * @package Hugh_Alroz_Tattoo
  */
 
-$footer_contact_title    = (string) hughalroztatoo_get_site_option( 'footer_contact_title' );
-$footer_phone            = (string) hughalroztatoo_get_site_option( 'footer_phone' );
-$footer_phone_href       = preg_replace( '/[^0-9+]/', '', $footer_phone );
-$footer_email            = (string) hughalroztatoo_get_site_option( 'footer_email' );
-$footer_social_title     = (string) hughalroztatoo_get_site_option( 'footer_social_title' );
-$footer_instagram_label  = (string) hughalroztatoo_get_site_option( 'footer_instagram_label' );
-$footer_instagram_url    = (string) hughalroztatoo_get_site_option( 'footer_instagram_url' );
-$footer_facebook_label   = (string) hughalroztatoo_get_site_option( 'footer_facebook_label' );
-$footer_facebook_url     = (string) hughalroztatoo_get_site_option( 'footer_facebook_url' );
-$footer_to_top_label     = (string) hughalroztatoo_get_site_option( 'footer_to_top_label' );
-$footer_copyright_name   = (string) hughalroztatoo_get_site_option( 'footer_copyright_name' );
-$footer_copyright_text   = (string) hughalroztatoo_get_site_option( 'footer_copyright_text' );
-$footer_legal_links      = hughalroztatoo_get_site_option( 'footer_legal_links', array() );
-$footer_legal_links      = is_array( $footer_legal_links ) ? $footer_legal_links : array();
-$footer_legal_links      = array_filter(
+$footer_contact_title      = (string) hughalroztatoo_get_site_option( 'footer_contact_title' );
+$footer_phone              = (string) hughalroztatoo_get_site_option( 'footer_phone' );
+$footer_phone_href         = preg_replace( '/[^0-9+]/', '', $footer_phone );
+$footer_email              = (string) hughalroztatoo_get_site_option( 'footer_email' );
+$footer_social_title_raw   = (string) hughalroztatoo_get_site_option( 'footer_social_title' );
+$footer_social_title       = hughalroztatoo_pll_footer_text( $footer_social_title_raw );
+$footer_instagram_label    = (string) hughalroztatoo_get_site_option( 'footer_instagram_label' );
+$footer_instagram_url      = (string) hughalroztatoo_get_site_option( 'footer_instagram_url' );
+$footer_facebook_label     = (string) hughalroztatoo_get_site_option( 'footer_facebook_label' );
+$footer_facebook_url       = (string) hughalroztatoo_get_site_option( 'footer_facebook_url' );
+$footer_to_top_label       = hughalroztatoo_pll_footer_text( (string) hughalroztatoo_get_site_option( 'footer_to_top_label' ) );
+$footer_copyright_name     = hughalroztatoo_pll_footer_text( (string) hughalroztatoo_get_site_option( 'footer_copyright_name' ) );
+$footer_copyright_text     = hughalroztatoo_pll_footer_text( (string) hughalroztatoo_get_site_option( 'footer_copyright_text' ) );
+$footer_legal_links        = hughalroztatoo_get_site_option( 'footer_legal_links', array() );
+$footer_legal_links        = is_array( $footer_legal_links ) ? $footer_legal_links : array();
+$footer_legal_links        = array_filter(
 	$footer_legal_links,
 	static function ( $footer_legal_link ) {
 		return is_array( $footer_legal_link ) && ! empty( $footer_legal_link['label'] ) && ! empty( $footer_legal_link['url'] );
@@ -27,7 +28,7 @@ $footer_legal_links      = array_filter(
 );
 
 $footer_has_contact = '' !== $footer_contact_title || '' !== $footer_phone || '' !== $footer_email;
-$footer_has_social  = '' !== $footer_social_title || ( '' !== $footer_instagram_label && '' !== $footer_instagram_url ) || ( '' !== $footer_facebook_label && '' !== $footer_facebook_url );
+$footer_has_social  = '' !== $footer_social_title_raw || ( '' !== $footer_instagram_label && '' !== $footer_instagram_url ) || ( '' !== $footer_facebook_label && '' !== $footer_facebook_url );
 $footer_has_top     = $footer_has_contact || $footer_has_social || '' !== $footer_to_top_label;
 $footer_copy_parts  = array_filter( array( $footer_copyright_name, $footer_copyright_text ) );
 
@@ -105,7 +106,7 @@ $footer_has_legal      = $footer_legal_has_menu || ! empty( $footer_legal_links 
 						'theme_location'       => 'footer',
 						'container'            => 'nav',
 						'container_class'      => 'hat-footer__legal',
-						'container_aria_label' => esc_attr__( 'Informations légales', 'hughalroztatoo' ),
+						'container_aria_label' => hughalroztatoo_pll__( 'Informations légales' ),
 						'menu_class'           => '',
 						'depth'                => 1,
 						'fallback_cb'          => false,
@@ -113,7 +114,7 @@ $footer_has_legal      = $footer_legal_has_menu || ! empty( $footer_legal_links 
 				);
 				?>
 			<?php elseif ( ! empty( $footer_legal_links ) ) : ?>
-			<nav class="hat-footer__legal" aria-label="<?php esc_attr_e( 'Informations légales', 'hughalroztatoo' ); ?>">
+			<nav class="hat-footer__legal" aria-label="<?php echo hughalroztatoo_pll_esc_attr__( 'Informations légales' ); ?>">
 				<ul>
 					<?php foreach ( $footer_legal_links as $footer_legal_link ) : ?>
 						<?php
@@ -123,6 +124,7 @@ $footer_has_legal      = $footer_legal_has_menu || ! empty( $footer_legal_links 
 						if ( '' === $footer_legal_label ) {
 							continue;
 						}
+						$footer_legal_label = hughalroztatoo_pll_footer_text( $footer_legal_label );
 						?>
 						<li><a href="<?php echo esc_url( $footer_legal_url ); ?>"><?php echo esc_html( $footer_legal_label ); ?></a></li>
 					<?php endforeach; ?>

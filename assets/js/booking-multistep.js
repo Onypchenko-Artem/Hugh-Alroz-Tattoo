@@ -808,6 +808,27 @@
 			return out;
 		}
 
+		/** Placeholders {{current}} {{needed}} {{missing}} from Polylang strings. */
+		function fillBookingTemplate(tpl, vals) {
+			if (!tpl || typeof tpl !== 'string') {
+				return '';
+			}
+			return tpl.replace(/\{\{\s*([a-zA-Z0-9_]+)\s*\}\}/g, function (_, name) {
+				return vals[name] != null ? String(vals[name]) : '';
+			});
+		}
+
+		function renderPhotoProgressLine(tpl, vals, isOk) {
+			const text = fillBookingTemplate(tpl, vals);
+			if (!text.trim()) {
+				return '';
+			}
+			const cls =
+				'hugh-ms__photo-progress' +
+				(isOk ? ' hugh-ms__photo-progress--ok' : ' hugh-ms__photo-progress--pending');
+			return '<p class="' + cls + '" role="status">' + esc(text) + '</p>';
+		}
+
 		function renderPhotoSlotFeedback(files) {
 			if (!files || !files.length) {
 				return '';
@@ -918,13 +939,18 @@
 			if (state.step === 6) {
 				const nZone = state.photoFilesZone.length;
 				const nRef = state.photoFilesReference.length;
+				if (nZone === 0) {
+					setError(S.photoErrorZoneNone || S.photoErrorZoneMin || S.errorGeneric);
+					render();
+					return;
+				}
 				if (nZone < 3) {
 					setError(S.photoErrorZoneMin || S.errorGeneric);
 					render();
 					return;
 				}
-				if (nRef < 1) {
-					setError(S.photoErrorRefMin || S.errorGeneric);
+				if (nRef === 0) {
+					setError(S.photoErrorRefNone || S.photoErrorRefMin || S.errorGeneric);
 					render();
 					return;
 				}
@@ -952,7 +978,7 @@
 				syncFieldsFromDom();
 				const c = state.customer;
 				if (!c.firstName || !c.lastName || !c.email) {
-					setError(S.errorGeneric);
+					setError(S.errorCustomerIdentity || S.errorGeneric);
 					render();
 					return;
 				}
@@ -1336,8 +1362,12 @@
 				esc(monthLabel) +
 				'</span>' +
 				'<div class="hugh-ms__cal-arrows">' +
-				'<button type="button" class="hugh-ms__cal-arrow" data-cal="prev" aria-label="Previous month">‹</button>' +
-				'<button type="button" class="hugh-ms__cal-arrow" data-cal="next" aria-label="Next month">›</button>' +
+				'<button type="button" class="hugh-ms__cal-arrow" data-cal="prev" aria-label="' +
+				esc(S.calAriaPrevMonth || '') +
+				'">‹</button>' +
+				'<button type="button" class="hugh-ms__cal-arrow" data-cal="next" aria-label="' +
+				esc(S.calAriaNextMonth || '') +
+				'">›</button>' +
 				'</div>' +
 				'</div>' +
 				'<div class="hugh-ms__cal-weekdays">' +
@@ -1482,6 +1512,20 @@
 				.join('');
 			const warn = photoCfsOk ? '' : '<p class="hugh-ms__warn">' + esc(S.photoNoField) + '</p>';
 			const reqMark = ' <span class="hugh-ms__req" aria-hidden="true">*</span>';
+			const ZONE_MIN = 3;
+			const REF_MIN = 1;
+			const nz = state.photoFilesZone.length;
+			const nr = state.photoFilesReference.length;
+			const zMiss = Math.max(0, ZONE_MIN - nz);
+			const rMiss = Math.max(0, REF_MIN - nr);
+			const zoneProgressHtml =
+				zMiss > 0
+					? renderPhotoProgressLine(S.photoZoneProgressIncomplete, { current: nz, needed: ZONE_MIN, missing: zMiss }, false)
+					: renderPhotoProgressLine(S.photoZoneProgressComplete, { current: nz, needed: ZONE_MIN, missing: 0 }, true);
+			const refProgressHtml =
+				rMiss > 0
+					? renderPhotoProgressLine(S.photoRefProgressIncomplete, { current: nr, needed: REF_MIN, missing: rMiss }, false)
+					: renderPhotoProgressLine(S.photoRefProgressComplete, { current: nr, needed: REF_MIN, missing: 0 }, true);
 			const zoneFeedback = renderPhotoSlotFeedback(state.photoFilesZone);
 			const refFeedback = renderPhotoSlotFeedback(state.photoFilesReference);
 			return (
@@ -1509,6 +1553,7 @@
 				esc(S.photoUploadZone || '3 photos de la zone à tatouer') +
 				reqMark +
 				'</span>' +
+				zoneProgressHtml +
 				zoneFeedback +
 				'</label>' +
 				'<label class="hugh-ms__photo-upload-card">' +
@@ -1518,6 +1563,7 @@
 				esc(S.photoUploadRef || '1+ photo de référence ( style )') +
 				reqMark +
 				'</span>' +
+				refProgressHtml +
 				refFeedback +
 				'</label>' +
 				'</div>' +
@@ -2037,6 +2083,9 @@
 							state.photoFilesZone = mergeZonePhotoFiles(state.photoFilesZone, list);
 						}
 						t.value = '';
+						if (state.step === 6) {
+							setError('');
+						}
 						render();
 						return;
 					}
