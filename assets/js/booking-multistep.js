@@ -4,6 +4,9 @@
 (function () {
 	'use strict';
 
+	/** Amelia format preselect from URL hash or delegated links (consumes once). */
+	let hatBookingPresetQueue = null;
+
 	const cfg = typeof hughAmeliaBooking === 'undefined' ? null : hughAmeliaBooking;
 	if (!cfg) {
 		return;
@@ -568,11 +571,10 @@
 			.trim();
 	}
 
-	function preselectedServiceQuery() {
-		if (typeof window === 'undefined' || !window.location || !window.location.search) {
+	function parseQueryParamsToPreset(q) {
+		if (!q || typeof q.get !== 'function') {
 			return null;
 		}
-		const q = new URLSearchParams(window.location.search);
 		const serviceIdRaw = q.get('hat_service_id') || q.get('hatServiceId') || q.get('serviceId') || '';
 		const serviceId = parseInt(serviceIdRaw, 10);
 		const serviceName = q.get('hat_service') || q.get('hatService') || q.get('service') || '';
@@ -585,6 +587,19 @@
 			serviceName: normalizeLookupToken(serviceName),
 			duration: normalizeLookupToken(duration),
 		};
+	}
+
+	function preselectedServiceQuery() {
+		if (hatBookingPresetQueue) {
+			const p = hatBookingPresetQueue;
+			hatBookingPresetQueue = null;
+			return p;
+		}
+		if (typeof window === 'undefined' || !window.location || !window.location.search) {
+			return null;
+		}
+		const q = new URLSearchParams(window.location.search);
+		return parseQueryParamsToPreset(q);
 	}
 
 	function matchPreselectedService(flat, preselected) {
@@ -633,18 +648,10 @@
 		return bestScore > 0 ? best : null;
 	}
 
+	/** Только времена этого дня; объединение по месяцу давало «чужие» часы и ставило их disabled. */
 	function displayTimesForDate(allSlots, date) {
 		const daySlots = allSlots && allSlots[date] ? allSlots[date] : {};
-		const dayTimes = Object.keys(daySlots || {});
-		const monthTimesMap = {};
-		Object.keys(allSlots || {}).forEach(function (ymd) {
-			const slots = allSlots[ymd];
-			Object.keys(slots || {}).forEach(function (time) {
-				monthTimesMap[time] = true;
-			});
-		});
-		const monthTimes = Object.keys(monthTimesMap);
-		return (monthTimes.length ? monthTimes : dayTimes).sort();
+		return Object.keys(daySlots || {}).sort();
 	}
 
 	function pickProviderFromSlot(cell, depth) {
@@ -747,34 +754,38 @@
 			const n = !isNaN(fromUi) && fromUi > 0 ? fromUi : !isNaN(fromCfg) && fromCfg > 0 ? fromCfg : 4;
 			return n > 0 ? n : 4;
 		})();
-		const state = {
-			step: 1,
-			categories: [],
-			categoryEntries: [],
-			flat: [],
-			selectedCategoryId: null,
-			serviceEntry: null,
-			service: null,
-			categoryName: '',
-			date: '',
-			slotsMonth: new Date(),
-			slotsFinal: {},
-			extras: [],
-			selectedExtra: null,
-			time: '',
-			providerId: null,
-			photoFilesZone: [],
-			photoFilesReference: [],
-			tattooZone: '',
-			tattooZoneOpen: false,
-			customFields: [],
-			customer: { firstName: '', lastName: '', email: '', phone: '', note: '' },
-			ageConfirmed: false,
-			payTermsAccepted: false,
-			loading: false,
-			error: '',
-			resultData: null,
-		};
+		function createInitialState() {
+			return {
+				step: 1,
+				categories: [],
+				categoryEntries: [],
+				flat: [],
+				selectedCategoryId: null,
+				serviceEntry: null,
+				service: null,
+				categoryName: '',
+				date: '',
+				slotsMonth: new Date(),
+				slotsFinal: {},
+				extras: [],
+				selectedExtra: null,
+				time: '',
+				providerId: null,
+				photoFilesZone: [],
+				photoFilesReference: [],
+				tattooZone: '',
+				tattooZoneOpen: false,
+				customFields: [],
+				customer: { firstName: '', lastName: '', email: '', phone: '', note: '' },
+				ageConfirmed: false,
+				payTermsAccepted: false,
+				loading: false,
+				error: '',
+				resultData: null,
+			};
+		}
+
+		let state = createInitialState();
 
 		function setError(msg) {
 			state.error = msg || '';
@@ -1952,6 +1963,10 @@
 		}
 
 		function bind() {
+			if (el.dataset.hughMsBound === '1') {
+				return;
+			}
+			el.dataset.hughMsBound = '1';
 			el.addEventListener('click', function (e) {
 				const t = e.target;
 				if (!(t instanceof Element)) {
@@ -1961,7 +1976,12 @@
 					e.preventDefault();
 				}
 				if (t.closest('[data-act="close"]')) {
-					window.location.href = '/';
+					e.preventDefault();
+					if (typeof window.hughalroztatooBookingModalClose === 'function') {
+						window.hughalroztatooBookingModalClose();
+					} else {
+						window.location.href = '/';
+					}
 					return;
 				}
 				if (state.step === 6 && state.tattooZoneOpen && !t.closest('.hugh-ms__photo-zone-field')) {
@@ -2161,8 +2181,7 @@
 			render();
 		}
 
-		async function boot() {
-			bind();
+		async function loadEntitiesAndApply() {
 			state.loading = true;
 			render();
 			try {
@@ -2207,6 +2226,34 @@
 			state.loading = false;
 			render();
 		}
+
+		async function boot() {
+			bind();
+			await loadEntitiesAndApply();
+		}
+
+		function applyHrefToPresetQueue(href) {
+			if (!href || typeof href !== 'string') {
+				return;
+			}
+			try {
+				const u = new URL(href, window.location.origin);
+				const p = parseQueryParamsToPreset(u.searchParams);
+				if (p) {
+					hatBookingPresetQueue = p;
+				} else {
+					hatBookingPresetQueue = null;
+				}
+			} catch (e) {
+				hatBookingPresetQueue = null;
+			}
+		}
+
+		el._hughHatRebootFromHref = async function (href) {
+			applyHrefToPresetQueue(href);
+			state = createInitialState();
+			await loadEntitiesAndApply();
+		};
 
 		boot();
 	}

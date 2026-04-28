@@ -306,15 +306,13 @@ $pricing_title_prefix2 = function_exists( 'get_field' ) ? (string) get_field( 'h
 $pricing_title_main_3  = function_exists( 'get_field' ) ? (string) get_field( 'home_pricing_title_main_3', $home_post_id ) : '';
 
 $pricing_cards = array();
-$booking_base_url_raw = hughalroztatoo_get_localized_field_fallback( 'home_hero_cta_url', $home_post_id );
-$booking_base_url = is_array( $booking_base_url_raw ) ? (string) ( $booking_base_url_raw['url'] ?? '' ) : (string) $booking_base_url_raw;
 
 if ( function_exists( 'get_field' ) ) {
 	$pricing_cards = get_field( 'home_pricing_cards', $home_post_id );
 }
 
 $pricing_cards = is_array( $pricing_cards ) ? $pricing_cards : array();
-$booking_base_url = trim( $booking_base_url );
+$pricing_home_url = trim( (string) get_permalink( (int) $home_post_id ) );
 $pricing_service_ids = array_values(
 	array_filter(
 		array_map(
@@ -415,7 +413,7 @@ if ( ! $pricing_has_heading && empty( $pricing_cards ) ) {
 
 				$lines = preg_split( '/\r\n|\r|\n/', $features );
 				$card_url = '';
-				if ( '' !== $booking_base_url ) {
+				if ( '' !== $pricing_home_url ) {
 					$query_args = array_filter(
 						array(
 							'hat_service'    => $title,
@@ -423,12 +421,12 @@ if ( ! $pricing_has_heading && empty( $pricing_cards ) ) {
 							'hat_service_id' => $service_id > 0 ? $service_id : '',
 						)
 					);
-					$card_url   = add_query_arg( $query_args, $booking_base_url );
+					$card_url   = add_query_arg( $query_args, $pricing_home_url );
 				}
 				?>
 				<li class="hat-pricing__card<?php echo $popular ? ' hat-pricing__card--popular' : ''; ?>">
 					<?php if ( '' !== $card_url ) : ?>
-					<a class="hat-pricing__card-link" href="<?php echo esc_url( $card_url ); ?>" aria-label="<?php echo esc_attr( sprintf( __( 'Choisir le format %1$s (%2$s)', 'hughalroztatoo' ), $title, $duration ) ); ?>">
+					<a class="hat-pricing__card-link hat-js-booking-trigger" href="<?php echo esc_url( $card_url ); ?>" aria-label="<?php echo esc_attr( sprintf( __( 'Choisir le format %1$s (%2$s)', 'hughalroztatoo' ), $title, $duration ) ); ?>">
 					<?php else : ?>
 					<div class="hat-pricing__card-link">
 					<?php endif; ?>

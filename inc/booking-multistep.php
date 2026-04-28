@@ -2,7 +2,8 @@
 /**
  * Custom Amelia multistep booking (shortcode + assets).
  *
- * Usage: add [hugh_amelia_booking] to a page. Requires Amelia plugin.
+ * Usage: wizard is injected in the footer as a popup. Optional shortcode [hugh_amelia_booking] on the Booking template
+ * remains supported for admins; frontend output strips it (see hughalroztatoo_strip_booking_shortcode_from_booking_template). Requires Amelia.
  *
  * @package Hugh_Alroz_Tattoo
  */
@@ -20,6 +21,51 @@ function hughalroztatoo_amelia_active() {
 }
 
 /**
+ * Resolve the WordPress page that holds Booking ACF (template page-booking.php).
+ *
+ * Used when the multistep renders in the global footer modal (queried object is not that page).
+ *
+ * @return int Post ID or 0.
+ */
+function hughalroztatoo_booking_acf_source_post_id() {
+	static $memo = false;
+	if ( false !== $memo ) {
+		return (int) $memo;
+	}
+	$memo = 0;
+
+	$post_id = (int) get_queried_object_id();
+	if ( $post_id > 0 ) {
+		$tpl = get_page_template_slug( $post_id );
+		if ( 'page-booking.php' === (string) $tpl ) {
+			return $memo = $post_id;
+		}
+	}
+
+	$page = get_posts(
+		array(
+			'post_type'              => 'page',
+			'post_status'            => 'publish',
+			'posts_per_page'         => 1,
+			'orderby'                => 'ID',
+			'order'                  => 'ASC',
+			'no_found_rows'          => true,
+			'suppress_filters'       => false,
+			'update_post_term_cache' => false,
+			'ignore_sticky_posts'    => true,
+			'meta_key'               => '_wp_page_template',
+			'meta_value'             => 'page-booking.php',
+		)
+	);
+
+	if ( ! empty( $page[0] ) && isset( $page[0]->ID ) ) {
+		$memo = (int) $page[0]->ID;
+	}
+
+	return (int) apply_filters( 'hughalroztatoo_booking_acf_source_post_id', (int) $memo );
+}
+
+/**
  * Detect shortcode in singular content (Classic Editor).
  *
  * @param string|null $content Post content.
@@ -27,6 +73,25 @@ function hughalroztatoo_amelia_active() {
  */
 function hughalroztatoo_content_has_amelia_booking_shortcode( $content ) {
 	return is_string( $content ) && has_shortcode( $content, 'hugh_amelia_booking' );
+}
+
+/**
+ * Whether Amelia booking assets should load on this front request.
+ *
+ * @return bool
+ */
+function hughalroztatoo_frontend_needs_booking_multistep() {
+	global $post;
+	if ( ! hughalroztatoo_amelia_active() ) {
+		return false;
+	}
+	if ( hughalroztatoo_booking_acf_source_post_id() > 0 ) {
+		return true;
+	}
+	if ( $post && hughalroztatoo_content_has_amelia_booking_shortcode( $post->post_content ) ) {
+		return true;
+	}
+	return false;
 }
 
 if ( ! function_exists( 'hughalroztatoo_amelia_locale_candidates' ) ) {
@@ -200,7 +265,7 @@ function hughalroztatoo_booking_field( $field_name, $default = '' ) {
 	if ( ! function_exists( 'get_field' ) ) {
 		return $default;
 	}
-	$post_id = get_the_ID();
+	$post_id = hughalroztatoo_booking_acf_source_post_id();
 	if ( ! $post_id ) {
 		return $default;
 	}
@@ -222,7 +287,7 @@ function hughalroztatoo_booking_field_wysiwyg( $field_name, $default = '' ) {
 	if ( ! function_exists( 'get_field' ) ) {
 		return $default;
 	}
-	$post_id = get_the_ID();
+	$post_id = hughalroztatoo_booking_acf_source_post_id();
 	if ( ! $post_id ) {
 		return $default;
 	}
@@ -243,7 +308,7 @@ function hughalroztatoo_get_booking_category_descriptions() {
 	if ( ! function_exists( 'get_field' ) ) {
 		return $out;
 	}
-	$post_id = get_the_ID();
+	$post_id = hughalroztatoo_booking_acf_source_post_id();
 	if ( ! $post_id ) {
 		return $out;
 	}
@@ -274,7 +339,7 @@ function hughalroztatoo_get_booking_zone_options() {
 	if ( ! function_exists( 'get_field' ) ) {
 		return $out;
 	}
-	$post_id = get_the_ID();
+	$post_id = hughalroztatoo_booking_acf_source_post_id();
 	if ( ! $post_id ) {
 		return $out;
 	}
@@ -326,6 +391,17 @@ function hughalroztatoo_register_amelia_multistep_assets() {
 			true
 		);
 	}
+
+	$modal_js = $theme_dir . '/assets/js/booking-modal.js';
+	if ( file_exists( $modal_js ) ) {
+		wp_register_script(
+			'hughalroztatoo-booking-modal',
+			$theme_uri . '/assets/js/booking-modal.js',
+			array( 'hughalroztatoo-booking-ms' ),
+			(string) filemtime( $modal_js ),
+			true
+		);
+	}
 }
 add_action( 'wp_enqueue_scripts', 'hughalroztatoo_register_amelia_multistep_assets', 5 );
 
@@ -353,6 +429,8 @@ function hughalroztatoo_localize_amelia_multistep_script() {
 			'nonce'            => wp_create_nonce( 'ajax-nonce' ),
 			'timeZone'         => $tz,
 			'locale'           => get_locale(),
+			/** Open fullscreen booking URL in modal overlay (booking template). */
+			'openBookingModalOnLoad' => is_page_template( 'page-booking.php' ),
 			/**
 			 * BCP 47 tag for calendar month names (independent of WP admin language).
 			 * Filter: hughalroztatoo_booking_calendar_locale
@@ -485,12 +563,7 @@ function hughalroztatoo_localize_amelia_multistep_script() {
  * Enqueue when post content contains shortcode.
  */
 function hughalroztatoo_maybe_enqueue_amelia_multistep() {
-	if ( is_admin() || ! hughalroztatoo_amelia_active() ) {
-		return;
-	}
-
-	global $post;
-	if ( ! $post || ! hughalroztatoo_content_has_amelia_booking_shortcode( $post->post_content ) ) {
+	if ( is_admin() || ! hughalroztatoo_frontend_needs_booking_multistep() ) {
 		return;
 	}
 
@@ -500,6 +573,9 @@ function hughalroztatoo_maybe_enqueue_amelia_multistep() {
 	if ( wp_script_is( 'hughalroztatoo-booking-ms', 'registered' ) ) {
 		wp_enqueue_script( 'hughalroztatoo-booking-ms' );
 		hughalroztatoo_localize_amelia_multistep_script();
+	}
+	if ( wp_script_is( 'hughalroztatoo-booking-modal', 'registered' ) ) {
+		wp_enqueue_script( 'hughalroztatoo-booking-modal' );
 	}
 }
 add_action( 'wp_enqueue_scripts', 'hughalroztatoo_maybe_enqueue_amelia_multistep', 20 );
@@ -542,6 +618,54 @@ function hughalroztatoo_amelia_multistep_internal_notes( $appointment_data ) {
 add_filter( 'amelia_before_booking_added_filter', 'hughalroztatoo_amelia_multistep_internal_notes', 10, 1 );
 
 /**
+ * Remove processed shortcode from Booking template page output (wizard is rendered globally in footer modal).
+ *
+ * Keeps optional non-shortcode content (paragraphs, etc.).
+ *
+ * @param string $content Post content.
+ * @return string
+ */
+function hughalroztatoo_strip_booking_shortcode_from_booking_template( $content ) {
+	if ( ! is_singular( 'page' ) ) {
+		return $content;
+	}
+	$pid = (int) get_queried_object_id();
+	if ( $pid <= 0 || 'page-booking.php' !== (string) get_page_template_slug( $pid ) ) {
+		return $content;
+	}
+	return (string) preg_replace( '/\[\s*hugh_amelia_booking(?:\s+[^\]]*)?\]\s*/', '', $content );
+}
+add_filter( 'the_content', 'hughalroztatoo_strip_booking_shortcode_from_booking_template', 9 );
+
+/**
+ * Output booking modal shell (shortcode instance) before scripts.
+ */
+function hughalroztatoo_render_booking_modal() {
+	if ( is_admin() || ! hughalroztatoo_amelia_active() ) {
+		return;
+	}
+	if ( hughalroztatoo_booking_acf_source_post_id() <= 0 ) {
+		return;
+	}
+	$label = esc_attr__( 'Réservation', 'hughalroztatoo' );
+	$close = esc_attr__( 'Fermer', 'hughalroztatoo' );
+	echo '<div id="hugh-ms-booking-modal" class="hugh-ms-booking-modal" aria-hidden="true">';
+	echo '<div class="hugh-ms-booking-modal__backdrop" data-hat-booking-modal-close tabindex="-1"></div>';
+	echo '<div class="hugh-ms-booking-modal__shell">';
+	echo '<div class="hugh-ms-booking-modal__grab" aria-hidden="true"><span class="hugh-ms-booking-modal__grab-bar"></span></div>';
+	echo '<div class="hugh-ms-booking-modal__dialog" role="dialog" aria-modal="true" aria-label="' . $label . '">';
+	echo '<div class="hugh-ms-booking-modal__body">';
+	echo do_shortcode( '[hugh_amelia_booking]' );
+	echo '</div></div>';
+	$close_icon = esc_url( get_template_directory_uri() . '/assets/images/close.svg' );
+	echo '<button type="button" class="hugh-ms-booking-modal__close" data-hat-booking-modal-close aria-label="' . $close . '">';
+	echo '<img class="hugh-ms-booking-modal__close-svg" src="' . $close_icon . '" alt="" width="22" height="22" draggable="false" />';
+	echo '</button>';
+	echo '</div></div>';
+}
+add_action( 'wp_footer', 'hughalroztatoo_render_booking_modal', 5 );
+
+/**
  * Shortcode callback.
  *
  * Attributes:
@@ -582,6 +706,9 @@ function hughalroztatoo_shortcode_amelia_booking( $atts ) {
 		wp_enqueue_script( 'hughalroztatoo-booking-ms' );
 		hughalroztatoo_localize_amelia_multistep_script();
 	}
+	if ( wp_script_is( 'hughalroztatoo-booking-modal', 'registered' ) ) {
+		wp_enqueue_script( 'hughalroztatoo-booking-modal' );
+	}
 
 	$default_note_id = (int) apply_filters( 'hughalroztatoo_booking_project_note_field_id', 4 );
 	$data            = wp_json_encode(
@@ -594,6 +721,6 @@ function hughalroztatoo_shortcode_amelia_booking( $atts ) {
 		)
 	);
 
-	return '<div class="hugh-ms-booking" data-hugh-ms-config="' . esc_attr( $data ) . '" role="region" aria-live="polite"></div>';
+	return '<div id="hugh-ms-booking-root" class="hugh-ms-booking" data-hugh-ms-config="' . esc_attr( $data ) . '" role="region" aria-live="polite"></div>';
 }
 add_shortcode( 'hugh_amelia_booking', 'hughalroztatoo_shortcode_amelia_booking' );

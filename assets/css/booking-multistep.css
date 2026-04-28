@@ -1520,14 +1520,17 @@
 	background: #fff;
 }
 
+/* Step 7: панель с прокруткой; кнопка «Retour» — в потоке flex (.hugh-ms__step2-head), не абсолютная (иначе в модалке уезжает). */
 .hugh-ms__inner--step-7 .hugh-ms__panel--info {
+	position: relative;
+	flex: 1 1 auto;
 	min-height: 0;
 	padding-left: clamp(48px, 4.16vw, 80px);
 }
 
 .hugh-ms__inner--step-7 .hugh-ms__step2-head {
 	display: flex;
-	align-items: baseline;
+	align-items: flex-start;
 	justify-content: space-between;
 	gap: 24px;
 }
@@ -1554,17 +1557,25 @@
 	text-align: left;
 }
 
+/* Шаги 2, 3, 5, 6: Back в правом верхнем углу относительно .hugh-ms__panel — не добавлять сюда step 7–8 (--figma), иначе в модальном режиме «Retour» уезжает. */
 .hugh-ms__inner--step-2 .hugh-ms__step2-back,
 .hugh-ms__inner--step-3 .hugh-ms__step2-back,
 .hugh-ms__inner--step-5 .hugh-ms__step2-back,
-.hugh-ms__inner--step-6 .hugh-ms__step2-back,
-.hugh-ms__inner--step-7 .hugh-ms__step2-back--figma,
-.hugh-ms__inner--step-8 .hugh-ms__step2-back--figma,
-.hugh-ms__inner--step-9 .hugh-ms__step2-back--figma {
+.hugh-ms__inner--step-6 .hugh-ms__step2-back {
 	position: absolute;
 	right: clamp(48px, 4.16vw, 80px);
-	top: 67px;
+	top: 0;
 	z-index: 5;
+}
+
+/* Steps 7–8: «Retour» в строке flex (.hugh-ms__step2-head), не absolute (модалка иначе ломает якорь). */
+.hugh-ms__inner--step-7 .hugh-ms__step2-head > .hugh-ms__step2-back--figma,
+.hugh-ms__inner--step-8 .hugh-ms__step2-head > .hugh-ms__step2-back--figma {
+	position: static;
+	right: auto;
+	top: auto;
+	z-index: auto;
+	flex-shrink: 0;
 }
 
 .hugh-ms-booking .hugh-ms__step2-back-ico {
@@ -1804,6 +1815,8 @@
 }
 
 .hugh-ms__inner--step-8 .hugh-ms__panel--pay {
+	position: relative;
+	flex: 1 1 auto;
 	min-height: 0;
 	padding-left: clamp(48px, 4.16vw, 80px);
 	padding-right: clamp(48px, 4.16vw, 80px);
@@ -1811,7 +1824,7 @@
 
 .hugh-ms__inner--step-8 .hugh-ms__step2-head {
 	display: flex;
-	align-items: baseline;
+	align-items: flex-start;
 	justify-content: space-between;
 	gap: 24px;
 }
@@ -1821,7 +1834,7 @@
 	font-size: clamp(58px, 5.2vw, 100px);
 	font-weight: 300;
 	line-height: 1;
-	letter-spacing: 0.01em;
+	letter-spacing: 0;
 	text-transform: uppercase;
 	color: #fff;
 }
@@ -3544,4 +3557,244 @@
 	.hugh-ms__inner[class*="hugh-ms__inner--step-"].hugh-ms__inner--step-7 .hugh-ms__crumb.is-active { width: 84.5% !important; }
 	.hugh-ms__inner[class*="hugh-ms__inner--step-"].hugh-ms__inner--step-8 .hugh-ms__crumb.is-active,
 	.hugh-ms__inner[class*="hugh-ms__inner--step-"].hugh-ms__inner--step-9 .hugh-ms__crumb.is-active { width: 100% !important; }
+}
+
+/* —— Global footer modal (opens over current page) —— */
+
+html.hat-booking-modal-open,
+html.hat-booking-modal-open body {
+	overflow: hidden;
+	overscroll-behavior: contain;
+}
+
+.hugh-ms-booking-modal {
+	position: fixed;
+	inset: 0;
+	z-index: 99990;
+	display: none;
+	box-sizing: border-box;
+	padding: clamp(16px, 4vw, 48px);
+	pointer-events: none;
+	align-items: center;
+	justify-items: center;
+}
+.hugh-ms-booking-modal.is-open {
+	display: grid;
+	grid-template-columns: minmax(0, 1fr);
+	grid-template-rows: minmax(0, 1fr);
+	align-items: center;
+	justify-items: center;
+	justify-content: safe center;
+	pointer-events: auto;
+}
+
+/* Один слой подложки и оболочки — иначе сетка кладёт shell под backdrop и попап не по центру. */
+.hugh-ms-booking-modal.is-open > .hugh-ms-booking-modal__backdrop,
+.hugh-ms-booking-modal.is-open > .hugh-ms-booking-modal__shell {
+	grid-area: 1 / 1;
+}
+
+.hugh-ms-booking-modal.is-open > .hugh-ms-booking-modal__shell {
+	place-self: center;
+}
+
+/* Как у .hat-desktop-menu (main.css): десктоп — тот же тинт и blur, что при открытом бургере */
+.hugh-ms-booking-modal__backdrop {
+	position: fixed;
+	inset: 0;
+	z-index: 0;
+	cursor: pointer;
+	background: rgba(0, 0, 0, 0.78);
+	backdrop-filter: blur(35px);
+	-webkit-backdrop-filter: blur(35px);
+}
+
+@media (max-width: 768px) {
+	.hugh-ms-booking-modal__backdrop {
+		background: #000;
+		backdrop-filter: none;
+		-webkit-backdrop-filter: none;
+	}
+}
+
+/* Свайп-хэндл (только мобила; жест смахивания вниз см. booking-modal.js) */
+.hugh-ms-booking-modal__grab {
+	display: none;
+}
+
+.hugh-ms-booking-modal__grab-bar {
+	display: block;
+	width: 95px;
+	height: 4px;
+	border-radius: 999px;
+	margin: 0 auto;
+	background: rgba(245, 242, 237, 0.45);
+}
+
+/* Ряд: попап + иконка закрытия справа, сверху (выровняна по верху окна попапа) */
+.hugh-ms-booking-modal__shell {
+	position: relative;
+	z-index: 1;
+	box-sizing: border-box;
+	display: flex;
+	flex-direction: row;
+	flex-wrap: nowrap;
+	align-items: flex-start;
+	justify-content: center;
+	gap: clamp(10px, 1.5vw, 20px);
+	max-width: calc(100vw - 2 * clamp(16px, 4vw, 48px));
+	pointer-events: none;
+}
+
+.hugh-ms-booking-modal__shell > * {
+	pointer-events: auto;
+}
+
+@media (max-width: 767px) {
+	.hugh-ms-booking-modal {
+		align-items: end;
+		justify-items: stretch;
+		padding-inline: 0;
+		padding-block: max(env(safe-area-inset-bottom), 0px) 0;
+		padding-top: env(safe-area-inset-top, 0px);
+	}
+
+	.hugh-ms-booking-modal.is-open > .hugh-ms-booking-modal__shell {
+		/*place-self: end stretch;*/
+		/*align-self: end;*/
+		justify-self: stretch;
+	}
+
+	.hugh-ms-booking-modal__shell {
+		box-sizing: border-box;
+		width: 100%;
+		max-width: 100vw;
+		max-height: calc(100dvh - env(safe-area-inset-bottom, 0px));
+		height: auto;
+		flex-direction: column;
+		align-items: stretch;
+		justify-content: flex-start;
+		gap: 0;
+		padding: 0;
+		transition: transform 0.38s cubic-bezier(0.32, 0.72, 0, 1);
+		will-change: transform;
+	}
+
+	.hugh-ms-booking-modal__shell.is-sheet-dragging {
+		transition: none;
+	}
+
+	.hugh-ms-booking-modal__grab {
+		display: flex;
+		justify-content: center;
+		align-items: center;
+		flex-shrink: 0;
+		min-height: 28px;
+		padding: 10px 0 6px;
+		touch-action: none;
+		cursor: grab;
+		user-select: none;
+	}
+
+	.hugh-ms-booking-modal__grab:active {
+		cursor: grabbing;
+	}
+
+	/* Закрытие: смахивание вниз / overlay / Escape — без крестика */
+	.hugh-ms-booking-modal__close {
+		display: none !important;
+	}
+
+	.hugh-ms-booking-modal__dialog {
+		box-sizing: border-box;
+		width: 100%;
+		max-width: 100%;
+		max-height: min(88dvh, calc(100dvh - max(env(safe-area-inset-top), 52px)));
+		flex: 1 1 auto;
+		min-height: 0;
+		overflow-x: visible;
+		overflow-y: auto;
+		touch-action: pan-y;
+		border: 0;
+		outline: none;
+		box-shadow: 0 -8px 48px rgba(0, 0, 0, 0.45);
+		-webkit-overflow-scrolling: touch;
+		border-top-left-radius: 14px;
+		border-top-right-radius: 14px;
+	}
+
+	.hugh-ms-booking-modal__body {
+		min-height: 0;
+	}
+
+	.hugh-ms-booking-modal__body .hugh-ms-booking {
+		width: 100%;
+		min-height: min(594px, 100%);
+		border: none !important;
+		outline: none;
+	}
+}
+
+/* Desktop — тот же «холст», что у .hugh-ms-booking на странице букинга: 1569×818 */
+
+@media (min-width: 768px) {
+	/* −56px: отступ под крестик справа + gap, без горизонтального скролла */
+	.hugh-ms-booking-modal__dialog {
+		flex: 0 0 auto;
+		width: min(1569px, calc(100vw - 40px - 56px));
+		max-width: 1569px;
+		min-height: 818px;
+		max-height: none;
+	}
+
+	.hugh-ms-booking-modal__body .hugh-ms-booking {
+		width: min(1569px, calc(100vw - 40px - 56px));
+		max-width: 1569px;
+		min-height: 818px;
+		margin: 0;
+	}
+}
+
+.hugh-ms-booking-modal__dialog {
+	position: relative;
+	box-sizing: border-box;
+	overflow: visible;
+	box-shadow: 0 28px 80px rgba(0, 0, 0, 0.65);
+}
+
+.hugh-ms-booking-modal__body .hugh-ms-booking {
+	margin: 0;
+	border-radius: 0;
+}
+
+.hugh-ms-booking-modal__close {
+	position: static;
+	flex-shrink: 0;
+	box-sizing: border-box;
+	min-width: 44px;
+	min-height: 44px;
+	display: grid;
+	align-items: center;
+	justify-items: center;
+	padding: 0;
+	border: 0;
+	cursor: pointer;
+	background: transparent;
+	transition: opacity 0.15s ease;
+}
+
+.hugh-ms-booking-modal__close-svg {
+	display: block;
+	width: clamp(18px, 2.5vw, 26px);
+	height: auto;
+	filter: drop-shadow(0 1px 12px rgba(0, 0, 0, 0.5));
+}
+
+.hugh-ms-booking-modal__close:focus-visible {
+	outline: 2px solid #fff;
+	outline-offset: 4px;
+}
+
+.hugh-ms-booking-modal__close:hover {
+	opacity: 0.75;
 }
