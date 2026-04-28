@@ -44,18 +44,11 @@ $hero_has_heading     = '' !== $hero_heading_image_url;
 $hero_has_action      = '' !== $hero_lede || ( '' !== $hero_cta_label && '' !== $hero_cta_url );
 $hero_has_strip       = '' !== $hero_strip_left || '' !== $hero_strip_center || '' !== $hero_strip_right;
 
-$booking_src_id           = function_exists( 'hughalroztatoo_booking_acf_source_post_id' )
-	? (int) hughalroztatoo_booking_acf_source_post_id()
-	: 0;
-$booking_permalink        = $booking_src_id > 0 ? (string) get_permalink( $booking_src_id ) : '';
-$hero_cta_normalized      = trim( (string) $hero_cta_url ) !== ''
-	? untrailingslashit( strtok( trailingslashit( esc_url_raw( $hero_cta_url ) ), '?' ) )
-	: '';
-$booking_url_normalized = $booking_permalink !== ''
-	? untrailingslashit( strtok( trailingslashit( $booking_permalink ), '?' ) )
-	: '';
-$hero_cta_is_booking      = '' !== $hero_cta_normalized && '' !== $booking_url_normalized
-	&& $hero_cta_normalized === $booking_url_normalized;
+$hero_cta_is_booking = function_exists( 'hughalroztatoo_url_is_booking_modal_cta' )
+	&& hughalroztatoo_url_is_booking_modal_cta( $hero_cta_url );
+
+/** Для модалки не даём открыть «бронирование» в новой вкладке из ACF. */
+$hero_cta_target_final = $hero_cta_is_booking ? '_self' : $hero_cta_target;
 
 if ( ! $hero_has_studio_info && ! $hero_has_heading && ! $hero_has_action && ! $hero_has_strip ) {
 	return;
@@ -103,7 +96,7 @@ if ( ! $hero_has_studio_info && ! $hero_has_heading && ! $hero_has_action && ! $
 			<?php endif; ?>
 
 			<?php if ( '' !== $hero_cta_label && '' !== $hero_cta_url ) : ?>
-			<a class="hat-hero__cta<?php echo $hero_cta_is_booking ? ' hat-js-booking-trigger' : ''; ?>" href="<?php echo esc_url( $hero_cta_url ); ?>" target="<?php echo esc_attr( $hero_cta_target ); ?>">
+			<a class="hat-hero__cta<?php echo $hero_cta_is_booking ? ' hat-js-booking-trigger' : ''; ?>" href="<?php echo esc_url( $hero_cta_url ); ?>" target="<?php echo esc_attr( $hero_cta_target_final ); ?>">
 				<span class="hat-hero__cta-label"><?php echo esc_html( $hero_cta_label ); ?></span>
 				<span class="hat-hero__cta-arrow" aria-hidden="true">
 					<img src="<?php echo esc_url( get_template_directory_uri() . '/assets/images/arrow-up-outline.svg' ); ?>" alt="" width="35" height="35">

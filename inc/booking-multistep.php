@@ -66,6 +66,51 @@ function hughalroztatoo_booking_acf_source_post_id() {
 }
 
 /**
+ * Whether a frontend URL targets the Booking page template (opens modal via .hat-js-booking-trigger).
+ *
+ * Matches by template slug (incl. Polylang locales), canonical booking post ID, or normalized URLs.
+ *
+ * @param string $cta_url Link from ACF or markup.
+ * @return bool
+ */
+function hughalroztatoo_url_is_booking_modal_cta( $cta_url ) {
+	if ( '' === trim( (string) $cta_url ) ) {
+		return false;
+	}
+
+	$booking_src_id      = function_exists( 'hughalroztatoo_booking_acf_source_post_id' )
+		? (int) hughalroztatoo_booking_acf_source_post_id()
+		: 0;
+	$booking_permalink = $booking_src_id > 0 ? (string) get_permalink( $booking_src_id ) : '';
+
+	$cta_id = (int) url_to_postid( esc_url_raw( $cta_url ) );
+
+	if ( $cta_id > 0 ) {
+		$cta_tpl = (string) get_page_template_slug( $cta_id );
+		if ( 'page-booking.php' === $cta_tpl ) {
+			return true;
+		}
+		if ( $booking_src_id > 0 && $cta_id === $booking_src_id ) {
+			return true;
+		}
+	}
+
+	if ( $booking_src_id > 0 && '' !== $booking_permalink ) {
+		$cta_norm     = untrailingslashit(
+			strtok( trailingslashit( esc_url_raw( $cta_url ) ), '?' )
+		);
+		$booking_norm = untrailingslashit(
+			strtok( trailingslashit( $booking_permalink ), '?' )
+		);
+		if ( '' !== $cta_norm && '' !== $booking_norm && $cta_norm === $booking_norm ) {
+			return true;
+		}
+	}
+
+	return false;
+}
+
+/**
  * Detect shortcode in singular content (Classic Editor).
  *
  * @param string|null $content Post content.

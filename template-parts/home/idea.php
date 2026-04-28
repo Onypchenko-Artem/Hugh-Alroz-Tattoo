@@ -25,6 +25,13 @@ $idea_strip_2   = function_exists( 'get_field' ) ? (string) get_field( 'home_ide
 
 $idea_cta_label = '' !== $idea_cta_label ? $idea_cta_label : $idea_cta_title;
 $idea_cta_target = '' !== $idea_cta_target ? $idea_cta_target : '_self';
+
+$idea_cta_is_booking = function_exists( 'hughalroztatoo_url_is_booking_modal_cta' )
+	&& hughalroztatoo_url_is_booking_modal_cta( $idea_cta_url );
+
+/** То же поведение, что hero: модалка, без новой вкладки. */
+$idea_cta_target_final = $idea_cta_is_booking ? '_self' : $idea_cta_target;
+
 $idea_has_title = '' !== $idea_title_1 || '' !== $idea_title_2;
 $idea_has_action = '' !== $idea_text || ( '' !== $idea_cta_label && '' !== $idea_cta_url );
 $idea_has_strip = '' !== $idea_strip_1 || '' !== $idea_strip_2;
@@ -70,7 +77,7 @@ if ( '' === $idea_eyebrow && ! $idea_has_title && ! $idea_has_action && ! $idea_
 			<?php endif; ?>
 
 			<?php if ( '' !== $idea_cta_label && '' !== $idea_cta_url ) : ?>
-			<a class="hat-idea__cta" href="<?php echo esc_url( $idea_cta_url ); ?>" target="<?php echo esc_attr( $idea_cta_target ); ?>">
+			<a class="hat-idea__cta<?php echo $idea_cta_is_booking ? ' hat-js-booking-trigger' : ''; ?>" href="<?php echo esc_url( $idea_cta_url ); ?>" target="<?php echo esc_attr( $idea_cta_target_final ); ?>">
 				<span class="hat-idea__cta-label"><?php echo esc_html( $idea_cta_label ); ?></span>
 				<span class="hat-idea__cta-arrow" aria-hidden="true">
 					<img src="<?php echo esc_url( get_template_directory_uri() . '/assets/images/arrow-up-outline.svg' ); ?>" alt="" width="35" height="35">

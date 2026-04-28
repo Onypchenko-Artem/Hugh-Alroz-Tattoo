@@ -90,7 +90,7 @@
 .hat-idea__cta {
 	display: inline-flex;
 	align-items: center;
-	justify-content: space-between;
+	justify-content: center;
 	background: #fff;
 	color: #000;
 	text-decoration: none;
