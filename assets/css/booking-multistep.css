@@ -62,6 +62,10 @@
 	letter-spacing: 0.06em;
 }
 
+.hugh-ms__step-counter {
+	display: none;
+}
+
 .hugh-ms__sub {
 	margin: 0 0 8px;
 	font-size: 0.85rem;

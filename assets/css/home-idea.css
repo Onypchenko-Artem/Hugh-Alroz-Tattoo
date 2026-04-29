@@ -250,7 +250,7 @@
 		height: auto;
 		min-height: clamp(45px, 13.74vw, 54px);
 		box-sizing: border-box;
-		justify-content: space-between;
+		justify-content: center;
 		align-items: center;
 		padding: clamp(7px, 2.04vw, 8px) clamp(8px, 2.54vw, 10px);
 		gap: clamp(8px, 2.54vw, 10px);
