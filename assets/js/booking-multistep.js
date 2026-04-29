@@ -840,6 +840,34 @@
 			return '<p class="' + cls + '" role="status">' + esc(text) + '</p>';
 		}
 
+		function isSuiteDeTravailCategory() {
+			return parseInt(state.selectedCategoryId, 10) === 3;
+		}
+
+		function mobileStepLabel() {
+			const stepToIndex = { 2: 1, 3: 2, 5: 3, 6: 4, 7: 5, 8: 6 };
+			const current = stepToIndex[state.step];
+			if (!current) {
+				return '';
+			}
+			return fillBookingTemplate(
+				S.stepCounterFormat || 'Étape {{current}} sur {{total}}',
+				{ current: current, total: 6 }
+			);
+		}
+
+		function renderStepTitle(title) {
+			const stepLabel = mobileStepLabel();
+			return (
+				'<h2 class="hugh-ms__title">' +
+				esc(title) +
+				(stepLabel
+					? '<span class="hugh-ms__step-counter">' + esc(stepLabel) + '</span>'
+					: '') +
+				'</h2>'
+			);
+		}
+
 		function renderPhotoSlotFeedback(files) {
 			if (!files || !files.length) {
 				return '';
@@ -950,6 +978,13 @@
 			if (state.step === 6) {
 				const nZone = state.photoFilesZone.length;
 				const nRef = state.photoFilesReference.length;
+				if (isSuiteDeTravailCategory()) {
+					if (nZone < 1) {
+						setError(S.photoRequired || S.errorGeneric);
+						render();
+						return;
+					}
+				} else {
 				if (nZone === 0) {
 					setError(S.photoErrorZoneNone || S.photoErrorZoneMin || S.errorGeneric);
 					render();
@@ -964,6 +999,7 @@
 					setError(S.photoErrorRefNone || S.photoErrorRefMin || S.errorGeneric);
 					render();
 					return;
+				}
 				}
 				const ameliaFiles = resolveAmeliaFileFieldsForBooking(
 					state.service.id,
@@ -1279,9 +1315,7 @@
 			return (
 				'<div class="hugh-ms__panel">' +
 				'<div class="hugh-ms__step2-head">' +
-				'<h2 class="hugh-ms__title">' +
-				esc(S.stepService || S.stepType) +
-				'</h2>' +
+				renderStepTitle(S.stepService || S.stepType) +
 				'<button type="button" class="hugh-ms__step2-back hugh-ms__step2-back--figma" data-act="back">' +
 				'<span class="hugh-ms__step2-back-ico" aria-hidden="true"></span>' +
 				'<span class="hugh-ms__step2-back-txt">' +
@@ -1357,9 +1391,7 @@
 			return (
 				'<div class="hugh-ms__panel">' +
 				'<div class="hugh-ms__step2-head">' +
-				'<h2 class="hugh-ms__title">' +
-				esc(S.stepDate) +
-				'</h2>' +
+				renderStepTitle(S.stepDate) +
 				'<button type="button" class="hugh-ms__step2-back hugh-ms__step2-back--figma" data-act="back">' +
 				'<span class="hugh-ms__step2-back-ico" aria-hidden="true"></span>' +
 				'<span class="hugh-ms__step2-back-txt">' +
@@ -1462,9 +1494,7 @@
 			return (
 				'<div class="hugh-ms__panel">' +
 				'<div class="hugh-ms__step2-head">' +
-				'<h2 class="hugh-ms__title">' +
-				esc(S.stepTime) +
-				'</h2>' +
+				renderStepTitle(S.stepTime) +
 				'<button type="button" class="hugh-ms__step2-back hugh-ms__step2-back--figma" data-act="back">' +
 				'<span class="hugh-ms__step2-back-ico" aria-hidden="true"></span>' +
 				'<span class="hugh-ms__step2-back-txt">' +
@@ -1482,6 +1512,7 @@
 		}
 
 		function renderPhoto() {
+			const isSuite = isSuiteDeTravailCategory();
 			const ameliaF = resolveAmeliaFileFieldsForBooking(
 				state.service.id,
 				state.customFields,
@@ -1523,7 +1554,7 @@
 				.join('');
 			const warn = photoCfsOk ? '' : '<p class="hugh-ms__warn">' + esc(S.photoNoField) + '</p>';
 			const reqMark = ' <span class="hugh-ms__req" aria-hidden="true">*</span>';
-			const ZONE_MIN = 3;
+			const ZONE_MIN = isSuite ? 1 : 3;
 			const REF_MIN = 1;
 			const nz = state.photoFilesZone.length;
 			const nr = state.photoFilesReference.length;
@@ -1539,12 +1570,47 @@
 					: renderPhotoProgressLine(S.photoRefProgressComplete, { current: nr, needed: REF_MIN, missing: 0 }, true);
 			const zoneFeedback = renderPhotoSlotFeedback(state.photoFilesZone);
 			const refFeedback = renderPhotoSlotFeedback(state.photoFilesReference);
+			const suiteTitle = S.stepPhotoSuiteTitle || 'PHOTO DU PROJET';
+			const suiteSub = S.stepPhotoSuiteSub || 'SUITE DE TRAVAIL';
+			const suiteLead = S.stepPhotoSuiteLead || 'Envoyez une photo de votre tatouage existant pour que le studio puisse identifier votre projet et preparer la suite de la session.';
+			const suiteUpload = S.photoUploadSuite || 'Photo du tatouage existant';
+			const suiteNote = S.photoHintSuite || 'Pas besoin de reference ni de photos de zone - uniquement une photo claire du tatouage en cours.';
+			if (isSuite) {
+				return (
+					'<div class="hugh-ms__panel">' +
+					'<div class="hugh-ms__step2-head">' +
+					renderStepTitle(suiteTitle) +
+					'<button type="button" class="hugh-ms__step2-back hugh-ms__step2-back--figma" data-act="back">' +
+					'<span class="hugh-ms__step2-back-ico" aria-hidden="true"></span>' +
+					'<span class="hugh-ms__step2-back-txt">' +
+					esc(S.back) +
+					'</span>' +
+					'</button>' +
+					'</div>' +
+					'<p class="hugh-ms__photo-subtitle">' + esc(suiteSub) + '</p>' +
+					'<p class="hugh-ms__photo-guidelines">' + esc(suiteLead) + '</p>' +
+					warn +
+					'<div class="hugh-ms__photo-upload-grid">' +
+					'<label class="hugh-ms__photo-upload-card">' +
+					'<input type="file" class="hugh-ms__file-input" name="bookingPhotos" data-photo-slot="zone" accept="image/*" multiple>' +
+					'<span class="hugh-ms__photo-upload-icon" aria-hidden="true"></span>' +
+					'<span class="hugh-ms__photo-upload-text">' + esc(suiteUpload) + reqMark + '</span>' +
+					zoneProgressHtml +
+					zoneFeedback +
+					'</label>' +
+					'</div>' +
+					'<p class="hugh-ms__photo-guidelines">' + esc(suiteNote) + '</p>' +
+					'<label class="hugh-ms__file-label hugh-ms__file-label--fallback">' +
+					'<input type="file" class="hugh-ms__file-input" name="bookingPhotos" accept="image/*" multiple>' +
+					'<span class="hugh-ms__file-btn">' + esc(S.photoChoose) + '</span>' +
+					'</label>' +
+					'</div>'
+				);
+			}
 			return (
 				'<div class="hugh-ms__panel">' +
 				'<div class="hugh-ms__step2-head">' +
-				'<h2 class="hugh-ms__title">' +
-				esc(S.stepPhoto) +
-				'</h2>' +
+				renderStepTitle(S.stepPhoto) +
 				'<button type="button" class="hugh-ms__step2-back hugh-ms__step2-back--figma" data-act="back">' +
 				'<span class="hugh-ms__step2-back-ico" aria-hidden="true"></span>' +
 				'<span class="hugh-ms__step2-back-txt">' +
@@ -1622,9 +1688,7 @@
 			return (
 				'<div class="hugh-ms__panel hugh-ms__panel--info">' +
 				'<div class="hugh-ms__step2-head">' +
-				'<h2 class="hugh-ms__title">' +
-				esc(S.stepInfo) +
-				'</h2>' +
+				renderStepTitle(S.stepInfo) +
 				'<button type="button" class="hugh-ms__step2-back hugh-ms__step2-back--figma" data-act="back">' +
 				'<span class="hugh-ms__step2-back-ico" aria-hidden="true"></span>' +
 				'<span class="hugh-ms__step2-back-txt">' +
@@ -1758,9 +1822,7 @@
 			return (
 				'<div class="hugh-ms__panel hugh-ms__panel--pay">' +
 				'<div class="hugh-ms__step2-head">' +
-				'<h2 class="hugh-ms__title">' +
-				esc(S.stepPay) +
-				'</h2>' +
+				renderStepTitle(S.stepPay) +
 				'<button type="button" class="hugh-ms__step2-back hugh-ms__step2-back--figma" data-act="back">' +
 				'<span class="hugh-ms__step2-back-ico" aria-hidden="true"></span>' +
 				'<span class="hugh-ms__step2-back-txt">' +
@@ -1903,7 +1965,9 @@
 			const nextDisabled =
 				(state.step === 2 && !state.date) ||
 				(state.step === 6 &&
-					(state.photoFilesZone.length < 3 || state.photoFilesReference.length < 1));
+					(isSuiteDeTravailCategory()
+						? state.photoFilesZone.length < 1
+						: (state.photoFilesZone.length < 3 || state.photoFilesReference.length < 1)));
 			const nextBtn =
 				showNext ?
 					'<button type="button" class="hugh-ms__btn hugh-ms__btn--primary" data-act="next"' +

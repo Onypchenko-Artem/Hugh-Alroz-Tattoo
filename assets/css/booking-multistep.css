@@ -1205,9 +1205,21 @@
 .hugh-ms__photo-guidelines {
 	width: min(712px, 100%);
 	margin: 0 0 30px;
+	padding-right: 30px;
+	font-weight: 300;
 	font-size: 24px;
 	line-height: 29px;
 	letter-spacing: 0.02em;
+	color: #fff;
+}
+
+.hugh-ms__photo-subtitle {
+	width: min(712px, 100%);
+	margin: 0 0 14px;
+	font-size: 32px;
+	line-height: 1.05;
+	letter-spacing: 0.02em;
+	text-transform: uppercase;
 	color: #fff;
 }
 
@@ -1232,7 +1244,7 @@
 	justify-content: center;
 	gap: 8px;
 	width: 100%;
-	min-height: 137px;
+	min-height: clamp(220px, 26vw, 334px);
 	padding: 24px 20px;
 	border: 1px solid #fff;
 	cursor: pointer;
@@ -2371,8 +2383,7 @@
 		letter-spacing: 0;
 	}
 
-	.hugh-ms__inner--step-2 .hugh-ms__title::after {
-		content: "Étape 1 sur 6";
+	.hugh-ms__inner--step-2 .hugh-ms__title .hugh-ms__step-counter {
 		display: block;
 		margin-top: 11px;
 		font-size: 14px;
@@ -2569,8 +2580,7 @@
 		letter-spacing: 0;
 	}
 
-	.hugh-ms__inner--step-3 .hugh-ms__title::after {
-		content: "Étape 2 sur 6";
+	.hugh-ms__inner--step-3 .hugh-ms__title .hugh-ms__step-counter {
 		display: block;
 		margin-top: 11px;
 		font-size: 14px;
@@ -2735,8 +2745,7 @@
 		letter-spacing: 0;
 	}
 
-	.hugh-ms__inner--step-5 .hugh-ms__title::after {
-		content: "Étape 3 sur 6";
+	.hugh-ms__inner--step-5 .hugh-ms__title .hugh-ms__step-counter {
 		display: block;
 		margin-top: 11px;
 		font-size: 14px;
@@ -2864,7 +2873,7 @@
 		align-items: flex-start;
 		gap: 11px;
 		max-width: 270px;
-		margin-bottom: 11px;
+		margin-bottom: 20px;
 	}
 
 	.hugh-ms__inner--step-6 .hugh-ms__step2-back,
@@ -2904,8 +2913,7 @@
 		letter-spacing: 0;
 	}
 
-	.hugh-ms__inner--step-6 .hugh-ms__title::after {
-		content: "Étape 4 sur 6";
+	.hugh-ms__inner--step-6 .hugh-ms__title .hugh-ms__step-counter {
 		display: block;
 		margin-top: 11px;
 		font-size: 14px;
@@ -2916,9 +2924,14 @@
 		color: #c0c0c0;
 	}
 
+	.hugh-ms__inner--step-6 .hugh-ms__photo-subtitle {
+		font-size: 18px;
+		margin-bottom: 0;
+	}
+
 	.hugh-ms__inner--step-6 .hugh-ms__photo-guidelines {
 		width: 100%;
-		margin: 0;
+		margin: 11px 0 0;
 		font-size: 15px;
 		font-weight: 300;
 		line-height: 18px;
@@ -3117,8 +3130,7 @@
 		letter-spacing: 0;
 	}
 
-	.hugh-ms__inner--step-7 .hugh-ms__title::after {
-		content: "Étape 5 sur 6";
+	.hugh-ms__inner--step-7 .hugh-ms__title .hugh-ms__step-counter {
 		display: block;
 		margin-top: 11px;
 		font-size: 14px;
@@ -3314,8 +3326,7 @@
 		letter-spacing: 0;
 	}
 
-	.hugh-ms__inner--step-8 .hugh-ms__title::after {
-		content: "Étape 6 sur 6";
+	.hugh-ms__inner--step-8 .hugh-ms__title .hugh-ms__step-counter {
 		display: block;
 		margin-top: 10px;
 		font-size: 14px;
