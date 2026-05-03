@@ -305,4 +305,100 @@
 	if (cfg.openBookingModalOnLoad) {
 		window.hughalroztatooOpenBookingModal(window.location.href);
 	}
+
+	/**
+	 * Auto-grow modal mode (desktop):
+	 * Если контент не помещается по высоте (или мы на высоких шагах 6/7/8),
+	 * модалка переходит в page-scroll режим и растёт по контенту.
+	 * Без внутреннего скролла и без выхода контента за рамку попапа.
+	 */
+	(function () {
+		var AUTO_GROW_MODAL_CLASS = 'is-auto-grow';
+		var DESKTOP_MQ = typeof window.matchMedia !== 'undefined' ? window.matchMedia('(min-width: 768px)') : null;
+		var active = false;
+		var rafToken = 0;
+
+		function isDesktop() {
+			return DESKTOP_MQ ? DESKTOP_MQ.matches : window.innerWidth >= 768;
+		}
+
+		function availableViewportHeight() {
+			var modalStyles = window.getComputedStyle(modal);
+			var padRaw = modalStyles.getPropertyValue('--hugh-ms-modal-pad') || '0px';
+			var pad = parseFloat(padRaw) || 0;
+			return Math.max(0, window.innerHeight - (pad * 2));
+		}
+
+		function contentHeight() {
+			var bookingEl = modal.querySelector('.hugh-ms-booking-modal__body .hugh-ms-booking');
+			if (!(bookingEl instanceof HTMLElement)) {
+				return 0;
+			}
+			return bookingEl.scrollHeight;
+		}
+
+		function hasTallStep() {
+			return !!root.querySelector(
+				'.hugh-ms__inner--step-6, .hugh-ms__inner--step-7, .hugh-ms__inner--step-8'
+			);
+		}
+
+		function shouldEnableAutoGrow() {
+			if (!modal.classList.contains('is-open') || !isDesktop()) {
+				return false;
+			}
+			var contentTooTall = contentHeight() > (availableViewportHeight() - 2);
+			return hasTallStep() || contentTooTall;
+		}
+
+		function enterAutoGrow() {
+			if (active) {
+				return;
+			}
+			active = true;
+			modal.classList.add(AUTO_GROW_MODAL_CLASS);
+		}
+
+		function exitAutoGrow() {
+			if (!active) {
+				return;
+			}
+			active = false;
+			modal.classList.remove(AUTO_GROW_MODAL_CLASS);
+		}
+
+		function syncAutoGrowMode() {
+			if (shouldEnableAutoGrow()) {
+				enterAutoGrow();
+			} else {
+				exitAutoGrow();
+			}
+		}
+
+		function scheduleSync() {
+			if (rafToken) {
+				return;
+			}
+			rafToken = window.requestAnimationFrame(function () {
+				rafToken = 0;
+				syncAutoGrowMode();
+			});
+		}
+
+		var observer = new MutationObserver(function () {
+			scheduleSync();
+		});
+		observer.observe(root, { childList: true, subtree: true });
+
+		var modalObserver = new MutationObserver(function () {
+			scheduleSync();
+		});
+		modalObserver.observe(modal, { attributes: true, attributeFilter: ['class'] });
+
+		window.addEventListener('resize', scheduleSync);
+
+		if (DESKTOP_MQ && typeof DESKTOP_MQ.addEventListener === 'function') {
+			DESKTOP_MQ.addEventListener('change', scheduleSync);
+		}
+	})();
 })();

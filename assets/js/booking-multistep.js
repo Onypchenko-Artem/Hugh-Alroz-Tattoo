@@ -1296,10 +1296,12 @@
 				'<h2 class="hugh-ms__title">' + esc(S.stepZone || 'SÉLECTIONNEZ LA ZONE') + '</h2>' +
 				'<div class="hugh-ms__zone-bodies">' +
 				'<div class="hugh-ms__zone-body" data-body-side="front">' +
+				'<img class="hugh-ms__zone-body-bg" src="' + esc(humanSvgUrl('body-front.jpg')) + '" alt="" draggable="false">' +
 				'<img class="hugh-ms__zone-body-silhouette" src="' + esc(humanSvgUrl('body-front-vector.svg')) + '" alt="" draggable="false">' +
 				frontParts +
 				'</div>' +
 				'<div class="hugh-ms__zone-body" data-body-side="back">' +
+				'<img class="hugh-ms__zone-body-bg" src="' + esc(humanSvgUrl('body-back.jpg')) + '" alt="" draggable="false">' +
 				'<img class="hugh-ms__zone-body-silhouette" src="' + esc(humanSvgUrl('body-back-vector.svg')) + '" alt="" draggable="false">' +
 				backParts +
 				'</div>' +
@@ -1718,31 +1720,9 @@
 				refFeedback +
 				'</label>' +
 				'</div>' +
-				'<div class="hugh-ms__photo-zone-wrap">' +
-				'<label class="hugh-ms__photo-zone-label">' +
-				esc(zoneFieldLabel) +
-				'</label>' +
-				'<div class="hugh-ms__photo-zone-field' +
-				(state.tattooZoneOpen ? ' is-open' : '') +
-				'">' +
 				'<input type="hidden" name="tattooZone" value="' +
 				esc(state.tattooZone) +
 				'">' +
-				'<button type="button" class="hugh-ms__photo-zone-trigger" data-zone-toggle="1" aria-haspopup="listbox" aria-expanded="' +
-				(state.tattooZoneOpen ? 'true' : 'false') +
-				'">' +
-				'<span class="hugh-ms__photo-zone-value">' +
-				esc(zoneLabel) +
-				'</span>' +
-				'<span class="hugh-ms__photo-zone-arrow" aria-hidden="true"></span>' +
-				'</button>' +
-				'<div class="hugh-ms__photo-zone-menu' +
-				(state.tattooZoneOpen ? ' is-open' : '') +
-				'" role="listbox">' +
-				zoneOptionsHtml +
-				'</div>' +
-				'</div>' +
-				'</div>' +
 				'<label class="hugh-ms__file-label hugh-ms__file-label--fallback">' +
 				'<input type="file" class="hugh-ms__file-input" name="bookingPhotos" accept="image/*" multiple>' +
 				'<span class="hugh-ms__file-btn">' +
