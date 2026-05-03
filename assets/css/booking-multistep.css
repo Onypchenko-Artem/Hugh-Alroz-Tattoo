@@ -638,10 +638,6 @@
 	.hugh-ms__zone-bodies {
 		gap: clamp(8px, 1.2vw, 16px);
 	}
-
-	.hugh-ms__zone-body {
-		max-width: clamp(140px, 22vh, 280px);
-	}
 }
 
 /* Step 1: "Type de visite" visual from Figma. */
