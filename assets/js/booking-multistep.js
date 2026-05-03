@@ -781,6 +781,7 @@
 			return {
 				step: 0,
 				selectedBodyZone: '',
+				selectedBodySide: 'front',
 				categories: [],
 				categoryEntries: [],
 				flat: [],
@@ -1288,23 +1289,135 @@
 			}).join('');
 		}
 
+		function selectedBodyZoneDef() {
+			if (!state.selectedBodyZone) {
+				return null;
+			}
+			var sides = ['front', 'back'];
+			for (var i = 0; i < sides.length; i++) {
+				var side = sides[i];
+				for (var j = 0; j < bodyZoneDefs[side].length; j++) {
+					var zone = bodyZoneDefs[side][j];
+					if (zone.key === state.selectedBodyZone) {
+						return {
+							side: side,
+							zone: zone,
+						};
+					}
+				}
+			}
+			return null;
+		}
+
+		function bodyZoneSide(zoneKey) {
+			var sides = ['front', 'back'];
+			for (var i = 0; i < sides.length; i++) {
+				var side = sides[i];
+				var found = bodyZoneDefs[side].some(function (z) {
+					return z.key === zoneKey;
+				});
+				if (found) {
+					return side;
+				}
+			}
+			return '';
+		}
+
+		function renderBodySideButton(side, label) {
+			var selected = state.selectedBodySide === side ? ' is-selected' : '';
+			return (
+				'<button type="button" class="hugh-ms__zone-side-btn' + selected + '" data-body-view="' + esc(side) + '" aria-pressed="' +
+				(state.selectedBodySide === side ? 'true' : 'false') +
+				'">' +
+				esc(label) +
+				'</button>'
+			);
+		}
+
+		function renderSelectedZoneHint() {
+			var picked = selectedBodyZoneDef();
+			if (!picked) {
+				return '';
+			}
+			var rawLabel = picked.zone.label != null ? String(picked.zone.label) : '';
+			var zoneLabel = rawLabel ? rawLabel.charAt(0).toLowerCase() + rawLabel.slice(1) : '';
+			return (
+				'<div class="hugh-ms__zone-picked-hint">' +
+				'<div class="hugh-ms__zone-picked-hint-inner">' +
+				'<span class="hugh-ms__zone-picked-hint-icon" aria-hidden="true"></span>' +
+				'<p class="hugh-ms__zone-picked-hint-text">' +
+				esc((S.zonePickedPrefix || 'Vous avez choisi ') + zoneLabel) +
+				'</p>' +
+				'</div>' +
+				'</div>'
+			);
+		}
+
+		function positionSelectedZoneHint() {
+			var hint = el.querySelector('.hugh-ms__zone-picked-hint');
+			var stage = el.querySelector('.hugh-ms__zone-stage');
+			var selected = el.querySelector('.hugh-ms__zone-part.is-selected');
+			if (!hint || !stage || !selected) {
+				return;
+			}
+			var stageRect = stage.getBoundingClientRect();
+			var selectedRect = selected.getBoundingClientRect();
+			hint.classList.remove('is-up');
+			hint.style.left = '0px';
+			hint.style.top = '0px';
+			var hintRect = hint.getBoundingClientRect();
+			var centerX = selectedRect.left + (selectedRect.width / 2);
+			var centerY = selectedRect.top + (selectedRect.height / 2);
+			var edgePad = 4;
+			var left = centerX - stageRect.left - (hintRect.width / 2);
+			var minLeft = edgePad;
+			var maxLeft = stageRect.width - hintRect.width - edgePad;
+			if (left < minLeft) {
+				left = minLeft;
+			}
+			if (left > maxLeft) {
+				left = maxLeft;
+			}
+			var top = centerY - stageRect.top;
+			var freeBottom = stageRect.height - top;
+			if (freeBottom < hintRect.height + edgePad) {
+				top = centerY - stageRect.top - hintRect.height;
+				hint.classList.add('is-up');
+			}
+			if (top < edgePad) {
+				top = edgePad;
+			}
+			hint.style.left = Math.round(left) + 'px';
+			hint.style.top = Math.round(top) + 'px';
+		}
+
 		function renderBodyZone() {
 			var frontParts = renderBodyZoneParts(bodyZoneDefs.front);
 			var backParts = renderBodyZoneParts(bodyZoneDefs.back);
+			var hint = renderSelectedZoneHint();
+			var frontActive = state.selectedBodySide === 'front' ? ' is-active' : '';
+			var backActive = state.selectedBodySide === 'back' ? ' is-active' : '';
 			return (
 				'<div class="hugh-ms__panel hugh-ms__panel--zone">' +
 				'<h2 class="hugh-ms__title">' + esc(S.stepZone || 'SÉLECTIONNEZ LA ZONE') + '</h2>' +
+				'<div class="hugh-ms__zone-stage">' +
 				'<div class="hugh-ms__zone-bodies">' +
-				'<div class="hugh-ms__zone-body" data-body-side="front">' +
+				'<div class="hugh-ms__zone-body' + frontActive + '" data-body-side="front">' +
 				'<img class="hugh-ms__zone-body-bg" src="' + esc(humanSvgUrl('body-front.jpg')) + '" alt="" draggable="false">' +
 				'<img class="hugh-ms__zone-body-silhouette" src="' + esc(humanSvgUrl('body-front-vector.svg')) + '" alt="" draggable="false">' +
 				frontParts +
 				'</div>' +
-				'<div class="hugh-ms__zone-body" data-body-side="back">' +
+				'<div class="hugh-ms__zone-body' + backActive + '" data-body-side="back">' +
 				'<img class="hugh-ms__zone-body-bg" src="' + esc(humanSvgUrl('body-back.jpg')) + '" alt="" draggable="false">' +
 				'<img class="hugh-ms__zone-body-silhouette" src="' + esc(humanSvgUrl('body-back-vector.svg')) + '" alt="" draggable="false">' +
 				backParts +
 				'</div>' +
+				'</div>' +
+				'<div class="hugh-ms__zone-side-toggle" aria-label="' + esc(S.bodySideToggle || 'Vue du corps') + '">' +
+				renderBodySideButton('front', S.bodySideFront || 'Devant') +
+				renderBodySideButton('back', S.bodySideBack || 'Dos') +
+				'</div>' +
+				hint +
 				'</div>' +
 				'</div>'
 			);
@@ -2082,6 +2195,10 @@
 				err +
 				mainHtml +
 				'</div>';
+			positionSelectedZoneHint();
+			if (typeof window !== 'undefined' && typeof window.requestAnimationFrame === 'function') {
+				window.requestAnimationFrame(positionSelectedZoneHint);
+			}
 		}
 
 		function bind() {
@@ -2114,9 +2231,20 @@
 						}
 					}, 0);
 				}
+				var bodyViewBtn = t.closest('[data-body-view]');
+				if (bodyViewBtn) {
+					var nextSide = bodyViewBtn.getAttribute('data-body-view') || 'front';
+					state.selectedBodySide = nextSide === 'back' ? 'back' : 'front';
+					if (state.selectedBodyZone && bodyZoneSide(state.selectedBodyZone) !== state.selectedBodySide) {
+						state.selectedBodyZone = '';
+					}
+					render();
+					return;
+				}
 				var zoneBtn = t.closest('[data-body-zone]');
 				if (zoneBtn) {
 					state.selectedBodyZone = zoneBtn.getAttribute('data-body-zone') || '';
+					state.selectedBodySide = bodyZoneSide(state.selectedBodyZone) || state.selectedBodySide;
 					render();
 					return;
 				}
