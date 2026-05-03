@@ -101,6 +101,7 @@
 	margin-top: 0;
 }
 
+.hugh-ms__inner--step-0 .hugh-ms__panel,
 .hugh-ms__inner--step-1 .hugh-ms__panel,
 .hugh-ms__inner--step-2 .hugh-ms__panel,
 .hugh-ms__inner--step-3 .hugh-ms__panel,
@@ -110,6 +111,7 @@
 	flex: 1 1 auto;
 }
 
+.hugh-ms__inner--step-0 .hugh-ms__panel-controls,
 .hugh-ms__inner--step-1 .hugh-ms__panel-controls,
 .hugh-ms__inner--step-2 .hugh-ms__panel-controls,
 .hugh-ms__inner--step-3 .hugh-ms__panel-controls,
@@ -480,6 +482,168 @@
 	color: var(--hat-color-text, #303030);
 }
 
+/* Step 0: Interactive body zone selector. */
+.hugh-ms__inner--step-0 .hugh-ms__crumbs {
+	position: relative;
+	display: block;
+	height: 15px;
+	border: 1px solid #fff;
+	border-radius: 56px;
+	overflow: hidden;
+	font-size: 0;
+	line-height: 0;
+}
+
+.hugh-ms__inner--step-0 .hugh-ms__crumb {
+	display: none;
+}
+
+.hugh-ms__inner--step-0 .hugh-ms__crumb.is-active {
+	display: block;
+	width: 5%;
+	height: 100%;
+	background: #fff;
+}
+
+.hugh-ms__inner--step-0 .hugh-ms__panel {
+	display: flex;
+	flex-direction: column;
+	min-height: 0;
+	padding-left: clamp(48px, 4.16vw, 80px);
+	padding-right: clamp(160px, 18vw, 280px);
+}
+
+.hugh-ms__inner--step-0 .hugh-ms__title {
+	margin-bottom: clamp(8px, 1.4vh, 20px);
+	font-size: clamp(28px, min(5.2vw, 9vh), 100px);
+	font-weight: 600;
+	line-height: 1;
+	letter-spacing: 0.01em;
+	color: #fff;
+	text-transform: uppercase;
+	flex-shrink: 0;
+}
+
+.hugh-ms__zone-bodies {
+	display: flex;
+	align-items: stretch;
+	justify-content: flex-start;
+	gap: clamp(8px, 1.5vw, 24px);
+	flex: 1 1 auto;
+	min-height: 0;
+	width: 100%;
+	margin: 0 auto;
+}
+
+.hugh-ms__zone-body {
+	position: relative;
+	height: clamp(300px, 29.58vw, 568px);
+	max-height: 100%;
+	aspect-ratio: 275.5 / 568;
+	width: auto;
+	max-width: clamp(160px, 14.32vw, 275px);
+	flex: 0 1 auto;
+}
+
+.hugh-ms__zone-body-silhouette {
+	display: block;
+	height: 100%;
+	width: 100%;
+	object-fit: contain;
+	pointer-events: none;
+	user-select: none;
+}
+
+.hugh-ms__zone-part {
+	position: absolute;
+	display: block;
+	padding: 0;
+	margin: 0;
+	border: 0;
+	background: transparent;
+	cursor: pointer;
+	opacity: 1;
+	transition: opacity 0.22s ease;
+	z-index: 2;
+}
+
+.hugh-ms__zone-part img {
+	display: block;
+	width: 100%;
+	height: 100%;
+	object-fit: contain;
+	pointer-events: none;
+}
+
+.hugh-ms__zone-part:hover {
+	opacity: 0.8;
+}
+
+.hugh-ms__zone-part.is-selected {
+	opacity: 1;
+}
+
+.hugh-ms__inner--step-0 .hugh-ms__btn--primary {
+	position: relative;
+	display: inline-flex;
+	align-items: center;
+	gap: 16px;
+	min-height: 85px;
+	padding: 14px 14px 13px 31px;
+	font-size: 24px;
+	font-weight: 500;
+	letter-spacing: 0.01em;
+	text-transform: uppercase;
+	color: #000;
+	background: #fff;
+	border: 2px solid #fff;
+	border-radius: 0;
+}
+
+.hugh-ms__inner--step-0 .hugh-ms__btn--primary::after {
+	content: "";
+	width: 57px;
+	height: 58px;
+	background: #000;
+	flex: 0 0 auto;
+}
+
+.hugh-ms__inner--step-0 .hugh-ms__btn--primary::before {
+	content: "";
+	position: absolute;
+	right: 25px;
+	top: 50%;
+	width: 35px;
+	height: 35px;
+	background: center / contain no-repeat url("../images/arrow-up-outline.svg");
+	transform: translateY(-50%);
+	z-index: 1;
+}
+
+.hugh-ms__inner--step-0 .hugh-ms__btn--primary:hover {
+	filter: none;
+	background: #f2f2f2;
+}
+
+@media (min-width: 768px) and (max-height: 860px) {
+	.hugh-ms__inner--step-0 .hugh-ms__title {
+		font-size: clamp(28px, 7vh, 72px);
+		margin-bottom: clamp(6px, 1vh, 14px);
+	}
+
+	.hugh-ms__inner--step-0 .hugh-ms__panel {
+		padding-right: clamp(140px, 16vw, 240px);
+	}
+
+	.hugh-ms__zone-bodies {
+		gap: clamp(8px, 1.2vw, 16px);
+	}
+
+	.hugh-ms__zone-body {
+		max-width: clamp(140px, 22vh, 280px);
+	}
+}
+
 /* Step 1: "Type de visite" visual from Figma. */
 .hugh-ms__inner--step-1 .hugh-ms__crumbs {
 	position: relative;
@@ -498,7 +662,7 @@
 
 .hugh-ms__inner--step-1 .hugh-ms__crumb.is-active {
 	display: block;
-	width: 9.6%;
+	width: 12%;
 	height: 100%;
 	background: #fff;
 }
@@ -2204,6 +2368,70 @@
 		background: #d7d7d7;
 	}
 
+	.hugh-ms__inner--step-0 {
+		gap: 20px;
+		padding: 20px 16px;
+	}
+
+	.hugh-ms__inner--step-0 .hugh-ms__crumbs {
+		width: 100%;
+		height: 8px;
+		margin: 0 auto;
+		border: 1px solid #fff;
+		border-radius: 21px;
+		background: transparent;
+		overflow: hidden;
+	}
+
+	.hugh-ms__inner--step-0 .hugh-ms__crumb.is-active {
+		width: 5%;
+		height: 100%;
+		background: #fff;
+	}
+
+	.hugh-ms__inner--step-0 .hugh-ms__panel {
+		padding-left: 0;
+		padding-right: 0;
+		min-height: 0;
+	}
+
+	.hugh-ms__inner--step-0 .hugh-ms__title {
+		margin-bottom: 12px;
+		font-size: 24px;
+	}
+
+	.hugh-ms__zone-bodies {
+		justify-content: center;
+		align-items: stretch;
+		gap: 8px;
+		flex: 1 1 auto;
+		min-height: 0;
+	}
+
+	.hugh-ms__zone-body {
+		width: auto;
+		max-width: clamp(120px, 40vw, 180px);
+		max-height: 100%;
+	}
+
+	.hugh-ms__inner--step-0 .hugh-ms__btn--primary {
+		min-height: 56px;
+		padding: 10px 10px 10px 20px;
+		font-size: 16px;
+		gap: 12px;
+	}
+
+	.hugh-ms__inner--step-0 .hugh-ms__btn--primary::after {
+		width: 40px;
+		height: 40px;
+	}
+
+	.hugh-ms__inner--step-0 .hugh-ms__btn--primary::before {
+		right: 17px;
+		width: 24px;
+		height: 24px;
+	}
+
 	.hugh-ms__inner--step-1 {
 		gap: 32px;
 	}
@@ -2219,7 +2447,7 @@
 	}
 
 	.hugh-ms__inner--step-1 .hugh-ms__crumb.is-active {
-		width: 9.6%;
+		width: 12%;
 		height: 100%;
 		background: #fff;
 	}
@@ -3564,7 +3792,8 @@
 		background: #fff !important;
 	}
 
-	.hugh-ms__inner[class*="hugh-ms__inner--step-"].hugh-ms__inner--step-1 .hugh-ms__crumb.is-active { width: 9.6% !important; }
+	.hugh-ms__inner[class*="hugh-ms__inner--step-"].hugh-ms__inner--step-0 .hugh-ms__crumb.is-active { width: 5% !important; }
+	.hugh-ms__inner[class*="hugh-ms__inner--step-"].hugh-ms__inner--step-1 .hugh-ms__crumb.is-active { width: 12% !important; }
 	.hugh-ms__inner[class*="hugh-ms__inner--step-"].hugh-ms__inner--step-2 .hugh-ms__crumb.is-active { width: 23% !important; }
 	.hugh-ms__inner[class*="hugh-ms__inner--step-"].hugh-ms__inner--step-3 .hugh-ms__crumb.is-active { width: 40% !important; }
 	.hugh-ms__inner[class*="hugh-ms__inner--step-"].hugh-ms__inner--step-5 .hugh-ms__crumb.is-active { width: 53% !important; }
@@ -3583,12 +3812,14 @@ html.hat-booking-modal-open body {
 }
 
 .hugh-ms-booking-modal {
+	--hugh-ms-modal-pad: clamp(16px, 4vw, 48px);
+	--hugh-ms-modal-h: clamp(560px, calc(100dvh - (var(--hugh-ms-modal-pad) * 2)), 818px);
 	position: fixed;
 	inset: 0;
 	z-index: 99990;
 	display: none;
 	box-sizing: border-box;
-	padding: clamp(16px, 4vw, 48px);
+	padding: var(--hugh-ms-modal-pad);
 	pointer-events: none;
 	align-items: center;
 	justify-items: center;
@@ -3657,7 +3888,7 @@ html.hat-booking-modal-open body {
 	align-items: flex-start;
 	justify-content: center;
 	gap: clamp(10px, 1.5vw, 20px);
-	max-width: calc(100vw - 2 * clamp(16px, 4vw, 48px));
+	max-width: calc(100vw - (var(--hugh-ms-modal-pad) * 2));
 	pointer-events: none;
 }
 
@@ -3756,24 +3987,32 @@ html.hat-booking-modal-open body {
 	/* −56px: отступ под крестик справа + gap, без горизонтального скролла */
 	.hugh-ms-booking-modal__dialog {
 		flex: 0 0 auto;
-		width: min(1569px, calc(100vw - 40px - 56px));
+		width: min(1569px, calc(100vw - (var(--hugh-ms-modal-pad) * 2) - 56px));
 		max-width: 1569px;
-		min-height: 818px;
-		max-height: none;
+		height: var(--hugh-ms-modal-h);
+		min-height: var(--hugh-ms-modal-h);
+		max-height: var(--hugh-ms-modal-h);
+		overflow: hidden;
 	}
 
 	.hugh-ms-booking-modal__body .hugh-ms-booking {
-		width: min(1569px, calc(100vw - 40px - 56px));
+		width: min(1569px, calc(100vw - (var(--hugh-ms-modal-pad) * 2) - 56px));
 		max-width: 1569px;
-		min-height: 818px;
+		height: var(--hugh-ms-modal-h);
+		min-height: var(--hugh-ms-modal-h);
 		margin: 0;
+	}
+
+	.hugh-ms-booking-modal__body .hugh-ms-booking .hugh-ms__inner {
+		min-height: calc(var(--hugh-ms-modal-h) - (var(--hugh-ms-pad-y) * 2));
 	}
 }
 
 .hugh-ms-booking-modal__dialog {
 	position: relative;
 	box-sizing: border-box;
-	overflow: visible;
+	overflow-x: visible;
+	overflow-y: visible;
 	box-shadow: 0 28px 80px rgba(0, 0, 0, 0.65);
 }
 

@@ -36,6 +36,29 @@
 	const calendarLocale = intlLocaleTag(cfg.calendarLocale) || 'fr-FR';
 	const ameliaLocaleCandidates = Array.isArray(cfg.ameliaLocaleCandidates) ? cfg.ameliaLocaleCandidates : [];
 
+	var humanUrl = cfg.humanImagesUrl || '';
+	function humanSvgUrl(f) { return humanUrl + '/' + f.replace(/ /g, '%20'); }
+
+	var bodyZoneDefs = {
+		front: [
+			{ key: 'head', label: 'Tête', file: 'head.svg', zoneValue: 'cou', left: 39.5, top: 0, h: 12 },
+			{ key: 'left-shoulder', label: 'Épaule gauche', file: 'right shoulder.svg', zoneValue: 'bras', left: 20.5, top: 19, h: 16 },
+			{ key: 'torso', label: 'Torse', file: 'torso.svg', zoneValue: 'torse', left: 31, top: 11.5, h: 30 },
+			{ key: 'right-shoulder', label: 'Épaule droite', file: 'left shoulder.svg', zoneValue: 'bras', left: 67, top: 19, h: 16 },
+			{ key: 'left-forearm', label: 'Avant-bras gauche', file: 'right forearm.svg', zoneValue: 'bras', left: 9, top: 35, h: 14 },
+			{ key: 'right-forearm', label: 'Avant-bras droit', file: 'left forearm.svg', zoneValue: 'bras', left: 71.5, top: 35, h: 14 },
+			{ key: 'left-palm', label: 'Main gauche', file: 'left palm.svg', zoneValue: 'bras', left: 85, top: 48, h: 10.5 },
+			{ key: 'right-palm', label: 'Main droite', file: 'right palm.svg', zoneValue: 'bras', left: 0, top: 48.5, h: 10 },
+			{ key: 'left-leg', label: 'Jambe gauche', file: 'left leg.svg', zoneValue: 'jambe', left: 27, top: 47, h: 44 },
+			{ key: 'right-leg', label: 'Jambe droite', file: 'right leg.svg', zoneValue: 'jambe', left: 51, top: 47, h: 44 },
+			{ key: 'left-foot', label: 'Pied gauche', file: 'left foot.svg', zoneValue: 'jambe', left: 59.5, top: 90.7, h: 9.1 },
+			{ key: 'right-foot', label: 'Pied droit', file: 'right foot.svg', zoneValue: 'jambe', left: 24.4, top: 90.8, h: 9.3 },
+		],
+		back: [
+			{ key: 'back', label: 'Dos', file: 'back.svg', zoneValue: 'dos', left: 31.3, top: 17, h: 23 },
+		]
+	};
+
 	/** 12 noms de mois (ordre janvier…décembre) depuis Polylang / traduction. */
 	function parseMonthCsv(s) {
 		if (!s || typeof s !== 'string') {
@@ -756,7 +779,8 @@
 		})();
 		function createInitialState() {
 			return {
-				step: 1,
+				step: 0,
+				selectedBodyZone: '',
 				categories: [],
 				categoryEntries: [],
 				flat: [],
@@ -845,14 +869,14 @@
 		}
 
 		function mobileStepLabel() {
-			const stepToIndex = { 2: 1, 3: 2, 5: 3, 6: 4, 7: 5, 8: 6 };
+			const stepToIndex = { 0: 1, 1: 2, 2: 3, 3: 4, 5: 5, 6: 6, 7: 7, 8: 8 };
 			const current = stepToIndex[state.step];
 			if (!current) {
 				return '';
 			}
 			return fillBookingTemplate(
 				S.stepCounterFormat || 'Étape {{current}} sur {{total}}',
-				{ current: current, total: 6 }
+				{ current: current, total: 8 }
 			);
 		}
 
@@ -903,6 +927,7 @@
 
 		function stepsMeta() {
 			const steps = [
+				{ step: 0, label: S.stepZone || 'Sélectionnez la zone' },
 				{ step: 1, label: S.stepCategory || S.stepType },
 				{ step: 2, label: S.stepDate },
 				{ step: 3, label: S.stepService || S.stepType },
@@ -922,6 +947,22 @@
 
 		async function goNext() {
 			setError('');
+			if (state.step === 0) {
+				if (!state.selectedBodyZone) {
+					setError(S.pickZone || 'Veuillez sélectionner une zone.');
+					render();
+					return;
+				}
+				var matched = (bodyZoneDefs.front.concat(bodyZoneDefs.back)).find(function (z) {
+					return z.key === state.selectedBodyZone;
+				});
+				if (matched && matched.zoneValue) {
+					state.tattooZone = matched.zoneValue;
+				}
+				state.step = 1;
+				render();
+				return;
+			}
 			if (state.step === 1) {
 				if (!state.selectedCategoryId) {
 					setError(S.pickCategory || S.errorGeneric);
@@ -1056,7 +1097,7 @@
 
 		function goBack() {
 			setError('');
-			if (state.step <= 1) {
+			if (state.step <= 0) {
 				return;
 			}
 			state.step -= 1;
@@ -1232,6 +1273,39 @@
 				setError(typeof msg === 'string' ? msg : S.errorBooking);
 			}
 			render();
+		}
+
+		function renderBodyZoneParts(zones) {
+			return zones.map(function (z) {
+				var sel = state.selectedBodyZone === z.key ? ' is-selected' : '';
+				return (
+					'<button type="button" class="hugh-ms__zone-part' + sel + '" data-body-zone="' + esc(z.key) + '" ' +
+					'style="left:' + z.left + '%;top:' + z.top + '%;width:' + z.w + '%;height:' + z.h + '%" ' +
+					'title="' + esc(z.label) + '">' +
+					'<img src="' + esc(humanSvgUrl(z.file)) + '" alt="' + esc(z.label) + '" draggable="false">' +
+					'</button>'
+				);
+			}).join('');
+		}
+
+		function renderBodyZone() {
+			var frontParts = renderBodyZoneParts(bodyZoneDefs.front);
+			var backParts = renderBodyZoneParts(bodyZoneDefs.back);
+			return (
+				'<div class="hugh-ms__panel hugh-ms__panel--zone">' +
+				'<h2 class="hugh-ms__title">' + esc(S.stepZone || 'SÉLECTIONNEZ LA ZONE') + '</h2>' +
+				'<div class="hugh-ms__zone-bodies">' +
+				'<div class="hugh-ms__zone-body" data-body-side="front">' +
+				'<img class="hugh-ms__zone-body-silhouette" src="' + esc(humanSvgUrl('body-front-vector.svg')) + '" alt="" draggable="false">' +
+				frontParts +
+				'</div>' +
+				'<div class="hugh-ms__zone-body" data-body-side="back">' +
+				'<img class="hugh-ms__zone-body-silhouette" src="' + esc(humanSvgUrl('body-back-vector.svg')) + '" alt="" draggable="false">' +
+				backParts +
+				'</div>' +
+				'</div>' +
+				'</div>'
+			);
 		}
 
 		function renderHeader() {
@@ -1916,6 +1990,9 @@
 				main = '<div class="hugh-ms__loading">' + esc(S.loading) + '</div>';
 			} else {
 				switch (state.step) {
+					case 0:
+						main = renderBodyZone();
+						break;
 					case 1:
 						main = renderCategory();
 						break;
@@ -1949,7 +2026,7 @@
 			}
 			const err = state.error ? '<p class="hugh-ms__error">' + esc(state.error) + '</p>' : '';
 			const showNext = state.step < 9 && !state.loading;
-			const showBack = state.step > 1 && state.step < 9 && !state.loading;
+			const showBack = state.step > 0 && state.step < 9 && !state.loading;
 			let nextLabel = S.next;
 			if (state.step === 8) {
 				const totalNum = bookingSessionPriceNumber(state.service, state.selectedExtra);
@@ -1963,6 +2040,7 @@
 				nextLabel = tmpl.indexOf('%s') !== -1 ? tmpl.replace('%s', depStr) : tmpl + ' ' + depStr;
 			}
 			const nextDisabled =
+				(state.step === 0 && !state.selectedBodyZone) ||
 				(state.step === 2 && !state.date) ||
 				(state.step === 6 &&
 					(isSuiteDeTravailCategory()
@@ -2055,6 +2133,12 @@
 							render();
 						}
 					}, 0);
+				}
+				var zoneBtn = t.closest('[data-body-zone]');
+				if (zoneBtn) {
+					state.selectedBodyZone = zoneBtn.getAttribute('data-body-zone') || '';
+					render();
+					return;
 				}
 				const cat = t.closest('[data-cat-idx]');
 				if (cat) {

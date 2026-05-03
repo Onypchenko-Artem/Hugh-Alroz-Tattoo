@@ -269,6 +269,7 @@ function hughalroztatoo_booking_pll_strings() {
 		// Mois 1…12, séparés par des virgules (même ordre que calWeekdays : traductible).
 		'monthsLong'         => 'janvier,février,mars,avril,mai,juin,juillet,août,septembre,octobre,novembre,décembre',
 		'monthsShort'        => 'janv.,févr.,mars,avr.,mai,juin,juil.,août,sept.,oct.,nov.,déc.',
+		'stepZone'           => 'Sélectionnez la zone',
 	);
 }
 
@@ -495,6 +496,7 @@ function hughalroztatoo_localize_amelia_multistep_script() {
 				'privacy'    => (string) apply_filters( 'hughalroztatoo_booking_pay_url_privacy', function_exists( 'get_privacy_policy_url' ) ? get_privacy_policy_url() : '' ),
 				'refund'     => (string) apply_filters( 'hughalroztatoo_booking_pay_url_refund', '' ),
 			),
+			'humanImagesUrl'         => get_template_directory_uri() . '/assets/images/human',
 			'zoneOptions'            => hughalroztatoo_get_booking_zone_options(),
 			/**
 			 * Amelia custom field id for “Note sur le projet” (textarea in step 6).
@@ -511,6 +513,7 @@ function hughalroztatoo_localize_amelia_multistep_script() {
 				'errorSlots'      => hughalroztatoo_booking_t( 'errorSlots' ),
 				'errorBooking'    => hughalroztatoo_booking_t( 'errorBooking' ),
 				'recaptcha'       => hughalroztatoo_booking_t( 'recaptcha' ),
+				'stepZone'        => hughalroztatoo_booking_field( 'booking_step0_title', hughalroztatoo_booking_t( 'stepZone' ) ),
 				'stepType'        => hughalroztatoo_booking_field( 'booking_step1_title', __( 'Type de visite', 'hughalroztatoo' ) ),
 				'stepCategory'    => hughalroztatoo_booking_field( 'booking_step1_title', __( 'Type de visite', 'hughalroztatoo' ) ),
 				'stepCategoryHint'=> hughalroztatoo_booking_field( 'booking_step1_lead', __( 'Nouveau projet ou suite ?', 'hughalroztatoo' ) ),
