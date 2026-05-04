@@ -20,6 +20,7 @@
 	const shell = modal.querySelector('.hugh-ms-booking-modal__shell');
 	const grab = modal.querySelector('.hugh-ms-booking-modal__grab');
 	const mqSheet = typeof window.matchMedia !== 'undefined' ? window.matchMedia('(max-width: 767px)') : null;
+	const viewportMeta = document.querySelector('meta[name="viewport"]');
 
 	let focusBeforeOpen = null;
 	let sheetDragging = false;
@@ -29,11 +30,47 @@
 	let sheetPrevTouchY = 0;
 	let sheetPrevTouchT = 0;
 	let sheetVelPxPerMs = 0;
+	let viewportZoomLocked = false;
+	let viewportRestoreContent = '';
 
 	let focusCloseBtn = modal.querySelector('.hugh-ms-booking-modal__close');
 
 	function isSheetBreakpoint() {
 		return mqSheet && mqSheet.matches;
+	}
+
+	function lockMobileViewportZoom() {
+		if (!isSheetBreakpoint() || !(viewportMeta instanceof HTMLMetaElement) || viewportZoomLocked) {
+			return;
+		}
+		viewportRestoreContent = viewportMeta.getAttribute('content') || '';
+		var next = viewportRestoreContent;
+		if (/user-scalable\s*=/.test(next)) {
+			next = next.replace(/user-scalable\s*=\s*[^,]+/gi, 'user-scalable=no');
+		} else {
+			next += ', user-scalable=no';
+		}
+		if (/maximum-scale\s*=/.test(next)) {
+			next = next.replace(/maximum-scale\s*=\s*[^,]+/gi, 'maximum-scale=1');
+		} else {
+			next += ', maximum-scale=1';
+		}
+		if (/minimum-scale\s*=/.test(next)) {
+			next = next.replace(/minimum-scale\s*=\s*[^,]+/gi, 'minimum-scale=1');
+		} else {
+			next += ', minimum-scale=1';
+		}
+		next = next.replace(/\s*,\s*/g, ', ').replace(/^\s*,\s*/, '').trim();
+		viewportMeta.setAttribute('content', next);
+		viewportZoomLocked = true;
+	}
+
+	function unlockMobileViewportZoom() {
+		if (!viewportZoomLocked || !(viewportMeta instanceof HTMLMetaElement)) {
+			return;
+		}
+		viewportMeta.setAttribute('content', viewportRestoreContent);
+		viewportZoomLocked = false;
 	}
 
 	function sheetResetTransform() {
@@ -77,6 +114,7 @@
 		modal.classList.add('is-open');
 		modal.setAttribute('aria-hidden', 'false');
 		document.documentElement.classList.add('hat-booking-modal-open');
+		lockMobileViewportZoom();
 
 		focusCloseBtn = modal.querySelector('.hugh-ms-booking-modal__close');
 
@@ -109,6 +147,7 @@
 		modal.setAttribute('aria-hidden', 'true');
 		document.documentElement.classList.remove('hat-booking-modal-open');
 		sheetResetTransform();
+		unlockMobileViewportZoom();
 		if (
 			focusBeforeOpen instanceof HTMLElement &&
 			typeof focusBeforeOpen.focus === 'function'
@@ -343,12 +382,17 @@
 			);
 		}
 
+		function shouldForceAutoGrowForTallSteps() {
+			// Keep a safety fallback only for very short desktop viewports.
+			return hasTallStep() && window.innerHeight <= 760;
+		}
+
 		function shouldEnableAutoGrow() {
 			if (!modal.classList.contains('is-open') || !isDesktop()) {
 				return false;
 			}
 			var contentTooTall = contentHeight() > (availableViewportHeight() - 2);
-			return hasTallStep() || contentTooTall;
+			return contentTooTall || shouldForceAutoGrowForTallSteps();
 		}
 
 		function enterAutoGrow() {

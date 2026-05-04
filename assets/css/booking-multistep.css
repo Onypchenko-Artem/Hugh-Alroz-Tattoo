@@ -9,15 +9,18 @@
 	--hugh-ms-text: #f5f2ed;
 	--hugh-ms-muted: rgba(245, 242, 237, 0.55);
 	--hugh-ms-danger: #e07070;
-	/* Fluid scale: desktop layout from 1280 to 1920 viewport width */
-	--hugh-ms-fluid-scale: clamp(0.6667, calc(100vw / 1920), 1);
+	/* Fluid scale: shrink when viewport is narrower than 1920px OR shorter than ~860px usable height */
+	--hugh-ms-fluid-scale-w: clamp(0.6667, calc(100vw / 1920), 1);
+	--hugh-ms-fluid-scale-h: clamp(0.52, calc((100dvh - 128px) / 860), 1);
+	--hugh-ms-fluid-scale: min(var(--hugh-ms-fluid-scale-w), var(--hugh-ms-fluid-scale-h));
+	--hugh-ms-shell-min-h: min(818px, calc(100dvh - 96px));
 	--hugh-ms-pad-y: clamp(15px, 1.3vw, 25px);
 	--hugh-ms-pad-x: clamp(18px, 1.56vw, 30px);
 	position: relative;
 	z-index: 1;
 	width: min(1569px, calc(100vw - 40px));
 	max-width: 1569px;
-	min-height: 818px;
+	min-height: var(--hugh-ms-shell-min-h);
 	height: auto;
 	margin: 0 auto;
 	padding: var(--hugh-ms-pad-y) var(--hugh-ms-pad-x);
@@ -33,8 +36,8 @@
 .hugh-ms__inner {
 	display: flex;
 	flex-direction: column;
-	gap: clamp(16px, 2vw, 24px);
-	min-height: calc(818px - (var(--hugh-ms-pad-y) * 2));
+	gap: clamp(12px, min(2vw, 2.4vh), 24px);
+	min-height: calc(var(--hugh-ms-shell-min-h) - (var(--hugh-ms-pad-y) * 2));
 }
 
 .hugh-ms__crumbs {
@@ -62,10 +65,6 @@
 	letter-spacing: 0.06em;
 }
 
-.hugh-ms__step-counter {
-	display: none;
-}
-
 .hugh-ms__sub {
 	margin: 0 0 8px;
 	font-size: 0.85rem;
@@ -78,6 +77,13 @@
 .hugh-ms__panel {
 	min-height: 200px;
 	padding-left: clamp(48px, 4.16vw, 80px);
+}
+
+.hugh-ms__step2-head {
+	display: flex;
+	align-items: baseline;
+	justify-content: space-between;
+	gap: 24px;
 }
 
 .hugh-ms__panel-controls {
@@ -425,6 +431,20 @@
 	filter: none;
 }
 
+/* Чёрный квадрат + стрелка по центру для primary CTA на всех шагах.
+   Step-8 переопределяет это правило (см. ниже). */
+.hugh-ms__btn--primary::after {
+	content: "";
+	flex: 0 0 auto;
+	width: clamp(40px, min(3vw, 5vh), 57px);
+	height: clamp(40px, min(3vw, 5.2vh), 58px);
+	background: #000 center / 20px 20px no-repeat url("../images/arrow-up-outline.svg");
+}
+
+.hugh-ms__btn--primary::before {
+	content: none;
+}
+
 .hugh-ms__btn--ghost {
 	color: var(--hugh-ms-text);
 	background: transparent;
@@ -544,11 +564,11 @@
 
 .hugh-ms__zone-body {
 	position: relative;
-	height: clamp(300px, 29.58vw, 568px);
+	height: clamp(270px, 26.5vw, 510px);
 	max-height: 100%;
 	aspect-ratio: 275.5 / 568;
 	width: auto;
-	max-width: clamp(160px, 14.32vw, 275px);
+	max-width: clamp(145px, 12.8vw, 247px);
 	flex: 0 1 auto;
 	overflow: hidden;
 }
@@ -605,8 +625,10 @@
 	pointer-events: none;
 }
 
-.hugh-ms__zone-part:hover {
-	opacity: 0.3;
+@media (hover: hover) and (pointer: fine) {
+	.hugh-ms__zone-part:hover {
+		opacity: 0.7;
+	}
 }
 
 .hugh-ms__zone-part.is-selected {
@@ -682,9 +704,9 @@
 	display: inline-flex;
 	align-items: center;
 	gap: 16px;
-	min-height: 85px;
-	padding: 14px 14px 13px 31px;
-	font-size: 24px;
+	min-height: clamp(52px, min(4.4vw, 8.5vh), 85px);
+	padding: clamp(10px, min(1.2vw, 1.8vh), 14px) clamp(10px, min(1.2vw, 1.8vh), 14px) clamp(9px, min(1.1vw, 1.6vh), 13px) clamp(18px, min(2.5vw, 3vh), 31px);
+	font-size: clamp(15px, min(1.85vw, 2.5vh), 24px);
 	font-weight: 500;
 	letter-spacing: 0.01em;
 	text-transform: uppercase;
@@ -692,26 +714,6 @@
 	background: #fff;
 	border: 2px solid #fff;
 	border-radius: 0;
-}
-
-.hugh-ms__inner--step-0 .hugh-ms__btn--primary::after {
-	content: "";
-	width: 57px;
-	height: 58px;
-	background: #000;
-	flex: 0 0 auto;
-}
-
-.hugh-ms__inner--step-0 .hugh-ms__btn--primary::before {
-	content: "";
-	position: absolute;
-	right: 25px;
-	top: 50%;
-	width: 35px;
-	height: 35px;
-	background: center / contain no-repeat url("../images/arrow-up-outline.svg");
-	transform: translateY(-50%);
-	z-index: 1;
 }
 
 .hugh-ms__inner--step-0 .hugh-ms__btn--primary:hover {
@@ -763,8 +765,8 @@
 }
 
 .hugh-ms__inner--step-1 .hugh-ms__title {
-	margin-bottom: 32px;
-	font-size: clamp(60px, 5.2vw, 100px);
+	margin-bottom: clamp(12px, min(2vw, 3vh), 32px);
+	font-size: clamp(36px, min(5.2vw, 10.5vh), 100px);
 	font-weight: 300;
 	line-height: 1;
 	letter-spacing: 0.01em;
@@ -772,23 +774,23 @@
 }
 
 .hugh-ms__lead {
-	margin: 0 0 40px;
-	font-size: clamp(1rem, 2vw, 2rem);
+	margin: 0 0 clamp(16px, min(3vw, 4.5vh), 40px);
+	font-size: clamp(1rem, min(2vw, 3.2vh), 2rem);
 	line-height: 1.2;
 	letter-spacing: 0.02em;
 	color: #fff;
 }
 
 .hugh-ms__inner--step-1 .hugh-ms__grid {
-	gap: 20px;
+	gap: clamp(12px, min(2vw, 2.5vh), 20px);
 	max-width: 670px;
 }
 
 .hugh-ms__inner--step-1 .hugh-ms__card {
-	min-height: 228px;
-	padding: 21px 25px;
+	min-height: clamp(130px, min(22vw, 26vh), 228px);
+	padding: clamp(14px, min(2vw, 2.2vh), 21px) clamp(16px, min(2.5vw, 2.8vh), 25px);
 	justify-content: flex-start;
-	gap: 28px;
+	gap: clamp(14px, min(2vw, 2.8vh), 28px);
 	border: 1px solid #fff;
 	border-radius: 0;
 	background: transparent;
@@ -836,9 +838,9 @@
 	display: inline-flex;
 	align-items: center;
 	gap: 16px;
-	min-height: 85px;
-	padding: 14px 14px 13px 31px;
-	font-size: 24px;
+	min-height: clamp(52px, min(4.4vw, 8.5vh), 85px);
+	padding: clamp(10px, min(1.2vw, 1.8vh), 14px) clamp(10px, min(1.2vw, 1.8vh), 14px) clamp(9px, min(1.1vw, 1.6vh), 13px) clamp(18px, min(2.5vw, 3vh), 31px);
+	font-size: clamp(15px, min(1.85vw, 2.5vh), 24px);
 	font-weight: 500;
 	letter-spacing: 0.01em;
 	text-transform: uppercase;
@@ -846,26 +848,6 @@
 	background: #fff;
 	border: 2px solid #fff;
 	border-radius: 0;
-}
-
-.hugh-ms__inner--step-1 .hugh-ms__btn--primary::after {
-	content: "";
-	width: 57px;
-	height: 58px;
-	background: #000;
-	flex: 0 0 auto;
-}
-
-.hugh-ms__inner--step-1 .hugh-ms__btn--primary::before {
-	content: "";
-	position: absolute;
-	right: 25px;
-	top: 50%;
-	width: 35px;
-	height: 35px;
-	background: center / contain no-repeat url("../images/arrow-up-outline.svg");
-	transform: translateY(-50%);
-	z-index: 1;
 }
 
 .hugh-ms__inner--step-1 .hugh-ms__btn--primary:hover {
@@ -909,8 +891,8 @@
 }
 
 .hugh-ms__inner--step-2 .hugh-ms__title {
-	margin-bottom: 24px;
-	font-size: clamp(60px, 5.2vw, 100px);
+	margin-bottom: clamp(12px, min(2vw, 2.8vh), 24px);
+	font-size: clamp(36px, min(5.2vw, 10.5vh), 100px);
 	font-weight: 300;
 	line-height: 1;
 	letter-spacing: 0.01em;
@@ -930,9 +912,9 @@
 
 .hugh-ms__inner--step-2 .hugh-ms__cal-wrap {
 	width: min(100%, 857px);
-	height: 585px;
+	height: clamp(340px, min(52vw, 58vh), 585px);
 	border: 1px solid #fff;
-	padding: 40px;
+	padding: clamp(20px, min(3vw, 4vh), 40px);
 	display: flex;
 	flex-direction: column;
 }
@@ -941,11 +923,11 @@
 	display: flex;
 	justify-content: space-between;
 	align-items: center;
-	margin-bottom: 60px;
+	margin-bottom: clamp(20px, min(5vw, 6vh), 60px);
 }
 
 .hugh-ms__cal-month {
-	font-size: 32px;
+	font-size: clamp(18px, min(2.4vw, 3.5vh), 32px);
 	font-weight: 300;
 	line-height: 1;
 	letter-spacing: 0.01em;
@@ -976,7 +958,7 @@
 
 .hugh-ms__cal-weekday {
 	text-align: center;
-	font-size: 30px;
+	font-size: clamp(14px, min(2.2vw, 3.2vh), 30px);
 	font-weight: 300;
 	line-height: 1;
 	color: rgba(255, 255, 255, 0.86);
@@ -991,8 +973,8 @@
 }
 
 .hugh-ms__inner--step-2 .hugh-ms__cal-cell {
-	min-height: 49px;
-	font-size: 31px;
+	min-height: clamp(34px, min(4vw, 5vh), 49px);
+	font-size: clamp(15px, min(2.2vw, 3.2vh), 31px);
 	border-radius: 0;
 	background: transparent;
 }
@@ -1027,9 +1009,9 @@
 	display: inline-flex;
 	align-items: center;
 	gap: 16px;
-	min-height: 85px;
-	padding: 14px 14px 13px 31px;
-	font-size: 24px;
+	min-height: clamp(52px, min(4.4vw, 8.5vh), 85px);
+	padding: clamp(10px, min(1.2vw, 1.8vh), 14px) clamp(10px, min(1.2vw, 1.8vh), 14px) clamp(9px, min(1.1vw, 1.6vh), 13px) clamp(18px, min(2.5vw, 3vh), 31px);
+	font-size: clamp(15px, min(1.85vw, 2.5vh), 24px);
 	font-weight: 500;
 	letter-spacing: 0.01em;
 	text-transform: uppercase;
@@ -1037,26 +1019,6 @@
 	background: #fff;
 	border: 2px solid #fff;
 	border-radius: 0;
-}
-
-.hugh-ms__inner--step-2 .hugh-ms__btn--primary::after {
-	content: "";
-	width: 57px;
-	height: 58px;
-	background: #000;
-	flex: 0 0 auto;
-}
-
-.hugh-ms__inner--step-2 .hugh-ms__btn--primary::before {
-	content: "";
-	position: absolute;
-	right: 25px;
-	top: 50%;
-	width: 35px;
-	height: 35px;
-	background: center / contain no-repeat url("../images/arrow-up-outline.svg");
-	transform: translateY(-50%);
-	z-index: 1;
 }
 
 .hugh-ms__inner--step-2 .hugh-ms__btn--primary:hover {
@@ -1100,8 +1062,8 @@
 }
 
 .hugh-ms__inner--step-3 .hugh-ms__title {
-	margin-bottom: 32px;
-	font-size: clamp(60px, 5.2vw, 100px);
+	margin-bottom: clamp(12px, min(2vw, 3vh), 32px);
+	font-size: clamp(36px, min(5.2vw, 10.5vh), 100px);
 	font-weight: 300;
 	line-height: 1;
 	letter-spacing: 0.01em;
@@ -1113,15 +1075,15 @@
 }
 
 .hugh-ms__inner--step-3 .hugh-ms__grid {
-	gap: 20px;
+	gap: clamp(12px, min(2vw, 2.5vh), 20px);
 	max-width: 670px;
 }
 
 .hugh-ms__inner--step-3 .hugh-ms__card {
-	min-height: 168px;
-	padding: 36px 44px;
+	min-height: clamp(110px, min(18vw, 20vh), 168px);
+	padding: clamp(18px, min(3.5vw, 4vh), 36px) clamp(22px, min(4vw, 4.5vh), 44px);
 	justify-content: flex-start;
-	gap: 12px;
+	gap: clamp(8px, min(1.5vw, 1.8vh), 12px);
 	border: 1px solid #fff;
 	border-radius: 0;
 	background: transparent;
@@ -1147,7 +1109,7 @@
 }
 
 .hugh-ms__inner--step-3 .hugh-ms__card-title {
-	font-size: 32px;
+	font-size: clamp(18px, min(2.5vw, 3.6vh), 32px);
 	font-weight: 300;
 	line-height: 1.25;
 	text-transform: uppercase;
@@ -1156,7 +1118,7 @@
 }
 
 .hugh-ms__inner--step-3 .hugh-ms__card-meta--price {
-	font-size: 36px;
+	font-size: clamp(20px, min(2.8vw, 4vh), 36px);
 	font-weight: 500;
 	line-height: 1.2;
 	text-transform: uppercase;
@@ -1179,9 +1141,9 @@
 	display: inline-flex;
 	align-items: center;
 	gap: 16px;
-	min-height: 85px;
-	padding: 14px 14px 13px 31px;
-	font-size: 24px;
+	min-height: clamp(52px, min(4.4vw, 8.5vh), 85px);
+	padding: clamp(10px, min(1.2vw, 1.8vh), 14px) clamp(10px, min(1.2vw, 1.8vh), 14px) clamp(9px, min(1.1vw, 1.6vh), 13px) clamp(18px, min(2.5vw, 3vh), 31px);
+	font-size: clamp(15px, min(1.85vw, 2.5vh), 24px);
 	font-weight: 500;
 	letter-spacing: 0.01em;
 	text-transform: uppercase;
@@ -1189,26 +1151,6 @@
 	background: #fff;
 	border: 2px solid #fff;
 	border-radius: 0;
-}
-
-.hugh-ms__inner--step-3 .hugh-ms__btn--primary::after {
-	content: "";
-	width: 57px;
-	height: 58px;
-	background: #000;
-	flex: 0 0 auto;
-}
-
-.hugh-ms__inner--step-3 .hugh-ms__btn--primary::before {
-	content: "";
-	position: absolute;
-	right: 25px;
-	top: 50%;
-	width: 35px;
-	height: 35px;
-	background: center / contain no-repeat url("../images/arrow-up-outline.svg");
-	transform: translateY(-50%);
-	z-index: 1;
 }
 
 .hugh-ms__inner--step-3 .hugh-ms__btn--primary:hover {
@@ -1252,8 +1194,8 @@
 }
 
 .hugh-ms__inner--step-5 .hugh-ms__title {
-	margin-bottom: 20px;
-	font-size: clamp(60px, 5.2vw, 100px);
+	margin-bottom: clamp(10px, min(1.8vw, 2.4vh), 20px);
+	font-size: clamp(36px, min(5.2vw, 10.5vh), 100px);
 	font-weight: 300;
 	line-height: 1.05;
 	letter-spacing: 0.01em;
@@ -1271,9 +1213,9 @@
 }
 
 .hugh-ms__time-meta {
-	margin: 0 0 40px;
-	font-size: 20px;
-	line-height: 24px;
+	margin: 0 0 clamp(16px, min(3vw, 4vh), 40px);
+	font-size: clamp(14px, min(1.6vw, 2.2vh), 20px);
+	line-height: 1.2;
 	color: #fff;
 }
 
@@ -1287,17 +1229,17 @@
 }
 
 .hugh-ms__time-sub {
-	margin: 0 0 52px;
-	font-size: 32px;
+	margin: 0 0 clamp(20px, min(4vw, 5vh), 52px);
+	font-size: clamp(18px, min(2.6vw, 3.8vh), 32px);
 	font-weight: 300;
-	line-height: 39px;
+	line-height: 1.2;
 	color: #fff;
 }
 
 .hugh-ms__inner--step-5 .hugh-ms__slots {
 	display: flex;
 	flex-wrap: wrap;
-	gap: 12px 38.322px;
+	gap: clamp(8px, min(1.2vw, 1.6vh), 12px) clamp(16px, min(3vw, 3.5vh), 38.322px);
 	max-width: 714px;
 }
 
@@ -1305,14 +1247,14 @@
 	box-sizing: border-box;
 	position: relative;
 	display: flex;
-	width: 211.78px;
-	min-height: 78.66px;
-	padding: 20.1695px 62px 22.1864px;
+	width: clamp(140px, min(22vw, 24vh), 211.78px);
+	min-height: clamp(52px, min(8vw, 9vh), 78.66px);
+	padding: clamp(12px, min(1.8vw, 2vh), 20.1695px) clamp(28px, min(6vw, 7vh), 62px) clamp(14px, min(2vw, 2.2vh), 22.1864px);
 	align-items: center;
 	justify-content: center;
-	font-size: 30.2542px;
+	font-size: clamp(16px, min(2.4vw, 3.2vh), 30.2542px);
 	font-weight: 300;
-	line-height: 37px;
+	line-height: 1.2;
 	color: #fff;
 	background: transparent;
 	border: 2.01695px solid #fff;
@@ -1367,9 +1309,9 @@
 	display: inline-flex;
 	align-items: center;
 	gap: 16px;
-	min-height: 85px;
-	padding: 14px 14px 13px 31px;
-	font-size: 24px;
+	min-height: clamp(52px, min(4.4vw, 8.5vh), 85px);
+	padding: clamp(10px, min(1.2vw, 1.8vh), 14px) clamp(10px, min(1.2vw, 1.8vh), 14px) clamp(9px, min(1.1vw, 1.6vh), 13px) clamp(18px, min(2.5vw, 3vh), 31px);
+	font-size: clamp(15px, min(1.85vw, 2.5vh), 24px);
 	font-weight: 500;
 	letter-spacing: 0.01em;
 	text-transform: uppercase;
@@ -1377,26 +1319,6 @@
 	background: #fff;
 	border: 2px solid #fff;
 	border-radius: 0;
-}
-
-.hugh-ms__inner--step-5 .hugh-ms__btn--primary::after {
-	content: "";
-	width: 57px;
-	height: 58px;
-	background: #000;
-	flex: 0 0 auto;
-}
-
-.hugh-ms__inner--step-5 .hugh-ms__btn--primary::before {
-	content: "";
-	position: absolute;
-	right: 25px;
-	top: 50%;
-	width: 35px;
-	height: 35px;
-	background: center / contain no-repeat url("../images/arrow-up-outline.svg");
-	transform: translateY(-50%);
-	z-index: 1;
 }
 
 .hugh-ms__inner--step-5 .hugh-ms__btn--primary:hover {
@@ -1441,8 +1363,8 @@
 }
 
 .hugh-ms__inner--step-6 .hugh-ms__title {
-	margin-bottom: 24px;
-	font-size: clamp(60px, 5.2vw, 100px);
+	margin-bottom: clamp(12px, min(2vw, 2.8vh), 24px);
+	font-size: clamp(36px, min(5.2vw, 10.5vh), 100px);
 	font-weight: 300;
 	line-height: 1;
 	letter-spacing: 0.01em;
@@ -1460,21 +1382,22 @@
 	cursor: pointer;
 }
 
-.hugh-ms__photo-guidelines {
+.hugh-ms__photo-guidelines,
+.hugh-ms__inner--step-0 .hugh-ms__zone-lead {
 	width: min(712px, 100%);
-	margin: 0 0 30px;
-	padding-right: 30px;
+	margin: 0 0 clamp(12px, min(2vw, 2.5vh), 20px);
+	padding-right: clamp(16px, 2.5vw, 30px);
 	font-weight: 300;
-	font-size: 24px;
-	line-height: 29px;
+	font-size: clamp(15px, min(2vw, 2.6vh), 24px);
+	line-height: 1.2;
 	letter-spacing: 0.02em;
 	color: #fff;
 }
 
 .hugh-ms__photo-subtitle {
 	width: min(712px, 100%);
-	margin: 0 0 14px;
-	font-size: 32px;
+	margin: 0 0 clamp(10px, min(1.5vw, 2vh), 14px);
+	font-size: clamp(18px, min(2.6vw, 3.6vh), 32px);
 	line-height: 1.05;
 	letter-spacing: 0.02em;
 	text-transform: uppercase;
@@ -1489,9 +1412,9 @@
 .hugh-ms__photo-upload-grid {
 	display: flex;
 	flex-direction: column;
-	gap: 20px;
+	gap: 14px;
 	width: min(712px, 100%);
-	margin-bottom: 30px;
+	margin-bottom: 20px;
 }
 
 .hugh-ms__photo-upload-card {
@@ -1502,8 +1425,8 @@
 	justify-content: center;
 	gap: 8px;
 	width: 100%;
-	min-height: clamp(220px, 26vw, 334px);
-	padding: 24px 20px;
+	min-height: clamp(120px, min(18vw, 22vh), 250px);
+	padding: clamp(12px, min(1.8vw, 2.2vh), 18px) clamp(14px, 2vw, 20px);
 	border: 1px solid #fff;
 	cursor: pointer;
 }
@@ -1593,15 +1516,15 @@
 }
 
 .hugh-ms__photo-zone-label {
-	font-size: 32px;
-	line-height: 39px;
+	font-size: clamp(18px, min(2.6vw, 3.6vh), 32px);
+	line-height: 1.2;
 	color: #fff;
 }
 
 .hugh-ms__photo-zone-field {
 	position: relative;
 	z-index: 20;
-	min-height: 70px;
+	min-height: clamp(52px, min(7vw, 8vh), 70px);
 	border: 1px solid #fff;
 }
 
@@ -1610,11 +1533,11 @@
 	align-items: center;
 	justify-content: space-between;
 	width: 100%;
-	min-height: 70px;
-	padding: 16px 44px 16px 15px;
+	min-height: clamp(52px, min(7vw, 8vh), 70px);
+	padding: clamp(12px, min(1.8vw, 2vh), 16px) clamp(22px, min(4vw, 4.5vh), 44px) clamp(12px, min(1.8vw, 2vh), 16px) clamp(12px, min(1.8vw, 2vh), 15px);
 	font: inherit;
-	font-size: 24px;
-	line-height: 29px;
+	font-size: clamp(15px, min(2vw, 2.6vh), 24px);
+	line-height: 1.2;
 	text-align: left;
 	color: #fff;
 	background: transparent;
@@ -1726,9 +1649,9 @@
 	display: inline-flex;
 	align-items: center;
 	gap: 16px;
-	min-height: 85px;
-	padding: 14px 14px 13px 31px;
-	font-size: 24px;
+	min-height: clamp(52px, min(4.4vw, 8.5vh), 85px);
+	padding: clamp(10px, min(1.2vw, 1.8vh), 14px) clamp(10px, min(1.2vw, 1.8vh), 14px) clamp(9px, min(1.1vw, 1.6vh), 13px) clamp(18px, min(2.5vw, 3vh), 31px);
+	font-size: clamp(15px, min(1.85vw, 2.5vh), 24px);
 	font-weight: 500;
 	letter-spacing: 0.01em;
 	text-transform: uppercase;
@@ -1738,26 +1661,6 @@
 	border-radius: 0;
 }
 
-.hugh-ms__inner--step-6 .hugh-ms__btn--primary::after {
-	content: "";
-	width: 57px;
-	height: 58px;
-	background: #000;
-	flex: 0 0 auto;
-}
-
-.hugh-ms__inner--step-6 .hugh-ms__btn--primary::before {
-	content: "";
-	position: absolute;
-	right: 25px;
-	top: 50%;
-	width: 35px;
-	height: 35px;
-	background: center / contain no-repeat url("../images/arrow-up-outline.svg");
-	transform: translateY(-50%);
-	z-index: 1;
-}
-
 .hugh-ms__inner--step-6 .hugh-ms__btn--primary:hover {
 	filter: none;
 	background: #f2f2f2;
@@ -1765,7 +1668,7 @@
 
 /* Step 7: customer information (Figma « information »). */
 .hugh-ms__inner--step-7 {
-	--hugh-ms-footer-slot: 132px;
+	--hugh-ms-footer-slot: clamp(96px, min(16vw, 20vh), 132px);
 }
 
 .hugh-ms__inner--step-7 .hugh-ms__crumbs {
@@ -1806,8 +1709,8 @@
 }
 
 .hugh-ms__inner--step-7 .hugh-ms__title {
-	margin: 0 0 24px;
-	font-size: clamp(40px, 5.2vw, 100px);
+	margin: 0 0 clamp(12px, min(2vw, 2.8vh), 24px);
+	font-size: clamp(28px, min(5.2vw, 9vh), 100px);
 	font-weight: 300;
 	line-height: 1.21;
 	letter-spacing: 0.01em;
@@ -1828,8 +1731,11 @@
 }
 
 /* Шаги 2, 3, 5, 6: Back в правом верхнем углу относительно .hugh-ms__panel — не добавлять сюда step 7–8 (--figma), иначе в модальном режиме «Retour» уезжает. */
+.hugh-ms__inner--step-0 .hugh-ms__step2-back,
+.hugh-ms__inner--step-1 .hugh-ms__step2-back,
 .hugh-ms__inner--step-2 .hugh-ms__step2-back,
 .hugh-ms__inner--step-3 .hugh-ms__step2-back,
+.hugh-ms__inner--step-4 .hugh-ms__step2-back,
 .hugh-ms__inner--step-5 .hugh-ms__step2-back,
 .hugh-ms__inner--step-6 .hugh-ms__step2-back {
 	position: absolute;
@@ -1869,7 +1775,7 @@
 .hugh-ms__inner--step-7 .hugh-ms__info-form {
 	display: flex;
 	flex-direction: column;
-	gap: 20px;
+	gap: clamp(12px, min(2vw, 2.5vh), 20px);
 	width: 100%;
 	max-width: 730px;
 }
@@ -1877,7 +1783,7 @@
 .hugh-ms__inner--step-7 .hugh-ms__info-row {
 	display: flex;
 	flex-wrap: wrap;
-	gap: 20px;
+	gap: clamp(12px, min(2vw, 2.5vh), 20px);
 	width: 100%;
 }
 
@@ -1907,8 +1813,8 @@
 	width: 100%;
 	font-family: "Inter Tight", system-ui, sans-serif;
 	font-weight: 300;
-	font-size: 24px;
-	line-height: 29px;
+	font-size: clamp(15px, min(2vw, 2.6vh), 24px);
+	line-height: 1.2;
 	text-transform: uppercase;
 	color: #fff;
 }
@@ -1921,11 +1827,11 @@
 .hugh-ms__inner--step-7 .hugh-ms__field-input {
 	box-sizing: border-box;
 	width: 100%;
-	min-height: 70px;
-	padding: 18px 14px 18px 15px;
+	min-height: clamp(48px, min(7vw, 8vh), 70px);
+	padding: clamp(12px, min(1.8vw, 2vh), 18px) clamp(12px, min(1.5vw, 1.8vh), 14px) clamp(12px, min(1.8vw, 2vh), 18px) clamp(12px, min(1.5vw, 1.8vh), 15px);
 	font-family: "Inter Tight", system-ui, sans-serif;
-	font-size: 20px;
-	line-height: 24px;
+	font-size: clamp(15px, min(1.8vw, 2.4vh), 20px);
+	line-height: 1.2;
 	font-weight: 300;
 	color: #fff;
 	background: transparent;
@@ -1947,9 +1853,9 @@
 }
 
 .hugh-ms__inner--step-7 .hugh-ms__field-input--note {
-	height: 70px;
-	min-height: 70px;
-	max-height: 70px;
+	height: clamp(48px, min(7vw, 8vh), 70px);
+	min-height: clamp(48px, min(7vw, 8vh), 70px);
+	max-height: clamp(48px, min(7vw, 8vh), 70px);
 	resize: none;
 	overflow-y: auto;
 }
@@ -2019,9 +1925,9 @@
 	display: inline-flex;
 	align-items: center;
 	gap: 16px;
-	min-height: 85px;
-	padding: 14px 14px 13px 31px;
-	font-size: 24px;
+	min-height: clamp(52px, min(4.4vw, 8.5vh), 85px);
+	padding: clamp(10px, min(1.2vw, 1.8vh), 14px) clamp(10px, min(1.2vw, 1.8vh), 14px) clamp(9px, min(1.1vw, 1.6vh), 13px) clamp(18px, min(2.5vw, 3vh), 31px);
+	font-size: clamp(15px, min(1.85vw, 2.5vh), 24px);
 	font-weight: 500;
 	letter-spacing: 0.01em;
 	text-transform: uppercase;
@@ -2029,26 +1935,6 @@
 	background: #fff;
 	border: 2px solid #fff;
 	border-radius: 0;
-}
-
-.hugh-ms__inner--step-7 .hugh-ms__btn--primary::after {
-	content: "";
-	width: 57px;
-	height: 58px;
-	background: #000;
-	flex: 0 0 auto;
-}
-
-.hugh-ms__inner--step-7 .hugh-ms__btn--primary::before {
-	content: "";
-	position: absolute;
-	right: 25px;
-	top: 50%;
-	width: 35px;
-	height: 35px;
-	background: center / contain no-repeat url("../images/arrow-up-outline.svg");
-	transform: translateY(-50%);
-	z-index: 1;
 }
 
 .hugh-ms__inner--step-7 .hugh-ms__btn--primary:hover {
@@ -2059,7 +1945,7 @@
 /* Step 8: deposit payment recap + Stripe CTA. */
 .hugh-ms__inner--step-8 {
 	/* Reserve more space so consent checkbox isn't covered by fixed footer */
-	--hugh-ms-footer-slot: 260px;
+	--hugh-ms-footer-slot: clamp(160px, min(26vw, 30vh), 260px);
 }
 
 .hugh-ms__inner--step-8 .hugh-ms__crumbs {
@@ -2100,8 +1986,8 @@
 }
 
 .hugh-ms__inner--step-8 .hugh-ms__title {
-	margin: 0 0 28px;
-	font-size: clamp(58px, 5.2vw, 100px);
+	margin: 0 0 clamp(12px, min(2.2vw, 3vh), 28px);
+	font-size: clamp(32px, min(5.2vw, 10vh), 100px);
 	font-weight: 300;
 	line-height: 1;
 	letter-spacing: 0;
@@ -2113,18 +1999,18 @@
 	display: flex;
 	flex-direction: column;
 	align-items: flex-start;
-	gap: 24px;
+	gap: clamp(14px, min(2.5vw, 3vh), 24px);
 	width: 100%;
 	max-width: min(558px, 100%);
-	margin-bottom: 50px;
+	margin-bottom: clamp(20px, min(4vw, 5vh), 50px);
 }
 
 .hugh-ms__inner--step-8 .hugh-ms__pay-sheet {
 	width: 100%;
-	padding: 50px 49px 58px 50px;
+	padding: clamp(22px, min(4vw, 5vh), 50px) clamp(22px, min(4vw, 4.5vh), 49px) clamp(26px, min(4.5vw, 5.5vh), 58px) clamp(22px, min(4vw, 4.5vh), 50px);
 	border: 1px solid #fff;
 	box-sizing: border-box;
-	min-height: 348px;
+	min-height: clamp(220px, min(38vw, 40vh), 348px);
 }
 
 .hugh-ms__inner--step-8 .hugh-ms__pay-row {
@@ -2132,11 +2018,11 @@
 	flex-direction: row;
 	justify-content: space-between;
 	align-items: center;
-	gap: 24px;
+	gap: clamp(14px, min(2.5vw, 3vh), 24px);
 	padding: 0;
 	font-family: "Inter Tight", system-ui, sans-serif;
-	font-size: 24px;
-	line-height: 29px;
+	font-size: clamp(15px, min(2vw, 2.6vh), 24px);
+	line-height: 1.2;
 	font-weight: 300;
 	color: #fff;
 }
@@ -2169,8 +2055,8 @@
 	max-width: 100%;
 	font-family: "Inter Tight", system-ui, sans-serif;
 	font-weight: 300;
-	font-size: 20px;
-	line-height: 24px;
+	font-size: clamp(14px, min(1.6vw, 2.2vh), 20px);
+	line-height: 1.25;
 	letter-spacing: 0.02em;
 	color: #fff;
 }
@@ -2199,8 +2085,8 @@
 .hugh-ms__inner--step-8 .hugh-ms__pay-terms-line {
 	font-family: "Inter Tight", system-ui, sans-serif;
 	font-weight: 300;
-	font-size: 18px;
-	line-height: 22px;
+	font-size: clamp(13px, min(1.45vw, 2vh), 18px);
+	line-height: 1.25;
 	color: #fff;
 }
 
@@ -2306,12 +2192,12 @@
 	align-items: center;
 	justify-content: center;
 	width: min(420px, 100%);
-	min-height: 85px;
-	padding: 20px 28px 19px;
-	font-size: 24px;
+	min-height: clamp(52px, min(4.4vw, 8.5vh), 85px);
+	padding: clamp(12px, min(2vw, 2.4vh), 20px) clamp(18px, min(2.8vw, 3.2vh), 28px) clamp(12px, min(1.9vw, 2.3vh), 19px);
+	font-size: clamp(15px, min(1.85vw, 2.5vh), 24px);
 	font-weight: 600;
 	letter-spacing: 0.01em;
-	line-height: 29px;
+	line-height: 1.2;
 	text-transform: uppercase;
 	text-align: center;
 	color: #000;
@@ -2359,14 +2245,14 @@
 	display: flex;
 	flex-direction: column;
 	align-items: center;
-	gap: 44px;
+	gap: clamp(22px, min(4vw, 5vh), 44px);
 	width: min(706px, 100%);
 	margin: 0 auto;
 }
 
 .hugh-ms__inner--step-9 .hugh-ms__done-icon {
-	width: 147px;
-	height: 147px;
+	width: clamp(96px, min(12vw, 14vh), 147px);
+	height: clamp(96px, min(12vw, 14vh), 147px);
 	position: relative;
 }
 
@@ -2380,7 +2266,7 @@
 .hugh-ms__inner--step-9 .hugh-ms__title {
 	margin: 0;
 	width: 100%;
-	font-size: clamp(44px, 4vw, 55px);
+	font-size: clamp(28px, min(4vw, 6vh), 55px);
 	line-height: 1.2;
 	letter-spacing: 0.02em;
 	text-transform: uppercase;
@@ -2391,21 +2277,21 @@
 .hugh-ms__inner--step-9 .hugh-ms__done-sheet {
 	box-sizing: border-box;
 	width: min(558px, 100%);
-	min-height: 271px;
-	padding: 50px 49px 58px 50px;
+	min-height: clamp(180px, min(32vw, 34vh), 271px);
+	padding: clamp(22px, min(4vw, 5vh), 50px) clamp(22px, min(4vw, 4.5vh), 49px) clamp(26px, min(4.5vw, 5.5vh), 58px) clamp(22px, min(4vw, 4.5vh), 50px);
 	border: 1px solid #fff;
 	display: flex;
 	flex-direction: column;
-	gap: 15px;
+	gap: clamp(10px, min(1.8vw, 2vh), 15px);
 }
 
 .hugh-ms__inner--step-9 .hugh-ms__done-row {
 	display: flex;
 	justify-content: space-between;
 	align-items: center;
-	gap: 24px;
-	font-size: 24px;
-	line-height: 29px;
+	gap: clamp(14px, min(2.5vw, 3vh), 24px);
+	font-size: clamp(15px, min(2vw, 2.6vh), 24px);
+	line-height: 1.2;
 	color: #fff;
 }
 
@@ -2426,8 +2312,8 @@
 .hugh-ms__inner--step-9 .hugh-ms__done-note {
 	margin: 0;
 	width: min(371px, 100%);
-	font-size: 20px;
-	line-height: 24px;
+	font-size: clamp(14px, min(1.6vw, 2.2vh), 20px);
+	line-height: 1.25;
 	text-align: center;
 	letter-spacing: 0.02em;
 	color: #fff;
@@ -2435,15 +2321,15 @@
 
 .hugh-ms__inner--step-9 .hugh-ms__done-close {
 	box-sizing: border-box;
-	width: 234px;
-	height: 75px;
-	padding: 15px;
+	width: clamp(180px, min(28vw, 30vh), 234px);
+	height: clamp(54px, min(7vw, 8vh), 75px);
+	padding: clamp(10px, min(1.5vw, 1.8vh), 15px);
 	border: 0;
 	background: #fff;
 	color: #000;
 	font: inherit;
-	font-size: 24px;
-	line-height: 29px;
+	font-size: clamp(15px, min(2vw, 2.6vh), 24px);
+	line-height: 1.2;
 	font-weight: 500;
 	letter-spacing: 0.01em;
 	text-transform: uppercase;
@@ -2466,6 +2352,13 @@
 		border: 0;
 		border-radius: 0;
 		background: #000;
+	}
+
+	/* Mobile: black square 35.38×36 with the arrow centered (20×20). */
+	.hugh-ms__btn--primary::after {
+		width: 35.38px;
+		height: 36px;
+		background: #000 center / 20px 20px no-repeat url("../images/arrow-up-outline.svg");
 	}
 
 	.hugh-ms__inner {
@@ -2500,7 +2393,7 @@
 
 	.hugh-ms__inner--step-0 {
 		gap: 20px;
-		padding: 20px 16px;
+		/*padding: 20px 16px;*/
 	}
 
 	.hugh-ms__inner--step-0 .hugh-ms__crumbs {
@@ -2541,30 +2434,83 @@
 		width: 100%;
 	}
 
+	/* Retour: как на шагах 2–6 — в потоке сверху слева, не absolute (иначе наезжает на переключатель вида тела). */
+	.hugh-ms__inner--step-0 .hugh-ms__step2-head {
+		position: relative;
+		display: flex;
+		flex-direction: column;
+		align-items: flex-start;
+		gap: 11px;
+		max-width: 312px;
+		/*margin-bottom: 15px;*/
+	}
+
+	.hugh-ms__inner--step-0 .hugh-ms__step2-back,
+	.hugh-ms__inner--step-0 .hugh-ms__step2-back--figma {
+		position: static;
+		right: auto;
+		top: auto;
+		z-index: auto;
+		display: inline-flex;
+		align-items: center;
+		gap: 5px;
+		order: 0;
+	}
+
+	.hugh-ms__inner--step-0 .hugh-ms__step2-back-ico {
+		flex: 0 0 18px;
+		width: 18px;
+		height: 18px;
+	}
+
+	.hugh-ms__inner--step-0 .hugh-ms__step2-back-txt {
+		font-family: "Helvetica Neue", "Inter Tight", system-ui, sans-serif;
+		font-size: 16px;
+		font-weight: 300;
+		line-height: 19px;
+		color: #c1c0c0;
+		text-transform: capitalize;
+		letter-spacing: 0.02em;
+	}
+
 	.hugh-ms__inner--step-0 .hugh-ms__title {
-		margin-bottom: 12px;
+		order: 1;
+		margin: 0 0 12px;
 		font-size: 24px;
 	}
 
+	/* Stage растягивается на всю оставшуюся высоту панели — как на десктопе. */
 	.hugh-ms__zone-stage {
+		position: relative;
 		width: 100%;
+		flex: 1 1 auto;
+		min-height: 0;
+		display: flex;
+		align-items: stretch;
+		justify-content: center;
 	}
 
 	.hugh-ms__zone-bodies {
 		justify-content: center;
-		align-items: flex-start;
+		align-items: stretch;
 		gap: 8px;
-		flex: 0 0 auto;
+		flex: 1 1 auto;
 		min-height: 0;
+		width: 100%;
+		height: 100%;
 	}
 
+	/* Тело занимает доступную высоту stage и сохраняет пропорции через aspect-ratio.
+	   Соотношение должно совпадать с десктопным (275.5 / 568) — кнопки зон позиционированы
+	   в процентах относительно этой коробки, иначе они «съезжают» относительно силуэта. */
 	.hugh-ms__zone-body {
 		display: none;
-		width: 288px;
-		max-width: 100%;
-		height: auto;
-		max-height: none;
-		/*aspect-ratio: 288 / 542;*/
+		width: auto;
+		max-width: 55%;
+		height: 100%;
+		max-height: 100%;
+		min-height: 0;
+		aspect-ratio: 275.5 / 568;
 		overflow: hidden;
 	}
 
@@ -2618,16 +2564,6 @@
 		line-height: 22px;
 	}
 
-	.hugh-ms__inner--step-0 .hugh-ms__btn--primary::after {
-		width: 35.38px;
-		height: 36px;
-		background: #000 center / 21.72px 21.72px no-repeat url("../images/arrow-up-outline.svg");
-	}
-
-	.hugh-ms__inner--step-0 .hugh-ms__btn--primary::before {
-		content: none;
-	}
-
 	.hugh-ms__inner--step-1 {
 		gap: 32px;
 	}
@@ -2655,7 +2591,46 @@
 		flex-direction: column;
 	}
 
+	.hugh-ms__inner--step-1 .hugh-ms__step2-head {
+		position: relative;
+		display: flex;
+		flex-direction: column;
+		align-items: flex-start;
+		gap: 11px;
+		max-width: 212px;
+		margin-bottom: 15px;
+	}
+
+	.hugh-ms__inner--step-1 .hugh-ms__step2-back,
+	.hugh-ms__inner--step-1 .hugh-ms__step2-back--figma {
+		position: static;
+		right: auto;
+		top: auto;
+		z-index: auto;
+		display: inline-flex;
+		align-items: center;
+		gap: 5px;
+		order: 0;
+	}
+
+	.hugh-ms__inner--step-1 .hugh-ms__step2-back-ico {
+		flex: 0 0 18px;
+		width: 18px;
+		height: 18px;
+	}
+
+	.hugh-ms__inner--step-1 .hugh-ms__step2-back-txt {
+		font-family: "Helvetica Neue", "Inter Tight", system-ui, sans-serif;
+		font-size: 16px;
+		font-weight: 300;
+		line-height: 19px;
+		color: #c1c0c0;
+		text-transform: capitalize;
+		letter-spacing: 0.02em;
+	}
+
 	.hugh-ms__inner--step-1 .hugh-ms__title {
+		order: 1;
 		margin: 0 0 8px;
 		font-size: 24px;
 		font-weight: 600;
@@ -2725,16 +2700,6 @@
 		font-size: 18px;
 		font-weight: 600;
 		line-height: 22px;
-	}
-
-	.hugh-ms__inner--step-1 .hugh-ms__btn--primary::after {
-		width: 35.38px;
-		height: 36px;
-		background: #000 center / 21.72px 21.72px no-repeat url("../images/arrow-up-outline.svg");
-	}
-
-	.hugh-ms__inner--step-1 .hugh-ms__btn--primary::before {
-		content: none;
 	}
 
 	/* Step 2 mobile */
@@ -2809,17 +2774,6 @@
 		font-weight: 600;
 		line-height: 29px;
 		letter-spacing: 0;
-	}
-
-	.hugh-ms__inner--step-2 .hugh-ms__title .hugh-ms__step-counter {
-		display: block;
-		margin-top: 11px;
-		font-size: 14px;
-		font-weight: 300;
-		line-height: 17px;
-		letter-spacing: 0.01em;
-		text-transform: none;
-		color: #c0c0c0;
 	}
 
 	.hugh-ms__inner--step-2 .hugh-ms__cal-wrap {
@@ -2924,15 +2878,6 @@
 		border-radius: 0;
 	}
 
-	.hugh-ms__inner--step-2 .hugh-ms__btn--primary::after {
-		width: 35.38px;
-		height: 36px;
-		background: #000 center / 21.72px 21.72px no-repeat url("../images/arrow-up-outline.svg");
-	}
-
-	.hugh-ms__inner--step-2 .hugh-ms__btn--primary::before {
-		content: none;
-	}
 
 	/* Step 3 mobile */
 	.hugh-ms__inner--step-3 {
@@ -3008,17 +2953,6 @@
 		letter-spacing: 0;
 	}
 
-	.hugh-ms__inner--step-3 .hugh-ms__title .hugh-ms__step-counter {
-		display: block;
-		margin-top: 11px;
-		font-size: 14px;
-		font-weight: 300;
-		line-height: 17px;
-		letter-spacing: 0.01em;
-		text-transform: none;
-		color: #c0c0c0;
-	}
-
 	.hugh-ms__inner--step-3 .hugh-ms__grid {
 		gap: 10px;
 		max-width: 100%;
@@ -3089,15 +3023,6 @@
 		border-radius: 0;
 	}
 
-	.hugh-ms__inner--step-3 .hugh-ms__btn--primary::after {
-		width: 35.38px;
-		height: 36px;
-		background: #000 center / 21.72px 21.72px no-repeat url("../images/arrow-up-outline.svg");
-	}
-
-	.hugh-ms__inner--step-3 .hugh-ms__btn--primary::before {
-		content: none;
-	}
 
 	/* Step 4 (time) mobile */
 	.hugh-ms__inner--step-5 {
@@ -3173,17 +3098,6 @@
 		letter-spacing: 0;
 	}
 
-	.hugh-ms__inner--step-5 .hugh-ms__title .hugh-ms__step-counter {
-		display: block;
-		margin-top: 11px;
-		font-size: 14px;
-		font-weight: 300;
-		line-height: 17px;
-		letter-spacing: 0.01em;
-		text-transform: none;
-		color: #c0c0c0;
-	}
-
 	.hugh-ms__inner--step-5 .hugh-ms__time-meta {
 		margin: 0 0 25px;
 		font-size: 15px;
@@ -3257,15 +3171,6 @@
 		border-radius: 0;
 	}
 
-	.hugh-ms__inner--step-5 .hugh-ms__btn--primary::after {
-		width: 35.38px;
-		height: 36px;
-		background: #000 center / 21.72px 21.72px no-repeat url("../images/arrow-up-outline.svg");
-	}
-
-	.hugh-ms__inner--step-5 .hugh-ms__btn--primary::before {
-		content: none;
-	}
 
 	/* Step 5 (photos) mobile */
 	.hugh-ms__inner--step-6 {
@@ -3341,25 +3246,15 @@
 		letter-spacing: 0;
 	}
 
-	.hugh-ms__inner--step-6 .hugh-ms__title .hugh-ms__step-counter {
-		display: block;
-		margin-top: 11px;
-		font-size: 14px;
-		font-weight: 300;
-		line-height: 17px;
-		letter-spacing: 0.01em;
-		text-transform: none;
-		color: #c0c0c0;
-	}
-
 	.hugh-ms__inner--step-6 .hugh-ms__photo-subtitle {
 		font-size: 18px;
 		margin-bottom: 0;
 	}
 
-	.hugh-ms__inner--step-6 .hugh-ms__photo-guidelines {
+	.hugh-ms__inner--step-6 .hugh-ms__photo-guidelines,
+	.hugh-ms__inner--step-0 .hugh-ms__zone-lead {
 		width: 100%;
-		margin: 11px 0 0;
+		margin: 0 0 15px;
 		font-size: 15px;
 		font-weight: 300;
 		line-height: 18px;
@@ -3374,7 +3269,7 @@
 	.hugh-ms__inner--step-6 .hugh-ms__photo-upload-grid {
 		width: 100%;
 		gap: 10px;
-		margin: 25px 0 0;
+		margin: 25px 0;
 	}
 
 	.hugh-ms__inner--step-6 .hugh-ms__photo-upload-card {
@@ -3471,15 +3366,6 @@
 		border-radius: 0;
 	}
 
-	.hugh-ms__inner--step-6 .hugh-ms__btn--primary::after {
-		width: 35.38px;
-		height: 36px;
-		background: #000 center / 21.72px 21.72px no-repeat url("../images/arrow-up-outline.svg");
-	}
-
-	.hugh-ms__inner--step-6 .hugh-ms__btn--primary::before {
-		content: none;
-	}
 
 	/* Step 6 (info) mobile */
 	.hugh-ms__inner--step-7 {
@@ -3556,17 +3442,6 @@
 		font-weight: 600;
 		line-height: 29px;
 		letter-spacing: 0;
-	}
-
-	.hugh-ms__inner--step-7 .hugh-ms__title .hugh-ms__step-counter {
-		display: block;
-		margin-top: 11px;
-		font-size: 14px;
-		font-weight: 300;
-		line-height: 17px;
-		letter-spacing: 0.01em;
-		text-transform: none;
-		color: #c0c0c0;
 	}
 
 	.hugh-ms__inner--step-7 .hugh-ms__info-form {
@@ -3666,15 +3541,6 @@
 		border-radius: 0;
 	}
 
-	.hugh-ms__inner--step-7 .hugh-ms__btn--primary::after {
-		width: 35.38px;
-		height: 36px;
-		background: #000 center / 21.72px 21.72px no-repeat url("../images/arrow-up-outline.svg");
-	}
-
-	.hugh-ms__inner--step-7 .hugh-ms__btn--primary::before {
-		content: none;
-	}
 
 	/* Step 7 (payment) mobile */
 	.hugh-ms__inner--step-8 {
@@ -3752,17 +3618,6 @@
 		font-weight: 600;
 		line-height: 29px;
 		letter-spacing: 0;
-	}
-
-	.hugh-ms__inner--step-8 .hugh-ms__title .hugh-ms__step-counter {
-		display: block;
-		margin-top: 10px;
-		font-size: 14px;
-		font-weight: 300;
-		line-height: 17px;
-		letter-spacing: 0.01em;
-		text-transform: none;
-		color: #c0c0c0;
 	}
 
 	.hugh-ms__inner--step-8 .hugh-ms__pay-layout {
@@ -3957,7 +3812,7 @@
 		width: 100%;
 		height: 61px;
 		margin-top: auto;
-		padding: 20px;
+		/*padding: 20px;*/
 		font-size: 18px;
 		font-weight: 600;
 		line-height: 22px;
@@ -4019,6 +3874,14 @@ html.hat-booking-modal-open body {
 	pointer-events: none;
 	align-items: center;
 	justify-items: center;
+}
+
+/* 13" laptops and short desktop screens: use tighter modal frame. */
+@media (min-width: 768px) and (max-width: 1366px), (min-width: 768px) and (max-height: 900px) {
+	.hugh-ms-booking-modal {
+		--hugh-ms-modal-pad: 20px;
+		--hugh-ms-modal-h: min(760px, calc(100dvh - (var(--hugh-ms-modal-pad) * 2)));
+	}
 }
 .hugh-ms-booking-modal.is-open {
 	display: grid;
@@ -4167,6 +4030,7 @@ html.hat-booking-modal-open body {
 
 	.hugh-ms-booking-modal__body {
 		min-height: 0;
+	background: #000;
 	}
 
 	.hugh-ms-booking-modal__body .hugh-ms-booking {
@@ -4207,14 +4071,67 @@ html.hat-booking-modal-open body {
 .hugh-ms-booking-modal__dialog {
 	position: relative;
 	box-sizing: border-box;
-	overflow-x: visible;
-	overflow-y: visible;
 	box-shadow: 0 28px 80px rgba(0, 0, 0, 0.65);
 }
 
 .hugh-ms-booking-modal__body .hugh-ms-booking {
 	margin: 0;
 	border-radius: 0;
+	--hugh-ms-bg: #000;
+	background: #000;
+	backdrop-filter: none;
+	-webkit-backdrop-filter: none;
+}
+
+/* Final confirmation step in modal: slightly tighter than standalone, still fluid by vh. */
+.hugh-ms-booking-modal__body .hugh-ms__inner--step-9 .hugh-ms__panel--done {
+	padding-top: clamp(12px, min(2vw, 2.8vh), 30px);
+	padding-bottom: clamp(12px, min(2vw, 2.8vh), 30px);
+}
+
+.hugh-ms-booking-modal__body .hugh-ms__inner--step-9 .hugh-ms__done-wrap {
+	gap: clamp(18px, min(3.2vw, 4vh), 26px);
+}
+
+.hugh-ms-booking-modal__body .hugh-ms__inner--step-9 .hugh-ms__done-icon {
+	width: clamp(88px, min(10vw, 12vh), 108px);
+	height: clamp(88px, min(10vw, 12vh), 108px);
+}
+
+.hugh-ms-booking-modal__body .hugh-ms__inner--step-9 .hugh-ms__title {
+	font-size: clamp(26px, min(3vw, 4.5vh), 46px);
+}
+
+.hugh-ms-booking-modal__body .hugh-ms__inner--step-9 .hugh-ms__done-sheet {
+	min-height: clamp(160px, min(28vw, 30vh), 220px);
+	padding: clamp(18px, min(3vw, 3.8vh), 28px) clamp(20px, min(3.2vw, 4vh), 30px);
+	gap: clamp(8px, min(1.5vw, 1.8vh), 10px);
+}
+
+.hugh-ms-booking-modal__body .hugh-ms__inner--step-9 .hugh-ms__done-row {
+	font-size: clamp(14px, min(1.7vw, 2.2vh), 20px);
+	line-height: 1.3;
+}
+
+.hugh-ms-booking-modal__body .hugh-ms__inner--step-9 .hugh-ms__done-note {
+	font-size: clamp(13px, min(1.5vw, 2vh), 18px);
+	line-height: 1.25;
+}
+
+.hugh-ms-booking-modal__body .hugh-ms__inner--step-9 .hugh-ms__done-close {
+	height: clamp(48px, min(6vw, 7vh), 64px);
+	font-size: clamp(14px, min(1.7vw, 2.2vh), 20px);
+	line-height: 1.2;
+}
+
+/* Mobile: keep internal modal scrolling enabled so footer actions stay reachable. */
+@media (max-width: 767px) {
+	.hugh-ms-booking-modal__dialog {
+		overflow-x: hidden;
+		overflow-y: auto;
+		-webkit-overflow-scrolling: touch;
+		overscroll-behavior: contain;
+	}
 }
 
 /* Desktop auto-grow mode:

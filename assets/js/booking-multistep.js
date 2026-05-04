@@ -41,21 +41,21 @@
 
 	var bodyZoneDefs = {
 		front: [
-			{ key: 'head', label: 'Tête', file: 'head.svg', zoneValue: 'cou', left: 39.5, top: 0, h: 12 },
-			{ key: 'left-shoulder', label: 'Épaule gauche', file: 'right shoulder.svg', zoneValue: 'bras', left: 20.5, top: 19, h: 16 },
-			{ key: 'torso', label: 'Torse', file: 'torso.svg', zoneValue: 'torse', left: 31, top: 11.5, h: 30 },
-			{ key: 'right-shoulder', label: 'Épaule droite', file: 'left shoulder.svg', zoneValue: 'bras', left: 67, top: 19, h: 16 },
-			{ key: 'left-forearm', label: 'Avant-bras gauche', file: 'right forearm.svg', zoneValue: 'bras', left: 9, top: 35, h: 14 },
-			{ key: 'right-forearm', label: 'Avant-bras droit', file: 'left forearm.svg', zoneValue: 'bras', left: 71.5, top: 35, h: 14 },
-			{ key: 'left-palm', label: 'Main gauche', file: 'left palm.svg', zoneValue: 'bras', left: 85, top: 48, h: 10.5 },
-			{ key: 'right-palm', label: 'Main droite', file: 'right palm.svg', zoneValue: 'bras', left: 0, top: 48.5, h: 10 },
-			{ key: 'left-leg', label: 'Jambe gauche', file: 'left leg.svg', zoneValue: 'jambe', left: 27, top: 47, h: 44 },
-			{ key: 'right-leg', label: 'Jambe droite', file: 'right leg.svg', zoneValue: 'jambe', left: 51, top: 47, h: 44 },
-			{ key: 'left-foot', label: 'Pied gauche', file: 'left foot.svg', zoneValue: 'jambe', left: 59.5, top: 90.7, h: 9.1 },
-			{ key: 'right-foot', label: 'Pied droit', file: 'right foot.svg', zoneValue: 'jambe', left: 24.4, top: 90.8, h: 9.3 },
+			{ key: 'head', label: S.bodyZoneHead || 'Tête', file: 'head.svg', zoneValue: 'cou', left: 39.5, top: 0, w: 20.8, h: 12 },
+			{ key: 'left-shoulder', label: S.bodyZoneLeftShoulder || 'Épaule gauche', file: 'right shoulder.svg', zoneValue: 'bras', left: 20.5, top: 19, w: 13.1, h: 16 },
+			{ key: 'torso', label: S.bodyZoneTorso || 'Torse', file: 'torso.svg', zoneValue: 'torse', left: 31, top: 11.5, w: 38, h: 30 },
+			{ key: 'right-shoulder', label: S.bodyZoneRightShoulder || 'Épaule droite', file: 'left shoulder.svg', zoneValue: 'bras', left: 67, top: 19, w: 13.1, h: 16 },
+			{ key: 'left-forearm', label: S.bodyZoneLeftForearm || 'Avant-bras gauche', file: 'right forearm.svg', zoneValue: 'bras', left: 9, top: 35, w: 18.6, h: 14 },
+			{ key: 'right-forearm', label: S.bodyZoneRightForearm || 'Avant-bras droit', file: 'left forearm.svg', zoneValue: 'bras', left: 71.5, top: 35, w: 19.2, h: 14 },
+			{ key: 'left-palm', label: S.bodyZoneLeftPalm || 'Main gauche', file: 'left palm.svg', zoneValue: 'bras', left: 85, top: 48, w: 14.4, h: 10.5 },
+			{ key: 'right-palm', label: S.bodyZoneRightPalm || 'Main droite', file: 'right palm.svg', zoneValue: 'bras', left: 0, top: 48.5, w: 14.7, h: 10 },
+			{ key: 'left-leg', label: S.bodyZoneLeftLeg || 'Jambe gauche', file: 'left leg.svg', zoneValue: 'jambe', left: 27, top: 47, w: 22.1, h: 44 },
+			{ key: 'right-leg', label: S.bodyZoneRightLeg || 'Jambe droite', file: 'right leg.svg', zoneValue: 'jambe', left: 51, top: 47, w: 22.1, h: 44 },
+			{ key: 'left-foot', label: S.bodyZoneLeftFoot || 'Pied gauche', file: 'left foot.svg', zoneValue: 'jambe', left: 59.5, top: 90.7, w: 15.3, h: 9.1 },
+			{ key: 'right-foot', label: S.bodyZoneRightFoot || 'Pied droit', file: 'right foot.svg', zoneValue: 'jambe', left: 24.4, top: 90.8, w: 14.6, h: 9.3 },
 		],
 		back: [
-			{ key: 'back', label: 'Dos', file: 'back.svg', zoneValue: 'dos', left: 31.3, top: 17, h: 23 },
+			{ key: 'back', label: S.bodyZoneBack || 'Dos', file: 'back.svg', zoneValue: 'dos', left: 31.3, top: 17, w: 38.6, h: 23 },
 		]
 	};
 
@@ -780,6 +780,7 @@
 		function createInitialState() {
 			return {
 				step: 0,
+				preselectedService: null,
 				selectedBodyZone: '',
 				selectedBodySide: 'front',
 				categories: [],
@@ -869,27 +870,82 @@
 			return parseInt(state.selectedCategoryId, 10) === 3;
 		}
 
-		function mobileStepLabel() {
-			const stepToIndex = { 0: 1, 1: 2, 2: 3, 3: 4, 5: 5, 6: 6, 7: 7, 8: 8 };
-			const current = stepToIndex[state.step];
-			if (!current) {
-				return '';
+		function isPreselectedFlow() {
+			return !!(state.preselectedService && state.service);
+		}
+
+		function flowSteps() {
+			const steps = [];
+			if (isPreselectedFlow()) {
+				steps.push(1, 2);
+				if (needsFormatStep()) {
+					steps.push(0, 4, 5);
+				} else {
+					steps.push(5, 0);
+				}
+			} else {
+				steps.push(3, 1, 2);
+				if (needsFormatStep()) {
+					steps.push(0, 4, 5);
+				} else {
+					steps.push(5, 0);
+				}
 			}
-			return fillBookingTemplate(
-				S.stepCounterFormat || 'Étape {{current}} sur {{total}}',
-				{ current: current, total: 8 }
-			);
+			steps.push(6, 7, 8, 9);
+			return steps;
+		}
+
+		function stepLabelFor(step) {
+			switch (step) {
+				case 0:
+					return S.stepZone || 'Sélectionnez la zone';
+				case 1:
+					return S.stepCategory || S.stepType;
+				case 2:
+					return S.stepDate;
+				case 3:
+					return S.stepService || S.stepType;
+				case 4:
+					return S.stepFormat;
+				case 5:
+					return S.stepTime;
+				case 6:
+					return S.stepPhoto;
+				case 7:
+					return S.stepInfo;
+				case 8:
+					return S.stepPay;
+				case 9:
+					return S.stepDone;
+				default:
+					return '';
+			}
 		}
 
 		function renderStepTitle(title) {
-			const stepLabel = mobileStepLabel();
+			return '<h2 class="hugh-ms__title">' + esc(title) + '</h2>';
+		}
+
+		function canGoBackFromCurrentStep() {
+			if (state.loading || state.step >= 9) {
+				return false;
+			}
+			const steps = flowSteps();
+			const idx = steps.indexOf(state.step);
+			return idx > 0;
+		}
+
+		function renderBackButton() {
+			if (!canGoBackFromCurrentStep()) {
+				return '';
+			}
 			return (
-				'<h2 class="hugh-ms__title">' +
-				esc(title) +
-				(stepLabel
-					? '<span class="hugh-ms__step-counter">' + esc(stepLabel) + '</span>'
-					: '') +
-				'</h2>'
+				'<button type="button" class="hugh-ms__step2-back hugh-ms__step2-back--figma" data-act="back">' +
+				'<span class="hugh-ms__step2-back-ico" aria-hidden="true"></span>' +
+				'<span class="hugh-ms__step2-back-txt">' +
+				esc(S.back) +
+				'</span>' +
+				'</button>'
 			);
 		}
 
@@ -927,23 +983,9 @@
 		}
 
 		function stepsMeta() {
-			const steps = [
-				{ step: 0, label: S.stepZone || 'Sélectionnez la zone' },
-				{ step: 1, label: S.stepCategory || S.stepType },
-				{ step: 2, label: S.stepDate },
-				{ step: 3, label: S.stepService || S.stepType },
-			];
-			if (needsFormatStep()) {
-				steps.push({ step: 4, label: S.stepFormat });
-			}
-			steps.push(
-				{ step: 5, label: S.stepTime },
-				{ step: 6, label: S.stepPhoto },
-				{ step: 7, label: S.stepInfo },
-				{ step: 8, label: S.stepPay },
-				{ step: 9, label: S.stepDone }
-			);
-			return steps;
+			return flowSteps().map(function (step) {
+				return { step: step, label: stepLabelFor(step) };
+			});
 		}
 
 		async function goNext() {
@@ -960,7 +1002,18 @@
 				if (matched && matched.zoneValue) {
 					state.tattooZone = matched.zoneValue;
 				}
-				state.step = 1;
+				if (!state.service) {
+					setError(S.pickService || S.errorGeneric);
+					state.step = 3;
+					render();
+					return;
+				}
+				if (needsFormatStep()) {
+					state.step = 4;
+					render();
+					return;
+				}
+				state.step = 6;
 				render();
 				return;
 			}
@@ -978,8 +1031,13 @@
 				if (!state.date) {
 					return;
 				}
-				state.step = 3;
-				render();
+				if (needsFormatStep()) {
+					state.step = 0;
+					render();
+					return;
+				}
+				state.step = 5;
+				await afterDateNext();
 				return;
 			}
 			if (state.step === 3) {
@@ -988,13 +1046,8 @@
 					render();
 					return;
 				}
-				if (needsFormatStep()) {
-					state.step = 4;
-					render();
-					return;
-				}
-				state.step = 5;
-				await afterDateNext();
+				state.step = 1;
+				render();
 				return;
 			}
 			if (state.step === 4) {
@@ -1013,7 +1066,11 @@
 					render();
 					return;
 				}
-				state.step = 6;
+				if (needsFormatStep()) {
+					state.step = 6;
+				} else {
+					state.step = 0;
+				}
 				render();
 				return;
 			}
@@ -1098,13 +1155,12 @@
 
 		function goBack() {
 			setError('');
-			if (state.step <= 0) {
+			const steps = flowSteps();
+			const idx = steps.indexOf(state.step);
+			if (idx <= 0) {
 				return;
 			}
-			state.step -= 1;
-			if (!needsFormatStep() && state.step === 4) {
-				state.step = 3;
-			}
+			state.step = steps[idx - 1];
 			state.tattooZoneOpen = false;
 			render();
 		}
@@ -1279,9 +1335,13 @@
 		function renderBodyZoneParts(zones) {
 			return zones.map(function (z) {
 				var sel = state.selectedBodyZone === z.key ? ' is-selected' : '';
+				var style = 'left:' + z.left + '%;top:' + z.top + '%;height:' + z.h + '%';
+				if (typeof z.w === 'number' && isFinite(z.w)) {
+					style += ';width:' + z.w + '%';
+				}
 				return (
 					'<button type="button" class="hugh-ms__zone-part' + sel + '" data-body-zone="' + esc(z.key) + '" ' +
-					'style="left:' + z.left + '%;top:' + z.top + '%;width:' + z.w + '%;height:' + z.h + '%" ' +
+					'style="' + style + '" ' +
 					'title="' + esc(z.label) + '">' +
 					'<img src="' + esc(humanSvgUrl(z.file)) + '" alt="' + esc(z.label) + '" draggable="false">' +
 					'</button>'
@@ -1339,8 +1399,7 @@
 			if (!picked) {
 				return '';
 			}
-			var rawLabel = picked.zone.label != null ? String(picked.zone.label) : '';
-			var zoneLabel = rawLabel ? rawLabel.charAt(0).toLowerCase() + rawLabel.slice(1) : '';
+			var zoneLabel = picked.zone.label != null ? String(picked.zone.label) : '';
 			return (
 				'<div class="hugh-ms__zone-picked-hint">' +
 				'<div class="hugh-ms__zone-picked-hint-inner">' +
@@ -1356,16 +1415,28 @@
 		function positionSelectedZoneHint() {
 			var hint = el.querySelector('.hugh-ms__zone-picked-hint');
 			var stage = el.querySelector('.hugh-ms__zone-stage');
-			var selected = el.querySelector('.hugh-ms__zone-part.is-selected');
+			var activeBody = el.querySelector('.hugh-ms__zone-body.is-active');
+			var selected = activeBody ? activeBody.querySelector('.hugh-ms__zone-part.is-selected') : el.querySelector('.hugh-ms__zone-part.is-selected');
 			if (!hint || !stage || !selected) {
 				return;
 			}
 			var stageRect = stage.getBoundingClientRect();
 			var selectedRect = selected.getBoundingClientRect();
 			hint.classList.remove('is-up');
-			hint.style.left = '0px';
-			hint.style.top = '0px';
 			var hintRect = hint.getBoundingClientRect();
+			if (
+				stageRect.width <= 1 ||
+				stageRect.height <= 1 ||
+				selectedRect.width <= 1 ||
+				selectedRect.height <= 1 ||
+				hintRect.width <= 1 ||
+				hintRect.height <= 1
+			) {
+				if (typeof window !== 'undefined' && typeof window.requestAnimationFrame === 'function') {
+					window.requestAnimationFrame(positionSelectedZoneHint);
+				}
+				return;
+			}
 			var centerX = selectedRect.left + (selectedRect.width / 2);
 			var centerY = selectedRect.top + (selectedRect.height / 2);
 			var edgePad = 4;
@@ -1397,9 +1468,16 @@
 			var hint = renderSelectedZoneHint();
 			var frontActive = state.selectedBodySide === 'front' ? ' is-active' : '';
 			var backActive = state.selectedBodySide === 'back' ? ' is-active' : '';
+			var zoneDescription =
+				S.stepZoneDescription ||
+				'Appuyez sur n’importe quelle zone du silhouette et choisissez l’emplacement pour votre futur tatouage.';
 			return (
 				'<div class="hugh-ms__panel hugh-ms__panel--zone">' +
-				'<h2 class="hugh-ms__title">' + esc(S.stepZone || 'SÉLECTIONNEZ LA ZONE') + '</h2>' +
+				'<div class="hugh-ms__step2-head">' +
+				renderStepTitle(S.stepZone || 'SÉLECTIONNEZ LA ZONE') +
+				renderBackButton() +
+				'</div>' +
+				'<p class="hugh-ms__lead hugh-ms__zone-lead">' + esc(zoneDescription) + '</p>' +
 				'<div class="hugh-ms__zone-stage">' +
 				'<div class="hugh-ms__zone-bodies">' +
 				'<div class="hugh-ms__zone-body' + frontActive + '" data-body-side="front">' +
@@ -1458,9 +1536,11 @@
 				})
 				.join('');
 			return (
-				'<div class="hugh-ms__panel"><h2 class="hugh-ms__title">' +
-				esc(S.stepCategory || S.stepType) +
-				'</h2>' +
+				'<div class="hugh-ms__panel">' +
+				'<div class="hugh-ms__step2-head">' +
+				renderStepTitle(S.stepCategory || S.stepType) +
+				renderBackButton() +
+				'</div>' +
 				'<p class="hugh-ms__lead">' +
 				esc(S.stepCategoryHint || '') +
 				'</p><div class="hugh-ms__grid">' +
@@ -1470,10 +1550,26 @@
 		}
 
 		function renderService() {
-			const items = state.flat
-				.filter(function (entry) {
-					return parseInt(entry.categoryId, 10) === parseInt(state.selectedCategoryId, 10);
-				})
+			const entries = (function () {
+				if (state.selectedCategoryId) {
+					return state.flat.filter(function (entry) {
+						return parseInt(entry.categoryId, 10) === parseInt(state.selectedCategoryId, 10);
+					});
+				}
+				const seen = Object.create(null);
+				return state.flat.filter(function (entry) {
+					if (!entry || !entry.service) {
+						return false;
+					}
+					const sid = parseInt(entry.service.id, 10);
+					if (!sid || seen[sid]) {
+						return false;
+					}
+					seen[sid] = true;
+					return true;
+				});
+			})();
+			const items = entries
 				.map(function (entry) {
 					const sel = state.service && state.service.id === entry.service.id ? ' is-selected' : '';
 					const rawPrice = entry.service.price;
@@ -1505,12 +1601,7 @@
 				'<div class="hugh-ms__panel">' +
 				'<div class="hugh-ms__step2-head">' +
 				renderStepTitle(S.stepService || S.stepType) +
-				'<button type="button" class="hugh-ms__step2-back hugh-ms__step2-back--figma" data-act="back">' +
-				'<span class="hugh-ms__step2-back-ico" aria-hidden="true"></span>' +
-				'<span class="hugh-ms__step2-back-txt">' +
-				esc(S.back) +
-				'</span>' +
-				'</button>' +
+				renderBackButton() +
 				'</div>' +
 				'<div class="hugh-ms__grid">' +
 				items +
@@ -1581,12 +1672,7 @@
 				'<div class="hugh-ms__panel">' +
 				'<div class="hugh-ms__step2-head">' +
 				renderStepTitle(S.stepDate) +
-				'<button type="button" class="hugh-ms__step2-back hugh-ms__step2-back--figma" data-act="back">' +
-				'<span class="hugh-ms__step2-back-ico" aria-hidden="true"></span>' +
-				'<span class="hugh-ms__step2-back-txt">' +
-				esc(S.back) +
-				'</span>' +
-				'</button>' +
+				renderBackButton() +
 				'</div>' +
 				'<div class="hugh-ms__cal-wrap">' +
 				'<div class="hugh-ms__cal-nav">' +
@@ -1632,9 +1718,12 @@
 				})
 				.join('');
 			return (
-				'<div class="hugh-ms__panel"><h2 class="hugh-ms__title">' +
-				esc(S.stepFormat) +
-				'</h2><div class="hugh-ms__grid">' +
+				'<div class="hugh-ms__panel">' +
+				'<div class="hugh-ms__step2-head">' +
+				renderStepTitle(S.stepFormat) +
+				renderBackButton() +
+				'</div>' +
+				'<div class="hugh-ms__grid">' +
 				items +
 				'</div></div>'
 			);
@@ -1684,12 +1773,7 @@
 				'<div class="hugh-ms__panel">' +
 				'<div class="hugh-ms__step2-head">' +
 				renderStepTitle(S.stepTime) +
-				'<button type="button" class="hugh-ms__step2-back hugh-ms__step2-back--figma" data-act="back">' +
-				'<span class="hugh-ms__step2-back-ico" aria-hidden="true"></span>' +
-				'<span class="hugh-ms__step2-back-txt">' +
-				esc(S.back) +
-				'</span>' +
-				'</button>' +
+				renderBackButton() +
 				'</div>' +
 				metaHtml +
 				'<h3 class="hugh-ms__time-sub">' +
@@ -1769,12 +1853,7 @@
 					'<div class="hugh-ms__panel">' +
 					'<div class="hugh-ms__step2-head">' +
 					renderStepTitle(suiteTitle) +
-					'<button type="button" class="hugh-ms__step2-back hugh-ms__step2-back--figma" data-act="back">' +
-					'<span class="hugh-ms__step2-back-ico" aria-hidden="true"></span>' +
-					'<span class="hugh-ms__step2-back-txt">' +
-					esc(S.back) +
-					'</span>' +
-					'</button>' +
+					renderBackButton() +
 					'</div>' +
 					'<p class="hugh-ms__photo-subtitle">' + esc(suiteSub) + '</p>' +
 					'<p class="hugh-ms__photo-guidelines">' + esc(suiteLead) + '</p>' +
@@ -1800,12 +1879,7 @@
 				'<div class="hugh-ms__panel">' +
 				'<div class="hugh-ms__step2-head">' +
 				renderStepTitle(S.stepPhoto) +
-				'<button type="button" class="hugh-ms__step2-back hugh-ms__step2-back--figma" data-act="back">' +
-				'<span class="hugh-ms__step2-back-ico" aria-hidden="true"></span>' +
-				'<span class="hugh-ms__step2-back-txt">' +
-				esc(S.back) +
-				'</span>' +
-				'</button>' +
+				renderBackButton() +
 				'</div>' +
 				'<p class="hugh-ms__photo-guidelines">' +
 				esc(S.photoHint) +
@@ -1856,12 +1930,7 @@
 				'<div class="hugh-ms__panel hugh-ms__panel--info">' +
 				'<div class="hugh-ms__step2-head">' +
 				renderStepTitle(S.stepInfo) +
-				'<button type="button" class="hugh-ms__step2-back hugh-ms__step2-back--figma" data-act="back">' +
-				'<span class="hugh-ms__step2-back-ico" aria-hidden="true"></span>' +
-				'<span class="hugh-ms__step2-back-txt">' +
-				esc(S.back) +
-				'</span>' +
-				'</button>' +
+				renderBackButton() +
 				'</div>' +
 				'<div class="hugh-ms__info-form">' +
 				'<div class="hugh-ms__info-row">' +
@@ -1990,12 +2059,7 @@
 				'<div class="hugh-ms__panel hugh-ms__panel--pay">' +
 				'<div class="hugh-ms__step2-head">' +
 				renderStepTitle(S.stepPay) +
-				'<button type="button" class="hugh-ms__step2-back hugh-ms__step2-back--figma" data-act="back">' +
-				'<span class="hugh-ms__step2-back-ico" aria-hidden="true"></span>' +
-				'<span class="hugh-ms__step2-back-txt">' +
-				esc(S.back) +
-				'</span>' +
-				'</button>' +
+				renderBackButton() +
 				'</div>' +
 				'<div class="hugh-ms__pay-layout">' +
 				'<div class="hugh-ms__pay-sheet">' +
@@ -2134,6 +2198,7 @@
 			}
 			const nextDisabled =
 				(state.step === 0 && !state.selectedBodyZone) ||
+				(state.step === 3 && !state.service) ||
 				(state.step === 2 && !state.date) ||
 				(state.step === 6 &&
 					(isSuiteDeTravailCategory()
@@ -2150,10 +2215,6 @@
 			const step7 = state.step === 7;
 			const step8 = state.step === 8;
 			const step9 = state.step === 9;
-			const footerBack =
-				showBack && !step7 && !step8 ?
-					'<button type="button" class="hugh-ms__btn hugh-ms__btn--ghost" data-act="back">' + esc(S.back) + '</button>' :
-					'';
 			const footerLeft =
 				step7 ?
 					'<label class="hugh-ms__age-row">' +
@@ -2164,7 +2225,7 @@
 					esc(S.ageCheckbox || '') +
 					'</span>' +
 					'</label>' :
-					footerBack;
+					'';
 			const footerPrimary =
 				step8 && nextBtn ?
 					'<div class="hugh-ms__pay-footer-stack">' +
@@ -2254,8 +2315,11 @@
 					const picked = state.categoryEntries[idx];
 					if (picked) {
 						state.selectedCategoryId = parseInt(picked.id, 10);
-						state.serviceEntry = null;
-						state.service = null;
+						state.categoryName = picked.name || '';
+						if (!isPreselectedFlow()) {
+							state.serviceEntry = null;
+							state.service = null;
+						}
 						state.selectedExtra = null;
 						state.time = '';
 						state.providerId = null;
@@ -2447,10 +2511,13 @@
 				state.flat = flattenServices(state.categories, ui.categoryIds || []);
 				const preselectedEntry = matchPreselectedService(state.flat, preselectedServiceQuery());
 				if (preselectedEntry) {
+					state.preselectedService = {
+						serviceId: parseInt(preselectedEntry.service.id, 10),
+					};
 					state.serviceEntry = preselectedEntry;
 					state.service = preselectedEntry.service;
-					state.categoryName = preselectedEntry.categoryName;
-					state.selectedCategoryId = parseInt(preselectedEntry.categoryId, 10);
+					state.categoryName = '';
+					state.selectedCategoryId = null;
 				}
 				const allow = ui.categoryIds && ui.categoryIds.length ? new Set(ui.categoryIds.map(function (id) { return parseInt(id, 10); })) : null;
 				state.categoryEntries = state.categories
@@ -2467,8 +2534,13 @@
 						return { id: cid, name: ameliaEntityName(cat) || '', description: description, servicesCount: servicesCount };
 					})
 					.filter(Boolean);
-				if (!state.selectedCategoryId && state.categoryEntries.length) {
+				if (!isPreselectedFlow() && !state.selectedCategoryId && state.categoryEntries.length) {
 					state.selectedCategoryId = parseInt(state.categoryEntries[0].id, 10);
+				}
+				if (isPreselectedFlow()) {
+					state.step = 1;
+				} else {
+					state.step = 3;
 				}
 				if (!state.flat.length) {
 					setError(S.errorNoServices);
