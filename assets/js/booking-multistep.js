@@ -42,15 +42,15 @@
 	var bodyZoneDefs = {
 		front: [
 			{ key: 'head', label: S.bodyZoneHead || 'Tête', file: 'head.svg', zoneValue: 'cou', left: 39.5, top: 0, w: 20.8, h: 12 },
-			{ key: 'left-shoulder', label: S.bodyZoneLeftShoulder || 'Épaule gauche', file: 'right shoulder.svg', zoneValue: 'bras', left: 20.5, top: 19, w: 13.1, h: 16 },
+			{ key: 'left-shoulder', label: S.bodyZoneRightShoulder || 'Épaule droite', file: 'right shoulder.svg', zoneValue: 'bras', left: 20.5, top: 19, w: 13.1, h: 16 },
 			{ key: 'torso', label: S.bodyZoneTorso || 'Torse', file: 'torso.svg', zoneValue: 'torse', left: 31, top: 11.5, w: 38, h: 30 },
-			{ key: 'right-shoulder', label: S.bodyZoneRightShoulder || 'Épaule droite', file: 'left shoulder.svg', zoneValue: 'bras', left: 67, top: 19, w: 13.1, h: 16 },
-			{ key: 'left-forearm', label: S.bodyZoneLeftForearm || 'Avant-bras gauche', file: 'right forearm.svg', zoneValue: 'bras', left: 9, top: 35, w: 18.6, h: 14 },
-			{ key: 'right-forearm', label: S.bodyZoneRightForearm || 'Avant-bras droit', file: 'left forearm.svg', zoneValue: 'bras', left: 71.5, top: 35, w: 19.2, h: 14 },
+			{ key: 'right-shoulder', label: S.bodyZoneLeftShoulder || 'Épaule gauche', file: 'left shoulder.svg', zoneValue: 'bras', left: 67, top: 19, w: 13.1, h: 16 },
+			{ key: 'left-forearm', label: S.bodyZoneRightForearm || 'Avant-bras droit', file: 'right forearm.svg', zoneValue: 'bras', left: 9, top: 35, w: 18.6, h: 14 },
+			{ key: 'right-forearm', label: S.bodyZoneLeftForearm || 'Avant-bras gauche', file: 'left forearm.svg', zoneValue: 'bras', left: 71.5, top: 35, w: 19.2, h: 14 },
 			{ key: 'left-palm', label: S.bodyZoneLeftPalm || 'Main gauche', file: 'left palm.svg', zoneValue: 'bras', left: 85, top: 48, w: 14.4, h: 10.5 },
 			{ key: 'right-palm', label: S.bodyZoneRightPalm || 'Main droite', file: 'right palm.svg', zoneValue: 'bras', left: 0, top: 48.5, w: 14.7, h: 10 },
-			{ key: 'left-leg', label: S.bodyZoneLeftLeg || 'Jambe gauche', file: 'left leg.svg', zoneValue: 'jambe', left: 27, top: 47, w: 22.1, h: 44 },
-			{ key: 'right-leg', label: S.bodyZoneRightLeg || 'Jambe droite', file: 'right leg.svg', zoneValue: 'jambe', left: 51, top: 47, w: 22.1, h: 44 },
+			{ key: 'left-leg', label: S.bodyZoneRightLeg || 'Jambe droite', file: 'left leg.svg', zoneValue: 'jambe', left: 27, top: 47, w: 22.1, h: 44 },
+			{ key: 'right-leg', label: S.bodyZoneLeftLeg || 'Jambe gauche', file: 'right leg.svg', zoneValue: 'jambe', left: 51, top: 47, w: 22.1, h: 44 },
 			{ key: 'left-foot', label: S.bodyZoneLeftFoot || 'Pied gauche', file: 'left foot.svg', zoneValue: 'jambe', left: 59.5, top: 90.7, w: 15.3, h: 9.1 },
 			{ key: 'right-foot', label: S.bodyZoneRightFoot || 'Pied droit', file: 'right foot.svg', zoneValue: 'jambe', left: 24.4, top: 90.8, w: 14.6, h: 9.3 },
 		],
@@ -311,9 +311,10 @@
 				photoFieldId: o.photoFieldId != null && o.photoFieldId !== '' ? o.photoFieldId : null,
 				photoRefFieldId: o.photoRefFieldId != null && o.photoRefFieldId !== '' ? o.photoRefFieldId : null,
 				projectNoteFieldId: o.projectNoteFieldId != null && o.projectNoteFieldId !== '' ? o.projectNoteFieldId : null,
+				bodyZoneFieldId: o.bodyZoneFieldId != null && o.bodyZoneFieldId !== '' ? o.bodyZoneFieldId : null,
 			};
 		} catch (e) {
-			return { categoryIds: [], categoryDescriptions: {}, photoFieldId: null, photoRefFieldId: null, projectNoteFieldId: null };
+			return { categoryIds: [], categoryDescriptions: {}, photoFieldId: null, photoRefFieldId: null, projectNoteFieldId: null, bodyZoneFieldId: null };
 		}
 	}
 
@@ -769,6 +770,26 @@
 		return d.innerHTML;
 	}
 
+	function escAllowBr(s) {
+		return esc(s).replace(/&lt;br\s*\/?&gt;/gi, '<br>');
+	}
+
+	function htmlLabelToText(value, keepLineBreaks) {
+		const raw = value == null ? '' : String(value);
+		if (!raw) {
+			return '';
+		}
+		const normalized = raw
+			.replace(/<br\s*\/?>/gi, keepLineBreaks ? '\n' : ' ')
+			.replace(/<\/(p|div|li)>/gi, keepLineBreaks ? '\n' : ' ');
+		const d = document.createElement('div');
+		d.innerHTML = normalized;
+		const text = d.textContent || d.innerText || '';
+		return keepLineBreaks
+			? text.replace(/\n{2,}/g, '\n').trim()
+			: text.replace(/\s+/g, ' ').trim();
+	}
+
 	function initRoot(el) {
 		const ui = parseConfig(el);
 		const projectNoteFieldId = (function () {
@@ -776,6 +797,12 @@
 			const fromCfg = cfg && cfg.projectNoteFieldId != null && cfg.projectNoteFieldId !== '' ? parseInt(cfg.projectNoteFieldId, 10) : NaN;
 			const n = !isNaN(fromUi) && fromUi > 0 ? fromUi : !isNaN(fromCfg) && fromCfg > 0 ? fromCfg : 4;
 			return n > 0 ? n : 4;
+		})();
+		const bodyZoneFieldId = (function () {
+			const fromUi = ui.bodyZoneFieldId != null && ui.bodyZoneFieldId !== '' ? parseInt(ui.bodyZoneFieldId, 10) : NaN;
+			const fromCfg = cfg && cfg.bodyZoneFieldId != null && cfg.bodyZoneFieldId !== '' ? parseInt(cfg.bodyZoneFieldId, 10) : NaN;
+			const n = !isNaN(fromUi) && fromUi > 0 ? fromUi : !isNaN(fromCfg) && fromCfg > 0 ? fromCfg : 5;
+			return n > 0 ? n : 5;
 		})();
 		function createInitialState() {
 			return {
@@ -800,6 +827,7 @@
 				photoFilesZone: [],
 				photoFilesReference: [],
 				tattooZone: '',
+				selectedBodyZoneLabel: '',
 				tattooZoneOpen: false,
 				customFields: [],
 				customer: { firstName: '', lastName: '', email: '', phone: '', note: '' },
@@ -1002,6 +1030,7 @@
 				if (matched && matched.zoneValue) {
 					state.tattooZone = matched.zoneValue;
 				}
+				state.selectedBodyZoneLabel = matched ? htmlLabelToText(matched.label, false) : '';
 				if (!state.service) {
 					setError(S.pickService || S.errorGeneric);
 					state.step = 3;
@@ -1201,8 +1230,12 @@
 								email: state.customer.email,
 								phone: state.customer.phone || null,
 							};
+							const bodyZoneLabel = state.selectedBodyZoneLabel != null && String(state.selectedBodyZoneLabel).trim();
 							if (cat) {
 								cust.hughCategoryName = String(state.categoryName).trim();
+							}
+							if (bodyZoneLabel) {
+								cust.hughBodyZoneLabel = String(bodyZoneLabel).trim();
 							}
 							return cust;
 						})(),
@@ -1223,14 +1256,19 @@
 			const splitAmelia = ameliaFiles.split;
 			const cfSubmit = splitAmelia ? ameliaFiles.zoneCf : ameliaFiles.singleCf;
 			const cfSubmitRef = splitAmelia ? ameliaFiles.refCf : null;
-			const zoneFieldSubmit = customFieldById(state.customFields, 3);
+			const zoneFieldSubmit = customFieldById(state.customFields, bodyZoneFieldId);
 			const bookingCustomFields = {};
-			if (zoneFieldSubmit && state.tattooZone) {
-				const zid = String(zoneFieldSubmit.id);
+			const selectedBodyZoneValue = state.selectedBodyZoneLabel != null && String(state.selectedBodyZoneLabel).trim()
+				? String(state.selectedBodyZoneLabel).trim()
+				: (state.tattooZone != null ? String(state.tattooZone).trim() : '');
+			if (selectedBodyZoneValue && bodyZoneFieldId > 0) {
+				const zid = String(bodyZoneFieldId);
+				const zoneType = zoneFieldSubmit && zoneFieldSubmit.type ? zoneFieldSubmit.type : 'text';
+				const zoneLabel = zoneFieldSubmit && zoneFieldSubmit.label != null ? String(zoneFieldSubmit.label) : 'Zone à tatouer';
 				bookingCustomFields[zid] = {
-					type: zoneFieldSubmit.type || 'text',
-					label: zoneFieldSubmit.label != null ? String(zoneFieldSubmit.label) : 'Zone à tatouer',
-					value: state.tattooZone,
+					type: zoneType,
+					label: zoneLabel,
+					value: selectedBodyZoneValue,
 				};
 			}
 			const noteRaw = state.customer.note != null && String(state.customer.note).trim();
@@ -1335,6 +1373,8 @@
 		function renderBodyZoneParts(zones) {
 			return zones.map(function (z) {
 				var sel = state.selectedBodyZone === z.key ? ' is-selected' : '';
+				var zoneLabelTooltip = htmlLabelToText(z.label, true);
+				var zoneLabelPlain = htmlLabelToText(z.label, false);
 				var style = 'left:' + z.left + '%;top:' + z.top + '%;height:' + z.h + '%';
 				if (typeof z.w === 'number' && isFinite(z.w)) {
 					style += ';width:' + z.w + '%';
@@ -1342,8 +1382,8 @@
 				return (
 					'<button type="button" class="hugh-ms__zone-part' + sel + '" data-body-zone="' + esc(z.key) + '" ' +
 					'style="' + style + '" ' +
-					'title="' + esc(z.label) + '">' +
-					'<img src="' + esc(humanSvgUrl(z.file)) + '" alt="' + esc(z.label) + '" draggable="false">' +
+					'title="' + esc(zoneLabelTooltip) + '">' +
+					'<img src="' + esc(humanSvgUrl(z.file)) + '" alt="' + esc(zoneLabelPlain) + '" draggable="false">' +
 					'</button>'
 				);
 			}).join('');
@@ -1399,13 +1439,14 @@
 			if (!picked) {
 				return '';
 			}
-			var zoneLabel = picked.zone.label != null ? String(picked.zone.label) : '';
+			var zonePickedPrefix = S.zonePickedPrefix || 'Vous avez choisi ';
+			var zoneLabel = htmlLabelToText(picked.zone.label, false);
 			return (
 				'<div class="hugh-ms__zone-picked-hint">' +
 				'<div class="hugh-ms__zone-picked-hint-inner">' +
 				'<span class="hugh-ms__zone-picked-hint-icon" aria-hidden="true"></span>' +
 				'<p class="hugh-ms__zone-picked-hint-text">' +
-				esc((S.zonePickedPrefix || 'Vous avez choisi ') + zoneLabel) +
+				escAllowBr(zonePickedPrefix) + esc(zoneLabel) +
 				'</p>' +
 				'</div>' +
 				'</div>'
@@ -1794,7 +1835,7 @@
 			const photoCfsOk = ameliaF.split
 				? !!(ameliaF.zoneCf && ameliaF.refCf)
 				: !!ameliaF.singleCf;
-			const zoneField = customFieldById(state.customFields, 3);
+			const zoneField = customFieldById(state.customFields, bodyZoneFieldId);
 			const zoneFieldLabel = S.photoZoneLabel || (zoneField && zoneField.label ? String(zoneField.label) : 'Zone à tatouer');
 			const zoneOptions = customFieldOptions(zoneField);
 			const acfZoneOptions = Array.isArray(cfg.zoneOptions) && cfg.zoneOptions.length ? cfg.zoneOptions : [];

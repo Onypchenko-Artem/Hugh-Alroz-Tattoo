@@ -516,6 +516,7 @@ function hughalroztatoo_localize_amelia_multistep_script() {
 			),
 			'humanImagesUrl'         => get_template_directory_uri() . '/assets/images/human',
 			'zoneOptions'            => hughalroztatoo_get_booking_zone_options(),
+			'bodyZoneFieldId'        => (int) apply_filters( 'hughalroztatoo_booking_body_zone_field_id', 5 ),
 			/**
 			 * Amelia custom field id for “Note sur le projet” (textarea in step 6).
 			 *
@@ -698,12 +699,25 @@ function hughalroztatoo_amelia_multistep_internal_notes( $appointment_data ) {
 		$category = trim( $customer['hughCategoryName'] );
 		$category = '' !== $category ? sanitize_text_field( $category ) : '';
 	}
+	$body_zone_label = '';
+	if ( isset( $customer['hughBodyZoneLabel'] ) && is_string( $customer['hughBodyZoneLabel'] ) ) {
+		$body_zone_label = trim( $customer['hughBodyZoneLabel'] );
+		$body_zone_label = '' !== $body_zone_label ? sanitize_text_field( $body_zone_label ) : '';
+	}
 	unset( $appointment_data['bookings'][0]['customer']['hughCategoryName'] );
+	unset( $appointment_data['bookings'][0]['customer']['hughBodyZoneLabel'] );
 
-	if ( '' === $category ) {
+	if ( '' === $category && '' === $body_zone_label ) {
 		return $appointment_data;
 	}
-	$block = __( 'Type de visite :', 'hughalroztatoo' ) . ' ' . $category;
+	$parts = array();
+	if ( '' !== $category ) {
+		$parts[] = __( 'Type de visite :', 'hughalroztatoo' ) . ' ' . $category;
+	}
+	if ( '' !== $body_zone_label ) {
+		$parts[] = __( 'Zone du corps :', 'hughalroztatoo' ) . ' ' . $body_zone_label;
+	}
+	$block = implode( "\n", $parts );
 	$prev  = ! empty( $appointment_data['internalNotes'] ) ? (string) $appointment_data['internalNotes'] : '';
 	if ( '' !== $prev ) {
 		$block = $prev . "\n\n" . $block;
@@ -768,6 +782,7 @@ add_action( 'wp_footer', 'hughalroztatoo_render_booking_modal', 5 );
  * - category: comma-separated Amelia category IDs to limit the list (optional).
  * - photo_field: ID du champ fichier « zone » (1er bloc), optionnel si un seul champ ou couple auto.
  * - photo_ref_field: ID du champ « référence (style) » (2e bloc). Si absent et la prestation a exactement 2 champs fichier Amelia, couplage auto (ids croissants : zone puis ref).
+ * - body_zone_field: ID du champ personnalisé Amelia « Zone à tatouer » (défaut: filtre hughalroztatoo_booking_body_zone_field_id, 5).
  * - project_note_field: ID du champ personnalisé « Note sur le projet » (défaut: filtre hughalroztatoo_booking_project_note_field_id, 4).
  *
  * @param array $atts Shortcode attributes.
@@ -783,6 +798,7 @@ function hughalroztatoo_shortcode_amelia_booking( $atts ) {
 			'category'           => '',
 			'photo_field'        => '',
 			'photo_ref_field'    => '',
+			'body_zone_field'    => '',
 			'project_note_field' => '',
 		),
 		$atts,
@@ -793,6 +809,7 @@ function hughalroztatoo_shortcode_amelia_booking( $atts ) {
 
 	$photo_field_id     = absint( $atts['photo_field'] );
 	$photo_ref_field_id = absint( $atts['photo_ref_field'] );
+	$body_zone_fid      = absint( $atts['body_zone_field'] );
 	$project_note_fid   = absint( $atts['project_note_field'] );
 
 	if ( wp_style_is( 'hughalroztatoo-booking-ms', 'registered' ) ) {
@@ -806,13 +823,15 @@ function hughalroztatoo_shortcode_amelia_booking( $atts ) {
 		wp_enqueue_script( 'hughalroztatoo-booking-modal' );
 	}
 
-	$default_note_id = (int) apply_filters( 'hughalroztatoo_booking_project_note_field_id', 4 );
-	$data            = wp_json_encode(
+	$default_note_id      = (int) apply_filters( 'hughalroztatoo_booking_project_note_field_id', 4 );
+	$default_body_zone_id = (int) apply_filters( 'hughalroztatoo_booking_body_zone_field_id', 5 );
+	$data                 = wp_json_encode(
 		array(
 			'categoryIds'          => $ids,
 			'categoryDescriptions' => hughalroztatoo_get_booking_category_descriptions(),
 			'photoFieldId'         => $photo_field_id ? $photo_field_id : null,
 			'photoRefFieldId'      => $photo_ref_field_id ? $photo_ref_field_id : null,
+			'bodyZoneFieldId'      => $body_zone_fid > 0 ? $body_zone_fid : $default_body_zone_id,
 			'projectNoteFieldId'   => $project_note_fid > 0 ? $project_note_fid : $default_note_id,
 		)
 	);
