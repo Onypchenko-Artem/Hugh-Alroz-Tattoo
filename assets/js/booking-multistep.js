@@ -56,6 +56,7 @@
 		],
 		back: [
 			{ key: 'back', label: S.bodyZoneBack || 'Dos', file: 'back.svg', zoneValue: 'dos', left: 31.3, top: 17, w: 38.6, h: 23 },
+			{ key: 'buttocks', label: S.bodyZoneButtocks || 'Fesses', file: 'buttocks.svg', zoneValue: 'dos', left: 27, top: 34, w: 46, h: 25 },
 		]
 	};
 

@@ -249,6 +249,7 @@ function hughalroztatoo_booking_pll_strings() {
 		'bodyZoneLeftFoot'   => 'Pied gauche',
 		'bodyZoneRightFoot'  => 'Pied droit',
 		'bodyZoneBack'       => 'Dos',
+		'bodyZoneButtocks'    => 'Fesses',
 		'submit'             => 'Confirmer la réservation',
 		'photoUploadStatus'    => 'Fichier(s) chargé(s).',
 		'tattooDurationHours'  => '%sh de tatouage',
@@ -600,6 +601,7 @@ function hughalroztatoo_localize_amelia_multistep_script() {
 				'bodyZoneLeftFoot' => hughalroztatoo_booking_t( 'bodyZoneLeftFoot' ),
 				'bodyZoneRightFoot' => hughalroztatoo_booking_t( 'bodyZoneRightFoot' ),
 				'bodyZoneBack'    => hughalroztatoo_booking_t( 'bodyZoneBack' ),
+				'bodyZoneButtocks' => hughalroztatoo_booking_t( 'bodyZoneButtocks' ),
 				'submit'          => hughalroztatoo_booking_t( 'submit' ),
 				'photoHint'       => hughalroztatoo_booking_field( 'booking_step5_guidelines', __( 'Photos claires, sans filtre, cadrage large. Demandez de l\'aide pour les prendre. Minimum 4 fichiers requis.', 'hughalroztatoo' ) ),
 				'photoUploadZone' => hughalroztatoo_booking_field( 'booking_step5_upload_zone_text', __( '3 photos de la zone à tatouer', 'hughalroztatoo' ) ),
@@ -678,8 +680,8 @@ function hughalroztatoo_maybe_enqueue_amelia_multistep() {
 add_action( 'wp_enqueue_scripts', 'hughalroztatoo_maybe_enqueue_amelia_multistep', 20 );
 
 /**
- * Map multistep visit type (category) to Amelia appointment internal notes. Project note stays in
- * the dedicated Amelia custom field; it is not duplicated here.
+ * Map multistep visit type (category) to Amelia appointment internal notes. Project note and body zone
+ * stay in dedicated Amelia custom fields; they are not duplicated here.
  *
  * The public /bookings endpoint does not set internalNotes; staff often read this field as «Заметка».
  *
@@ -699,25 +701,13 @@ function hughalroztatoo_amelia_multistep_internal_notes( $appointment_data ) {
 		$category = trim( $customer['hughCategoryName'] );
 		$category = '' !== $category ? sanitize_text_field( $category ) : '';
 	}
-	$body_zone_label = '';
-	if ( isset( $customer['hughBodyZoneLabel'] ) && is_string( $customer['hughBodyZoneLabel'] ) ) {
-		$body_zone_label = trim( $customer['hughBodyZoneLabel'] );
-		$body_zone_label = '' !== $body_zone_label ? sanitize_text_field( $body_zone_label ) : '';
-	}
 	unset( $appointment_data['bookings'][0]['customer']['hughCategoryName'] );
 	unset( $appointment_data['bookings'][0]['customer']['hughBodyZoneLabel'] );
 
-	if ( '' === $category && '' === $body_zone_label ) {
+	if ( '' === $category ) {
 		return $appointment_data;
 	}
-	$parts = array();
-	if ( '' !== $category ) {
-		$parts[] = __( 'Type de visite :', 'hughalroztatoo' ) . ' ' . $category;
-	}
-	if ( '' !== $body_zone_label ) {
-		$parts[] = __( 'Zone du corps :', 'hughalroztatoo' ) . ' ' . $body_zone_label;
-	}
-	$block = implode( "\n", $parts );
+	$block = __( 'Type de visite :', 'hughalroztatoo' ) . ' ' . $category;
 	$prev  = ! empty( $appointment_data['internalNotes'] ) ? (string) $appointment_data['internalNotes'] : '';
 	if ( '' !== $prev ) {
 		$block = $prev . "\n\n" . $block;
