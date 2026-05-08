@@ -14,6 +14,10 @@
 
 	const S = cfg.strings || {};
 
+	function stripeOffersOnlinePayment() {
+		return !!(cfg && cfg.stripeEnabled);
+	}
+
 	/** WordPress uses ru_RU; Intl / toLocaleString needs BCP 47 (ru-RU). */
 	function intlLocaleTag(wpLocale) {
 		if (!wpLocale || typeof wpLocale !== 'string') {
@@ -257,6 +261,26 @@
 			}
 		}
 		return null;
+	}
+
+	function customFieldAllowedForService(field, serviceId) {
+		if (!field) {
+			return false;
+		}
+		const sid = parseInt(serviceId, 10);
+		if (isNaN(sid) || sid <= 0) {
+			return false;
+		}
+		if (field.allServices) {
+			return true;
+		}
+		const svcs = valuesMap(field.services || field.serviceList);
+		for (let i = 0; i < svcs.length; i++) {
+			if (parseInt(svcs[i].id, 10) === sid) {
+				return true;
+			}
+		}
+		return false;
 	}
 
 	function customFieldOptions(field) {
@@ -842,9 +866,478 @@
 
 		let state = createInitialState();
 
+		const STRIPE_RETURN_STORAGE_KEY = 'hugh_ms_stripe_return_v1';
+
 		function setError(msg) {
 			state.error = msg || '';
 		}
+
+		function canUseSessionStorage() {
+			try {
+				return typeof window !== 'undefined' && typeof window.sessionStorage !== 'undefined';
+			} catch (e) {
+				return false;
+			}
+		}
+
+		function storeStripeReturnState(extraData) {
+			if (!canUseSessionStorage()) {
+				return;
+			}
+			try {
+				const extraId = state.selectedExtra && state.selectedExtra.id != null ? parseInt(state.selectedExtra.id, 10) : null;
+				const payload = Object.assign(
+					{
+					at: Date.now(),
+					serviceId: state.service && state.service.id != null ? parseInt(state.service.id, 10) : null,
+					extraId: !isNaN(extraId) && extraId > 0 ? extraId : null,
+					date: state.date || '',
+					time: state.time || '',
+					providerId: state.providerId != null ? parseInt(state.providerId, 10) : null,
+					categoryId: state.selectedCategoryId != null ? parseInt(state.selectedCategoryId, 10) : null,
+					},
+					extraData && typeof extraData === 'object' ? extraData : {}
+				);
+				window.sessionStorage.setItem(STRIPE_RETURN_STORAGE_KEY, JSON.stringify(payload));
+			} catch (e2) {}
+		}
+
+		function readStripeReturnState() {
+			if (!canUseSessionStorage()) {
+				return null;
+			}
+			try {
+				const raw = window.sessionStorage.getItem(STRIPE_RETURN_STORAGE_KEY);
+				if (!raw) {
+					return null;
+				}
+				const obj = JSON.parse(raw);
+				return obj && typeof obj === 'object' ? obj : null;
+			} catch (e) {
+				return null;
+			}
+		}
+
+		function clearStripeReturnState() {
+			if (!canUseSessionStorage()) {
+				return;
+			}
+			try {
+				window.sessionStorage.removeItem(STRIPE_RETURN_STORAGE_KEY);
+			} catch (e) {}
+		}
+
+		function readStripeReturnUrlData() {
+			try {
+				const u = new URL(window.location.href);
+				const status = (u.searchParams.get('hat_stripe_status') || u.searchParams.get('status') || '').toLowerCase();
+				const hatPidRaw = (u.searchParams.get('hat_payment_id') || '').trim();
+				const hatAmtRaw = (u.searchParams.get('hat_charged_amount') || '').trim();
+				const pid = hatPidRaw ? parseInt(hatPidRaw, 10) : NaN;
+				let charged = null;
+				if (hatAmtRaw !== '') {
+					const n = Number(hatAmtRaw);
+					charged = isFinite(n) && n > 0 ? n : null;
+				}
+				return {
+					status: status === 'success' || status === 'canceled' ? status : '',
+					sessionId: (u.searchParams.get('session_id') || '').trim(),
+					paymentAmeliaId: !isNaN(pid) && pid > 0 ? pid : null,
+					chargedAmount: charged,
+				};
+			} catch (e) {
+				return { status: '', sessionId: '', paymentAmeliaId: null, chargedAmount: null };
+			}
+		}
+
+		function clearStripeReturnUrlParams() {
+			try {
+				const u = new URL(window.location.href);
+				u.searchParams.delete('hat_stripe_status');
+				u.searchParams.delete('status');
+				u.searchParams.delete('session_id');
+				u.searchParams.delete('hat_payment_id');
+				u.searchParams.delete('hat_charged_amount');
+				window.history.replaceState({}, document.title, u.toString());
+			} catch (e) {}
+		}
+
+		/** Merge sessionStorage payload with payment id / amount from return URL (storage often empty after Stripe redirect). */
+		function mergeStripeReturnSaved(stored, urlData) {
+			const out = stored && typeof stored === 'object' ? Object.assign({}, stored) : {};
+			if (urlData && urlData.paymentAmeliaId != null && urlData.paymentAmeliaId > 0) {
+				out.paymentAmeliaId = urlData.paymentAmeliaId;
+			}
+			if (urlData && urlData.chargedAmount != null && urlData.chargedAmount > 0) {
+				out.chargedAmount = urlData.chargedAmount;
+			}
+			return out;
+		}
+
+		function thankYouPayloadFromCurrentUrl() {
+			try {
+				const u = new URL(window.location.href);
+				const fmt = u.searchParams.get('hat_format');
+				if (!fmt || String(fmt).trim() === '' || String(fmt).trim() === '—') {
+					return null;
+				}
+				return {
+					format: String(fmt),
+					date: u.searchParams.get('hat_date') || '—',
+					slot: u.searchParams.get('hat_slot') || '—',
+					paid: u.searchParams.get('hat_paid') || '—',
+				};
+			} catch (e) {
+				return null;
+			}
+		}
+
+		/**
+		 * Finalize the Stripe success return.
+		 *
+		 * The PHP server-side handler updates the Amelia payment row directly (gateway/status/amount/transaction)
+		 * and redirects to a clean thank-you URL with hat_* params. This client-side path is only a fallback for
+		 * the rare case the server didn't run (e.g. URL was missing hat_payment_id from old Checkout sessions);
+		 * we deliberately skip the Amelia /payments/callback HTTP call to avoid creating a duplicate payment row
+		 * (the existing row may already be marked as paid).
+		 */
+		async function completeStripeSuccessReturn(saved) {
+			state.loading = false;
+			state.error = '';
+			const payload = thankYouPayloadForRedirect(saved);
+			clearStripeReturnState();
+			clearStripeReturnUrlParams();
+			if (redirectToThankYou(payload)) {
+				return true;
+			}
+			render();
+			return true;
+		}
+
+		async function applyStripeReturnIfAny() {
+			const ret = readStripeReturnUrlData();
+			if (!ret.status) {
+				return false;
+			}
+			const stored = readStripeReturnState();
+			const saved = mergeStripeReturnSaved(stored, ret);
+			if (!saved.paymentAmeliaId || !saved.chargedAmount) {
+				clearStripeReturnState();
+				clearStripeReturnUrlParams();
+				return false;
+			}
+
+			const svcId = saved.serviceId != null ? parseInt(saved.serviceId, 10) : NaN;
+			const entry =
+				!isNaN(svcId) && svcId > 0
+					? state.flat.find(function (x) {
+							return x && x.service && parseInt(x.service.id, 10) === svcId;
+					  })
+					: null;
+
+			if (entry) {
+				state.serviceEntry = entry;
+				state.service = entry.service;
+				state.categoryName = entry.categoryName || '';
+				state.selectedCategoryId = entry.categoryId != null ? parseInt(entry.categoryId, 10) : null;
+				state.date = saved.date || '';
+				state.time = saved.time || '';
+				state.providerId = saved.providerId != null ? parseInt(saved.providerId, 10) : null;
+
+				if (saved.extraId) {
+					const eid = parseInt(saved.extraId, 10);
+					const ex = serviceExtras().find(function (e) {
+						return e && parseInt(e.id, 10) === eid;
+					});
+					state.selectedExtra = ex || null;
+				}
+			}
+
+			if (ret.status === 'success') {
+				if (!ret.sessionId) {
+					clearStripeReturnState();
+					clearStripeReturnUrlParams();
+					return false;
+				}
+				return await completeStripeSuccessReturn(saved);
+			}
+
+			clearStripeReturnState();
+			clearStripeReturnUrlParams();
+			if (!entry) {
+				return false;
+			}
+			state.step = 8;
+			state.loading = false;
+			setError(S.errorBooking || S.errorGeneric);
+			render();
+			return true;
+		}
+
+		function mountStripeIfNeeded() {}
+
+		function useStripeGatewayThisBooking() {
+			const totalNum = bookingSessionPriceNumber(state.service, state.selectedExtra);
+			return stripeOffersOnlinePayment() && totalNum != null && totalNum > 0;
+		}
+
+		function parsePaymentAmount(value) {
+			if (value == null || value === '') {
+				return null;
+			}
+			const n = Number(value);
+			return isFinite(n) && n > 0 ? n : null;
+		}
+
+		function extractBookingPaymentMeta(data, fallbackAmount) {
+			const candidates = [];
+			if (data && data.payment && typeof data.payment === 'object') {
+				candidates.push(data.payment);
+			}
+			if (data && Array.isArray(data.bookings)) {
+				data.bookings.forEach(function (booking) {
+					if (booking && Array.isArray(booking.payments)) {
+						booking.payments.forEach(function (p) {
+							if (p && typeof p === 'object') {
+								candidates.push(p);
+							}
+						});
+					}
+				});
+			}
+			if (data && Array.isArray(data.payments)) {
+				data.payments.forEach(function (p) {
+					if (p && typeof p === 'object') {
+						candidates.push(p);
+					}
+				});
+			}
+			let selected = null;
+			for (let i = 0; i < candidates.length; i++) {
+				const p = candidates[i];
+				const pid = parseInt(p.id, 10);
+				if (!pid) {
+					continue;
+				}
+				if (p.status === 'pending') {
+					selected = p;
+					break;
+				}
+				if (!selected) {
+					selected = p;
+				}
+			}
+			if (!selected) {
+				return null;
+			}
+			const id = parseInt(selected.id, 10);
+			const amount = parsePaymentAmount(selected.amount) || parsePaymentAmount(fallbackAmount);
+			if (!id || !amount) {
+				return null;
+			}
+			return {
+				paymentAmeliaId: id,
+				chargedAmount: amount,
+				currency: String(cfg.paymentCurrency || 'cad').toLowerCase(),
+			};
+		}
+
+		/**
+		 * @param {string} statusValue success|canceled
+		 * @param {{format?:string,date?:string,slot?:string,paid?:string}|null|undefined} thankYouSummary Embedded in success_url so thank-you.php renders before JS (sessionStorage may be missing cross-context).
+		 * @param {{paymentAmeliaId?:number,chargedAmount?:number}|null|undefined} paymentBridge Amelia pending payment id + amount so /payments/callback runs without sessionStorage.
+		 */
+		function checkoutReturnUrl(statusValue, thankYouSummary, paymentBridge) {
+			var rawBase;
+			if (statusValue === 'success') {
+				rawBase = cfg.thankYouUrl && String(cfg.thankYouUrl).trim();
+				if (!rawBase) {
+					rawBase = cfg.stripeReturnBaseUrl && String(cfg.stripeReturnBaseUrl).trim();
+				}
+			} else {
+				rawBase = cfg.stripeReturnBaseUrl && String(cfg.stripeReturnBaseUrl).trim();
+			}
+			var baseHref = rawBase || window.location.href;
+			var u;
+			try {
+				u = new URL(baseHref, window.location.origin);
+			} catch (e) {
+				try {
+					u = new URL(window.location.href);
+				} catch (e2) {
+					return window.location.href;
+				}
+			}
+			u.searchParams.delete('hat_stripe_status');
+			u.searchParams.delete('status');
+			u.searchParams.delete('session_id');
+			u.searchParams.delete('hat_format');
+			u.searchParams.delete('hat_date');
+			u.searchParams.delete('hat_slot');
+			u.searchParams.delete('hat_paid');
+			u.searchParams.delete('hat_payment_id');
+			u.searchParams.delete('hat_charged_amount');
+			u.searchParams.set('hat_stripe_status', statusValue);
+			if (statusValue === 'success') {
+				u.searchParams.set('session_id', '{CHECKOUT_SESSION_ID}');
+				if (thankYouSummary && typeof thankYouSummary === 'object') {
+					function qp(name, val) {
+						var s = val == null ? '' : String(val);
+						if (s.length > 320) {
+							s = s.slice(0, 320);
+						}
+						u.searchParams.set(name, s);
+					}
+					qp('hat_format', thankYouSummary.format != null && String(thankYouSummary.format).trim() !== '' ? thankYouSummary.format : '—');
+					qp('hat_date', thankYouSummary.date != null && String(thankYouSummary.date).trim() !== '' ? thankYouSummary.date : '—');
+					qp('hat_slot', thankYouSummary.slot != null && String(thankYouSummary.slot).trim() !== '' ? thankYouSummary.slot : '—');
+					qp('hat_paid', thankYouSummary.paid != null && String(thankYouSummary.paid).trim() !== '' ? thankYouSummary.paid : '—');
+				}
+				if (paymentBridge && paymentBridge.paymentAmeliaId && paymentBridge.chargedAmount != null) {
+					u.searchParams.set('hat_payment_id', String(parseInt(paymentBridge.paymentAmeliaId, 10)));
+					u.searchParams.set('hat_charged_amount', String(Number(paymentBridge.chargedAmount)));
+				}
+			}
+			return u.toString();
+		}
+
+		function thankYouBaseUrl() {
+			const configured = cfg && typeof cfg.thankYouUrl === 'string' ? cfg.thankYouUrl.trim() : '';
+			if (configured) {
+				return configured;
+			}
+			const fb = cfg && typeof cfg.thankYouFallbackUrl === 'string' ? cfg.thankYouFallbackUrl.trim() : '';
+			if (fb) {
+				return fb;
+			}
+			return '/thank-you/';
+		}
+
+		function bookingSuccessPayloadFromState() {
+			const svc = state.service;
+			const extra = state.selectedExtra;
+			const formatName = extra ? ameliaEntityName(extra) : svc ? ameliaEntityName(svc) : '';
+			const dh = durationShortH(svc);
+			const formatVal = formatName && dh ? formatName + '- ' + dh : formatName || dh || '—';
+			const dateVal = formatDateLabel(state.date) || '—';
+			const slotVal = state.time || '—';
+			const totalNum = bookingSessionPriceNumber(svc, extra);
+			const pctRaw = cfg.depositPercent != null ? parseInt(cfg.depositPercent, 10) : 30;
+			const pct = isNaN(pctRaw) ? 30 : pctRaw;
+			let paidVal = '—';
+			if (totalNum != null) {
+				paidVal = String(Math.round((totalNum * pct) / 100)) + ' CAD';
+			}
+			return {
+				format: formatVal,
+				date: dateVal,
+				slot: slotVal,
+				paid: paidVal,
+			};
+		}
+
+		/** Prefer summary captured before Stripe redirect (sessionStorage), fall back to restored state or current URL. */
+		function thankYouPayloadForRedirect(saved) {
+			const live = bookingSuccessPayloadFromState();
+			const d = saved && saved.doneSummary && typeof saved.doneSummary === 'object' ? saved.doneSummary : null;
+			if (d) {
+				function pick(stored, fallback) {
+					if (stored != null && String(stored).trim() !== '') {
+						return String(stored);
+					}
+					return fallback;
+				}
+				return {
+					format: pick(d.format, live.format),
+					date: pick(d.date, live.date),
+					slot: pick(d.slot, live.slot),
+					paid: pick(d.paid, live.paid),
+				};
+			}
+			const fromUrl = thankYouPayloadFromCurrentUrl();
+			if (fromUrl) {
+				return fromUrl;
+			}
+			return live;
+		}
+
+		function redirectToThankYou(payload) {
+			let target;
+			try {
+				target = new URL(thankYouBaseUrl(), window.location.origin);
+			} catch (e) {
+				return false;
+			}
+			const data = payload && typeof payload === 'object' ? payload : {};
+			target.searchParams.set('hat_format', data.format || '—');
+			target.searchParams.set('hat_date', data.date || '—');
+			target.searchParams.set('hat_slot', data.slot || '—');
+			target.searchParams.set('hat_paid', data.paid || '—');
+			window.location.assign(target.toString());
+			return true;
+		}
+
+		async function createStripeCheckoutSessionOrThrow(payload, thankYouSummary) {
+			const body = new URLSearchParams();
+			body.set('action', 'hughalroztatoo_create_stripe_checkout_session');
+			body.set('nonce', cfg.nonce || '');
+			body.set('amount', String(payload.chargedAmount));
+			body.set('currency', String(payload.currency || cfg.paymentCurrency || 'cad'));
+			body.set(
+				'success_url',
+				checkoutReturnUrl('success', thankYouSummary, {
+					paymentAmeliaId: payload.paymentAmeliaId,
+					chargedAmount: payload.chargedAmount,
+				})
+			);
+			body.set('cancel_url', checkoutReturnUrl('canceled'));
+			body.set('description', payload.description || '');
+			body.set('payment_amelia_id', String(payload.paymentAmeliaId));
+			if (state.customer && state.customer.email) {
+				body.set('customer_email', String(state.customer.email));
+			}
+			const res = await fetch(cfg.ajaxUrl, {
+				method: 'POST',
+				credentials: 'same-origin',
+				headers: {
+					'Content-Type': 'application/x-www-form-urlencoded; charset=UTF-8',
+					Accept: 'application/json',
+				},
+				body: body.toString(),
+			});
+			const raw = await res.text();
+			let json = null;
+			try {
+				json = raw ? JSON.parse(raw) : null;
+			} catch (e) {
+				json = null;
+			}
+			if (!res.ok || !json || !json.success || !json.data || !json.data.url) {
+				const msg = json && json.data && json.data.message ? json.data.message : (S.errorBooking || S.errorGeneric);
+				throw new Error(msg);
+			}
+			return json.data;
+		}
+
+		function appointmentBookingFailed(ok, json) {
+			const d = json && json.data;
+			if (!ok) {
+				return true;
+			}
+			if (!d) {
+				return true;
+			}
+			if (d.requiresAction === true && d.paymentIntentClientSecret) {
+				return false;
+			}
+			return !!(
+				d.timeSlotUnavailable ||
+				d.recaptchaError ||
+				d.emailError ||
+				d.customerBlocked
+			);
+		}
+
 
 		function allPhotoFiles() {
 			return state.photoFilesZone.concat(state.photoFilesReference);
@@ -920,7 +1413,7 @@
 					steps.push(5, 0);
 				}
 			}
-			steps.push(6, 7, 8, 9);
+			steps.push(6, 7, 8);
 			return steps;
 		}
 
@@ -1195,17 +1688,7 @@
 			render();
 		}
 
-		async function submitBooking() {
-			state.loading = true;
-			state.error = '';
-			render();
-			const token = await recaptchaToken();
-			if (cfg.recaptchaOn && !token) {
-				state.loading = false;
-				setError(S.recaptcha || S.errorGeneric);
-				render();
-				return;
-			}
+		function composeBookingSubmission(paymentPayload, token) {
 			const bookingStart = state.date + ' ' + state.time + ':00';
 			const extrasPayload = [];
 			if (state.selectedExtra != null) {
@@ -1220,7 +1703,7 @@
 				locale: cfg.locale || '',
 				timeZone: cfg.timeZone || '',
 				recaptcha: token || undefined,
-				payment: { gateway: 'onSite' },
+				payment: paymentPayload,
 				bookings: [
 					{
 						customer: (function () {
@@ -1249,11 +1732,7 @@
 			if (loc != null && loc !== '' && parseInt(loc, 10) > 0) {
 				body.locationId = parseInt(loc, 10);
 			}
-			const ameliaFiles = resolveAmeliaFileFieldsForBooking(
-				state.service.id,
-				state.customFields,
-				ui
-			);
+			const ameliaFiles = resolveAmeliaFileFieldsForBooking(state.service.id, state.customFields, ui);
 			const splitAmelia = ameliaFiles.split;
 			const cfSubmit = splitAmelia ? ameliaFiles.zoneCf : ameliaFiles.singleCf;
 			const cfSubmitRef = splitAmelia ? ameliaFiles.refCf : null;
@@ -1262,7 +1741,11 @@
 			const selectedBodyZoneValue = state.selectedBodyZoneLabel != null && String(state.selectedBodyZoneLabel).trim()
 				? String(state.selectedBodyZoneLabel).trim()
 				: (state.tattooZone != null ? String(state.tattooZone).trim() : '');
-			if (selectedBodyZoneValue && bodyZoneFieldId > 0) {
+			if (
+				selectedBodyZoneValue &&
+				bodyZoneFieldId > 0 &&
+				customFieldAllowedForService(zoneFieldSubmit, state.service && state.service.id)
+			) {
 				const zid = String(bodyZoneFieldId);
 				const zoneType = zoneFieldSubmit && zoneFieldSubmit.type ? zoneFieldSubmit.type : 'text';
 				const zoneLabel = zoneFieldSubmit && zoneFieldSubmit.label != null ? String(zoneFieldSubmit.label) : 'Zone à tatouer';
@@ -1275,11 +1758,13 @@
 			const noteRaw = state.customer.note != null && String(state.customer.note).trim();
 			if (noteRaw) {
 				const nField = customFieldById(state.customFields, projectNoteFieldId);
-				bookingCustomFields[String(projectNoteFieldId)] = {
-					type: nField && nField.type ? nField.type : 'text-area',
-					label: nField && nField.label != null ? String(nField.label) : (S.labelProjectNote || 'Note sur le projet'),
-					value: String(state.customer.note).trim(),
-				};
+				if (customFieldAllowedForService(nField, state.service && state.service.id)) {
+					bookingCustomFields[String(projectNoteFieldId)] = {
+						type: nField && nField.type ? nField.type : 'text-area',
+						label: nField && nField.label != null ? String(nField.label) : (S.labelProjectNote || 'Note sur le projet'),
+						value: String(state.customer.note).trim(),
+					};
+				}
 			}
 			const zonePhotos = state.photoFilesZone;
 			const refPhotos = state.photoFilesReference;
@@ -1287,8 +1772,6 @@
 			const useMultipart = splitAmelia
 				? (cfSubmit && zonePhotos.length > 0) || (cfSubmitRef && refPhotos.length > 0)
 				: cfSubmit && photosForSubmit.length > 0;
-			let ok;
-			let json;
 			if (useMultipart) {
 				if (splitAmelia) {
 					if (cfSubmit && zonePhotos.length > 0) {
@@ -1321,11 +1804,30 @@
 					};
 				}
 				body.bookings[0].customFields = bookingCustomFields;
-				if (token) {
-					body.recaptcha = token;
-				}
+			}
+			return {
+				body: body,
+				useMultipart: useMultipart,
+				splitAmelia: splitAmelia,
+				cfSubmit: cfSubmit,
+				cfSubmitRef: cfSubmitRef,
+				zonePhotos: zonePhotos,
+				refPhotos: refPhotos,
+				photosForSubmit: photosForSubmit,
+				bookingCustomFields: bookingCustomFields,
+			};
+		}
+
+		async function sendComposedBooking(sub) {
+			if (sub.useMultipart) {
 				const fd = new FormData();
-				appendFormData(fd, body, '');
+				appendFormData(fd, sub.body, '');
+				const splitAmelia = sub.splitAmelia;
+				const cfSubmit = sub.cfSubmit;
+				const cfSubmitRef = sub.cfSubmitRef;
+				const zonePhotos = sub.zonePhotos;
+				const refPhotos = sub.refPhotos;
+				const photosForSubmit = sub.photosForSubmit;
 				if (splitAmelia) {
 					if (cfSubmit) {
 						zonePhotos.forEach(function (file, idx) {
@@ -1343,24 +1845,86 @@
 						fd.append('files[' + fid + '][' + idx + ']', file, file.name);
 					});
 				}
-				const postRes = await ameliaPostForm('/bookings', fd);
-				ok = postRes.ok;
-				json = postRes.json;
-			} else {
-				body.bookings[0].customFields =
-					Object.keys(bookingCustomFields).length ? bookingCustomFields : null;
-				const postRes = await ameliaPost('/bookings', body);
-				ok = postRes.ok;
-				json = postRes.json;
+				return ameliaPostForm('/bookings', fd);
 			}
-			state.loading = false;
+			sub.body.bookings[0].customFields =
+				Object.keys(sub.bookingCustomFields).length ? sub.bookingCustomFields : null;
+			return ameliaPost('/bookings', sub.body);
+		}
+
+		async function submitBooking() {
+			state.error = '';
+			let token = await recaptchaToken();
+			if (cfg.recaptchaOn && !token) {
+				setError(S.recaptcha || S.errorGeneric);
+				render();
+				return;
+			}
+			const shouldRedirectToStripe = useStripeGatewayThisBooking();
+			/* Amelia needs gateway onSite here so processPayment does not run in-app Stripe before our Checkout redirect.
+			   PHP relabels the payment row to gateway stripe when creating the Checkout session so the admin is not « sur place ». */
+			const payment = { gateway: 'onSite' };
+			if (shouldRedirectToStripe) {
+				const gt = S.payStripeCardLabel && String(S.payStripeCardLabel).trim();
+				if (gt) {
+					payment.gatewayTitle = gt;
+				}
+			}
+
+			state.loading = true;
+			render();
+
+			const sub = composeBookingSubmission(payment, token);
+			const postRes = await sendComposedBooking(sub);
+			const ok = postRes.ok;
+			const json = postRes.json;
 			const d = json && json.data;
-			const failed =
-				!ok ||
-				(d && (d.timeSlotUnavailable || d.recaptchaError || d.emailError || d.customerBlocked));
-			if (!failed && d) {
+
+			state.loading = false;
+			const failed = appointmentBookingFailed(ok, json);
+			if (!failed && d && d.requiresAction !== true) {
+				if (shouldRedirectToStripe) {
+					const totalNum = bookingSessionPriceNumber(state.service, state.selectedExtra);
+					const pctRaw = cfg.depositPercent != null ? parseInt(cfg.depositPercent, 10) : 30;
+					const pct = isNaN(pctRaw) ? 30 : pctRaw;
+					const fallbackDeposit = totalNum != null ? (totalNum * pct) / 100 : null;
+					const paymentMeta = extractBookingPaymentMeta(d, fallbackDeposit);
+					if (!paymentMeta) {
+						setError(S.errorBooking || S.errorGeneric);
+						render();
+						return;
+					}
+					const formatName = state.selectedExtra
+						? ameliaEntityName(state.selectedExtra)
+						: (state.service ? ameliaEntityName(state.service) : '');
+					const sessionPayload = Object.assign({}, paymentMeta, {
+						description: formatName || 'Tattoo booking deposit',
+					});
+					try {
+						const checkout = await createStripeCheckoutSessionOrThrow(sessionPayload, bookingSuccessPayloadFromState());
+						storeStripeReturnState({
+							paymentAmeliaId: paymentMeta.paymentAmeliaId,
+							chargedAmount: paymentMeta.chargedAmount,
+							currency: paymentMeta.currency,
+							doneSummary: bookingSuccessPayloadFromState(),
+						});
+						window.location.assign(String(checkout.url));
+						return;
+					} catch (sessionErr) {
+						setError(
+							typeof sessionErr.message === 'string' && sessionErr.message
+								? sessionErr.message
+								: (S.errorBooking || S.errorGeneric)
+						);
+						render();
+						return;
+					}
+				}
 				state.resultData = d;
-				state.step = 9;
+				if (redirectToThankYou(bookingSuccessPayloadFromState())) {
+					return;
+				}
+				setError(S.errorGeneric);
 			} else {
 				const msg =
 					(d && d.message) ||
@@ -2109,6 +2673,9 @@
 				payRow(S.payRowDate, dateVal) +
 				payRow(S.payRowSlot, slotVal) +
 				payRow(S.payRowTotal, totalDisplay) +
+				(useStripeGatewayThisBooking()
+					? payRow(S.payMethod || 'Moyen de paiement', S.payStripeCardLabel || 'Stripe')
+					: '') +
 				'<div class="hugh-ms__pay-sep" role="presentation"></div>' +
 				payRow(depLabel, depDisplay) +
 				'</div>' +
@@ -2301,6 +2868,12 @@
 			positionSelectedZoneHint();
 			if (typeof window !== 'undefined' && typeof window.requestAnimationFrame === 'function') {
 				window.requestAnimationFrame(positionSelectedZoneHint);
+				window.requestAnimationFrame(function () {
+					mountStripeIfNeeded();
+				});
+			} else {
+				positionSelectedZoneHint();
+				mountStripeIfNeeded();
 			}
 		}
 
@@ -2584,6 +3157,9 @@
 				} else {
 					state.step = 3;
 				}
+				if (await applyStripeReturnIfAny()) {
+					return;
+				}
 				if (!state.flat.length) {
 					setError(S.errorNoServices);
 				}
@@ -2628,5 +3204,5 @@
 		boot();
 	}
 
-	document.querySelectorAll('.hugh-ms-booking').forEach(initRoot);
+	document.querySelectorAll('.hugh-ms-booking[data-hugh-ms-config]').forEach(initRoot);
 })();

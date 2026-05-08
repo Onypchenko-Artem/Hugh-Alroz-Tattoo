@@ -342,7 +342,25 @@
 	});
 
 	if (cfg.openBookingModalOnLoad) {
-		window.hughalroztatooOpenBookingModal(window.location.href);
+		var stripeReturnLoad = false;
+		try {
+			var locUrl = new URL(window.location.href);
+			var retStatus = (
+				locUrl.searchParams.get('hat_stripe_status') ||
+				locUrl.searchParams.get('status') ||
+				''
+			).toLowerCase();
+			if (
+				retStatus === 'success' ||
+				retStatus === 'canceled' ||
+				String(locUrl.searchParams.get('session_id') || '').trim() !== ''
+			) {
+				stripeReturnLoad = true;
+			}
+		} catch (locErr) {}
+		if (!stripeReturnLoad) {
+			window.hughalroztatooOpenBookingModal(window.location.href);
+		}
 	}
 
 	/**

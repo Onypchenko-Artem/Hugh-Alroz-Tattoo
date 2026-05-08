@@ -21,6 +21,47 @@ function hughalroztatoo_amelia_active() {
 }
 
 /**
+ * Stripe credentials from Amelia (Settings → Payments), for the custom booking wizard.
+ *
+ * @return array{ enabled: bool, publishable_key: string, test_mode: bool }
+ */
+function hughalroztatoo_amelia_stripe_frontend_config() {
+	$out = array(
+		'enabled'         => false,
+		'publishable_key' => '',
+		'test_mode'       => false,
+		'currency'        => 'cad',
+	);
+	if ( ! hughalroztatoo_amelia_active() ) {
+		return $out;
+	}
+	$amelia_settings = json_decode( (string) get_option( 'amelia_settings', '{}' ), true );
+	if ( empty( $amelia_settings ) || ! is_array( $amelia_settings ) ) {
+		return $out;
+	}
+	$stripe = isset( $amelia_settings['payments']['stripe'] ) ? $amelia_settings['payments']['stripe'] : array();
+	if ( empty( $stripe['enabled'] ) ) {
+		return $out;
+	}
+	$test_mode = ! empty( $stripe['testMode'] );
+	$pk        = $test_mode ? (string) ( isset( $stripe['testPublishableKey'] ) ? $stripe['testPublishableKey'] : '' ) : (string) ( isset( $stripe['livePublishableKey'] ) ? $stripe['livePublishableKey'] : '' );
+	$sk        = $test_mode ? (string) ( isset( $stripe['testSecretKey'] ) ? $stripe['testSecretKey'] : '' ) : (string) ( isset( $stripe['liveSecretKey'] ) ? $stripe['liveSecretKey'] : '' );
+	$pk        = trim( $pk );
+	$sk        = trim( $sk );
+	if ( '' === $sk ) {
+		return $out;
+	}
+	if ( ! apply_filters( 'hughalroztatoo_booking_stripe_active', true, $stripe ) ) {
+		return $out;
+	}
+	$out['enabled']          = true;
+	$out['publishable_key']   = $pk;
+	$out['test_mode']        = $test_mode;
+	$out['currency']         = strtolower( (string) ( isset( $amelia_settings['payments']['currency'] ) ? $amelia_settings['payments']['currency'] : 'cad' ) );
+	return $out;
+}
+
+/**
  * Resolve the WordPress page that holds Booking ACF (template page-booking.php).
  *
  * Used when the multistep renders in the global footer modal (queried object is not that page).
@@ -63,6 +104,161 @@ function hughalroztatoo_booking_acf_source_post_id() {
 	}
 
 	return (int) apply_filters( 'hughalroztatoo_booking_acf_source_post_id', (int) $memo );
+}
+
+/**
+ * Resolve the Thank-you page by dedicated template.
+ *
+ * @return int Post ID or 0.
+ */
+function hughalroztatoo_thank_you_page_id() {
+	static $memo = false;
+	if ( false !== $memo ) {
+		return (int) $memo;
+	}
+	$memo = 0;
+
+	$post_id = (int) get_queried_object_id();
+	if ( $post_id > 0 ) {
+		$tpl = get_page_template_slug( $post_id );
+		if ( 'page-thank-you.php' === (string) $tpl ) {
+			return $memo = $post_id;
+		}
+	}
+
+	$page = get_posts(
+		array(
+			'post_type'              => 'page',
+			'post_status'            => 'publish',
+			'posts_per_page'         => 1,
+			'orderby'                => 'ID',
+			'order'                  => 'ASC',
+			'no_found_rows'          => true,
+			'suppress_filters'       => false,
+			'update_post_term_cache' => false,
+			'ignore_sticky_posts'    => true,
+			'meta_key'               => '_wp_page_template',
+			'meta_value'             => 'page-thank-you.php',
+		)
+	);
+
+	if ( ! empty( $page[0] ) && isset( $page[0]->ID ) ) {
+		$memo = (int) $page[0]->ID;
+	}
+
+	return (int) apply_filters( 'hughalroztatoo_thank_you_page_id', (int) $memo );
+}
+
+/**
+ * Thank-you page URL for booking success redirects.
+ *
+ * @return string Absolute URL.
+ */
+function hughalroztatoo_booking_thank_you_url() {
+	$page_id = hughalroztatoo_thank_you_page_id();
+	$url     = '';
+
+	if ( $page_id > 0 ) {
+		$localized_id = $page_id;
+		if ( function_exists( 'pll_get_post' ) && function_exists( 'pll_current_language' ) ) {
+			$current_lang = (string) pll_current_language( 'slug' );
+			if ( '' !== $current_lang ) {
+				$translated = (int) pll_get_post( $page_id, $current_lang );
+				if ( $translated > 0 ) {
+					$localized_id = $translated;
+				}
+			}
+		}
+		$url = (string) get_permalink( $localized_id );
+	}
+
+	if ( '' === $url ) {
+		$url = hughalroztatoo_booking_thank_you_fallback_url();
+	}
+
+	return (string) apply_filters( 'hughalroztatoo_booking_thank_you_url', $url, $page_id );
+}
+
+/**
+ * Thank-you page slug for a Polylang language slug (e.g. EN uses thank-you-en).
+ *
+ * @param string $lang_slug Polylang language slug or empty.
+ * @return string Post slug without slashes.
+ */
+function hughalroztatoo_thank_you_slug_for_language( $lang_slug ) {
+	$lang_slug = is_string( $lang_slug ) ? trim( $lang_slug ) : '';
+	$default   = ( 'en' === $lang_slug ) ? 'thank-you-en' : 'thank-you';
+
+	return (string) apply_filters( 'hughalroztatoo_booking_thank_you_slug', $default, $lang_slug );
+}
+
+/**
+ * All thank-you URL slugs we treat as the booking success route (templates + redirects).
+ *
+ * @return string[]
+ */
+function hughalroztatoo_thank_you_slug_variants() {
+	$variants = array( 'thank-you', 'thank-you-en' );
+
+	return (array) apply_filters( 'hughalroztatoo_thank_you_slug_variants', $variants );
+}
+
+/**
+ * Whether a page slug is the thank-you success route.
+ *
+ * @param string $slug Page post_name.
+ * @return bool
+ */
+function hughalroztatoo_is_thank_you_page_slug( $slug ) {
+	return in_array( (string) $slug, hughalroztatoo_thank_you_slug_variants(), true );
+}
+
+/**
+ * Fallback thank-you URL when no page uses template page-thank-you.php yet.
+ *
+ * @return string Absolute URL, trailing slash.
+ */
+function hughalroztatoo_booking_thank_you_fallback_url() {
+	$lang = '';
+	if ( function_exists( 'pll_current_language' ) ) {
+		$lang = (string) pll_current_language( 'slug' );
+	}
+	$slug = hughalroztatoo_thank_you_slug_for_language( $lang );
+	if ( function_exists( 'pll_home_url' ) && '' !== $lang ) {
+		$base = trailingslashit( (string) pll_home_url( $lang ) );
+
+		return trailingslashit( $base . $slug );
+	}
+
+	return trailingslashit( home_url( '/' . $slug . '/' ) );
+}
+
+/**
+ * Base URL for Stripe cancel_url (return to the booking page wizard).
+ * Success uses the thank-you page URL; that template embeds a hidden `[hugh_amelia_booking]` bridge for callback + redirect.
+ *
+ * @return string Absolute URL.
+ */
+function hughalroztatoo_booking_stripe_return_base_url() {
+	$booking_src_id = (int) hughalroztatoo_booking_acf_source_post_id();
+	if ( $booking_src_id <= 0 ) {
+		return (string) apply_filters( 'hughalroztatoo_booking_stripe_return_base_url', home_url( '/' ), 0 );
+	}
+	$localized_id = $booking_src_id;
+	if ( function_exists( 'pll_get_post' ) && function_exists( 'pll_current_language' ) ) {
+		$lang = (string) pll_current_language( 'slug' );
+		if ( '' !== $lang ) {
+			$translated = (int) pll_get_post( $booking_src_id, $lang );
+			if ( $translated > 0 ) {
+				$localized_id = $translated;
+			}
+		}
+	}
+	$url = (string) get_permalink( $localized_id );
+	if ( '' === $url ) {
+		$url = home_url( '/' );
+	}
+	return (string) apply_filters( 'hughalroztatoo_booking_stripe_return_base_url', $url, $localized_id );
 }
 
 /**
@@ -136,8 +332,59 @@ function hughalroztatoo_frontend_needs_booking_multistep() {
 	if ( $post && hughalroztatoo_content_has_amelia_booking_shortcode( $post->post_content ) ) {
 		return true;
 	}
+	if ( is_page() && 'page-thank-you.php' === (string) get_page_template_slug( (int) get_queried_object_id() ) ) {
+		return true;
+	}
 	return false;
 }
+
+/**
+ * Whether the current request renders the thank-you booking screen.
+ *
+ * @return bool
+ */
+function hughalroztatoo_is_booking_thank_you_request() {
+	if ( is_admin() ) {
+		return false;
+	}
+	if ( is_page() ) {
+		$tpl = (string) get_page_template_slug( (int) get_queried_object_id() );
+		if ( 'page-thank-you.php' === $tpl ) {
+			return true;
+		}
+		$slug = (string) get_post_field( 'post_name', (int) get_queried_object_id() );
+		if ( hughalroztatoo_is_thank_you_page_slug( $slug ) ) {
+			return true;
+		}
+	}
+	if ( isset( $_GET['hat_format'] ) || isset( $_GET['hat_date'] ) || isset( $_GET['hat_slot'] ) || isset( $_GET['hat_paid'] ) ) {
+		return true;
+	}
+	return false;
+}
+
+/**
+ * Body class on the booking thank-you screen (document-flow layout, not the global footer modal).
+ *
+ * @param string[] $classes Body classes.
+ * @return string[]
+ */
+function hughalroztatoo_booking_thank_you_body_class( $classes ) {
+	if ( ! is_page() ) {
+		return $classes;
+	}
+	$page_id = (int) get_queried_object_id();
+	if ( $page_id <= 0 ) {
+		return $classes;
+	}
+	$tpl  = (string) get_page_template_slug( $page_id );
+	$slug = (string) get_post_field( 'post_name', $page_id );
+	if ( 'page-thank-you.php' === $tpl || hughalroztatoo_is_thank_you_page_slug( $slug ) ) {
+		$classes[] = 'hat-booking-thank-you';
+	}
+	return $classes;
+}
+add_filter( 'body_class', 'hughalroztatoo_booking_thank_you_body_class' );
 
 if ( ! function_exists( 'hughalroztatoo_amelia_locale_candidates' ) ) {
 	/**
@@ -223,7 +470,13 @@ function hughalroztatoo_booking_pll_strings() {
 		'payTermsRefund'     => 'Politique de remboursement',
 		'paySecureLine'      => 'Paiement sécurisé · CAD',
 		'payViaStripe'       => 'Payer %s via Stripe',
+		'payMethod'          => 'Moyen de paiement',
+		'payStripeCardLabel' => 'Carte bancaire',
+		'errorStripeUnavailable' => 'Le paiement par carte est indisponible. Réessayez plus tard.',
+		'errorStripeCard' => 'Impossible de lire les informations de la carte.',
 		'errorPayTerms'      => 'Veuillez accepter les conditions pour continuer.',
+		'thankYouTitle'      => 'Réservation confirmée',
+		'thankYouMessage'    => 'Confirmation envoyée par email. Rappel automatique 24h avant la séance.',
 		'doneRowFormat'      => 'Format',
 		'doneRowDate'        => 'Date',
 		'doneRowSlot'        => 'Créneau',
@@ -348,6 +601,52 @@ function hughalroztatoo_booking_field( $field_name, $default = '' ) {
 }
 
 /**
+ * Booking template post ID for the current Polylang language (for ACF strings on localized pages).
+ *
+ * @return int
+ */
+function hughalroztatoo_booking_acf_post_id_for_current_language() {
+	$id = (int) hughalroztatoo_booking_acf_source_post_id();
+	if ( $id <= 0 ) {
+		return 0;
+	}
+	if ( function_exists( 'pll_get_post' ) && function_exists( 'pll_current_language' ) ) {
+		$lang = (string) pll_current_language( 'slug' );
+		if ( '' !== $lang ) {
+			$translated = (int) pll_get_post( $id, $lang );
+			if ( $translated > 0 ) {
+				return $translated;
+			}
+		}
+	}
+
+	return $id;
+}
+
+/**
+ * Plain-text ACF field from the Booking page in the current language (thank-you screen).
+ *
+ * @param string $field_name ACF field name.
+ * @param string $default    Fallback (e.g. Polylang string).
+ * @return string
+ */
+function hughalroztatoo_thank_you_field( $field_name, $default = '' ) {
+	if ( ! function_exists( 'get_field' ) ) {
+		return $default;
+	}
+	$post_id = hughalroztatoo_booking_acf_post_id_for_current_language();
+	if ( ! $post_id ) {
+		return $default;
+	}
+	$value = get_field( $field_name, $post_id );
+	if ( is_string( $value ) && '' !== trim( $value ) ) {
+		return trim( $value );
+	}
+
+	return $default;
+}
+
+/**
  * Read a booking ACF WYSIWYG field (for HTML allowed in front output).
  *
  * @param string $field_name ACF field name.
@@ -441,8 +740,12 @@ function hughalroztatoo_register_amelia_multistep_assets() {
 	$theme_uri = get_template_directory_uri();
 	$theme_dir = get_template_directory();
 
+	$stripe_fe = hughalroztatoo_amelia_stripe_frontend_config();
+
 	$css_path = $theme_dir . '/assets/css/booking-multistep.css';
 	$js_path  = $theme_dir . '/assets/js/booking-multistep.js';
+
+	$booking_js_deps = array();
 
 	if ( file_exists( $css_path ) ) {
 		wp_register_style(
@@ -457,7 +760,7 @@ function hughalroztatoo_register_amelia_multistep_assets() {
 		wp_register_script(
 			'hughalroztatoo-booking-ms',
 			$theme_uri . '/assets/js/booking-multistep.js',
-			array(),
+			$booking_js_deps,
 			(string) filemtime( $js_path ),
 			true
 		);
@@ -492,6 +795,8 @@ function hughalroztatoo_localize_amelia_multistep_script() {
 
 	$tz = function_exists( 'wp_timezone_string' ) ? wp_timezone_string() : 'UTC';
 
+	$stripe_fe = hughalroztatoo_amelia_stripe_frontend_config();
+
 	wp_localize_script(
 		'hughalroztatoo-booking-ms',
 		'hughAmeliaBooking',
@@ -509,7 +814,19 @@ function hughalroztatoo_localize_amelia_multistep_script() {
 			'calendarLocale'   => apply_filters( 'hughalroztatoo_booking_calendar_locale', 'fr-FR' ),
 			'recaptchaSiteKey' => $recaptcha_on ? (string) $grecap['siteKey'] : '',
 			'recaptchaOn'      => $recaptcha_on,
+			/** Stripe Payment Element/card step (requires Amelia Stripe enabled + publishable key). */
+			'stripeEnabled'     => ! empty( $stripe_fe['enabled'] ),
+			'stripePublishableKey' => $stripe_fe['enabled'] ? (string) $stripe_fe['publishable_key'] : '',
+			'stripeTestMode'    => ! empty( $stripe_fe['test_mode'] ),
+			'paymentCurrency'   => ! empty( $stripe_fe['currency'] ) ? (string) $stripe_fe['currency'] : 'cad',
 			'depositPercent'   => (int) apply_filters( 'hughalroztatoo_booking_deposit_percent', 30 ),
+			'thankYouUrl'          => (string) hughalroztatoo_booking_thank_you_url(),
+			'thankYouFallbackUrl'  => (string) hughalroztatoo_booking_thank_you_fallback_url(),
+			/**
+			 * Stripe cancel_url base (booking page). Success uses thankYouUrl when the thank-you template
+			 * includes a hidden booking bridge for /payments/callback.
+			 */
+			'stripeReturnBaseUrl' => (string) hughalroztatoo_booking_stripe_return_base_url(),
 			'payUrls'          => array(
 				'conditions' => (string) apply_filters( 'hughalroztatoo_booking_pay_url_conditions', '' ),
 				'privacy'    => (string) apply_filters( 'hughalroztatoo_booking_pay_url_privacy', function_exists( 'get_privacy_policy_url' ) ? get_privacy_policy_url() : '' ),
@@ -573,6 +890,10 @@ function hughalroztatoo_localize_amelia_multistep_script() {
 				'payTermsRefund'  => hughalroztatoo_booking_t( 'payTermsRefund' ),
 				'paySecureLine'   => hughalroztatoo_booking_t( 'paySecureLine' ),
 				'payViaStripe'    => hughalroztatoo_booking_t( 'payViaStripe' ),
+				'payMethod'       => hughalroztatoo_booking_t( 'payMethod' ),
+				'payStripeCardLabel' => hughalroztatoo_booking_t( 'payStripeCardLabel' ),
+				'errorStripeUnavailable' => hughalroztatoo_booking_t( 'errorStripeUnavailable' ),
+				'errorStripeCard' => hughalroztatoo_booking_t( 'errorStripeCard' ),
 				'errorPayTerms'   => hughalroztatoo_booking_t( 'errorPayTerms' ),
 				'stepDone'        => hughalroztatoo_booking_field( 'booking_step8_title', __( 'Réservation confirmée', 'hughalroztatoo' ) ),
 				'doneRowFormat'   => hughalroztatoo_booking_t( 'doneRowFormat' ),
@@ -738,6 +1059,41 @@ function hughalroztatoo_strip_booking_shortcode_from_booking_template( $content 
 add_filter( 'the_content', 'hughalroztatoo_strip_booking_shortcode_from_booking_template', 9 );
 
 /**
+ * Force dedicated thank-you template for the booking success route.
+ *
+ * Prevents accidental rendering of booking flow when a page with slug thank-you / thank-you-en
+ * exists but has a different assigned template/content.
+ *
+ * @param string $template Resolved template path.
+ * @return string
+ */
+function hughalroztatoo_force_booking_thank_you_template( $template ) {
+	if ( is_admin() || ! is_page() ) {
+		return $template;
+	}
+
+	$page_id = (int) get_queried_object_id();
+	if ( $page_id <= 0 ) {
+		return $template;
+	}
+
+	$is_thank_you_slug = hughalroztatoo_is_thank_you_page_slug( (string) get_post_field( 'post_name', $page_id ) );
+	$has_booking_done_params = isset( $_GET['hat_format'] ) || isset( $_GET['hat_date'] ) || isset( $_GET['hat_slot'] ) || isset( $_GET['hat_paid'] );
+
+	if ( ! $is_thank_you_slug && ! $has_booking_done_params ) {
+		return $template;
+	}
+
+	$thank_you_template = get_template_directory() . '/page-thank-you.php';
+	if ( file_exists( $thank_you_template ) ) {
+		return $thank_you_template;
+	}
+
+	return $template;
+}
+add_filter( 'template_include', 'hughalroztatoo_force_booking_thank_you_template', 99 );
+
+/**
  * Output booking modal shell (shortcode instance) before scripts.
  */
 function hughalroztatoo_render_booking_modal() {
@@ -745,6 +1101,9 @@ function hughalroztatoo_render_booking_modal() {
 		return;
 	}
 	if ( hughalroztatoo_booking_acf_source_post_id() <= 0 ) {
+		return;
+	}
+	if ( hughalroztatoo_is_booking_thank_you_request() ) {
 		return;
 	}
 	$label = esc_attr__( 'Réservation', 'hughalroztatoo' );
@@ -764,6 +1123,398 @@ function hughalroztatoo_render_booking_modal() {
 	echo '</div></div>';
 }
 add_action( 'wp_footer', 'hughalroztatoo_render_booking_modal', 5 );
+
+/**
+ * Validate front redirect URL for Stripe Checkout return.
+ *
+ * @param string $url Candidate absolute URL.
+ * @return string Safe URL or empty string.
+ */
+function hughalroztatoo_booking_validate_return_url( $url ) {
+	$url = trim( (string) $url );
+	if ( '' === $url ) {
+		return '';
+	}
+	$sanitized = esc_url_raw( $url );
+	if ( '' === $sanitized ) {
+		return '';
+	}
+	$parts = wp_parse_url( $sanitized );
+	if ( empty( $parts['scheme'] ) || empty( $parts['host'] ) ) {
+		return '';
+	}
+	$scheme = strtolower( (string) $parts['scheme'] );
+	if ( 'http' !== $scheme && 'https' !== $scheme ) {
+		return '';
+	}
+	$home_host = wp_parse_url( home_url(), PHP_URL_HOST );
+	$host      = isset( $parts['host'] ) ? (string) $parts['host'] : '';
+	if ( ! $home_host || '' === $host || strtolower( (string) $home_host ) !== strtolower( $host ) ) {
+		return '';
+	}
+	return $sanitized;
+}
+
+/**
+ * AJAX: Create Stripe Checkout Session (hosted page) for already-created Amelia booking payment.
+ */
+function hughalroztatoo_booking_create_stripe_checkout_session() {
+	check_ajax_referer( 'ajax-nonce', 'nonce' );
+
+	if ( ! hughalroztatoo_amelia_active() ) {
+		wp_send_json_error( array( 'message' => 'Amelia is not active.' ), 400 );
+	}
+
+	$amelia_settings = json_decode( (string) get_option( 'amelia_settings', '{}' ), true );
+	$stripe          = isset( $amelia_settings['payments']['stripe'] ) && is_array( $amelia_settings['payments']['stripe'] )
+		? $amelia_settings['payments']['stripe']
+		: array();
+
+	if ( empty( $stripe['enabled'] ) ) {
+		wp_send_json_error( array( 'message' => 'Stripe is disabled.' ), 400 );
+	}
+
+	$test_mode = ! empty( $stripe['testMode'] );
+	$secret    = $test_mode
+		? (string) ( isset( $stripe['testSecretKey'] ) ? $stripe['testSecretKey'] : '' )
+		: (string) ( isset( $stripe['liveSecretKey'] ) ? $stripe['liveSecretKey'] : '' );
+	$secret    = trim( $secret );
+	if ( '' === $secret ) {
+		wp_send_json_error( array( 'message' => 'Stripe secret key is missing.' ), 400 );
+	}
+
+	if ( ! class_exists( '\\AmeliaVendor\\Stripe\\StripeClient' ) ) {
+		wp_send_json_error( array( 'message' => 'Stripe SDK is unavailable.' ), 500 );
+	}
+
+	$amount_major = isset( $_POST['amount'] ) ? (float) wp_unslash( $_POST['amount'] ) : 0.0;
+	$amount_cents = (int) round( $amount_major * 100 );
+	if ( $amount_cents <= 0 ) {
+		wp_send_json_error( array( 'message' => 'Invalid payment amount.' ), 400 );
+	}
+
+	$currency = isset( $_POST['currency'] ) ? sanitize_key( wp_unslash( $_POST['currency'] ) ) : '';
+	if ( '' === $currency ) {
+		$currency = strtolower( (string) ( isset( $amelia_settings['payments']['currency'] ) ? $amelia_settings['payments']['currency'] : 'cad' ) );
+	}
+
+	$success_url = isset( $_POST['success_url'] ) ? hughalroztatoo_booking_validate_return_url( wp_unslash( $_POST['success_url'] ) ) : '';
+	$cancel_url  = isset( $_POST['cancel_url'] ) ? hughalroztatoo_booking_validate_return_url( wp_unslash( $_POST['cancel_url'] ) ) : '';
+	if ( '' === $success_url || '' === $cancel_url ) {
+		wp_send_json_error( array( 'message' => 'Invalid return URL.' ), 400 );
+	}
+
+	$description = isset( $_POST['description'] ) ? sanitize_text_field( wp_unslash( $_POST['description'] ) ) : '';
+	if ( '' === $description ) {
+		$description = __( 'Tattoo booking deposit', 'hughalroztatoo' );
+	}
+
+	$customer_email = isset( $_POST['customer_email'] ) ? sanitize_email( wp_unslash( $_POST['customer_email'] ) ) : '';
+
+	$payment_amelia_id = isset( $_POST['payment_amelia_id'] ) ? absint( wp_unslash( $_POST['payment_amelia_id'] ) ) : 0;
+	if ( $payment_amelia_id <= 0 ) {
+		wp_send_json_error( array( 'message' => 'Missing payment id.' ), 400 );
+	}
+	if ( ! hughalroztatoo_booking_payment_prepare_stripe_checkout( $payment_amelia_id ) ) {
+		wp_send_json_error( array( 'message' => 'This payment cannot be sent to Stripe Checkout.' ), 400 );
+	}
+
+	try {
+		$stripe_client = new \AmeliaVendor\Stripe\StripeClient( $secret );
+		$session_data  = array(
+			'mode'       => 'payment',
+			'success_url'=> $success_url,
+			'cancel_url' => $cancel_url,
+			'line_items' => array(
+				array(
+					'price_data' => array(
+						'currency'     => $currency,
+						'unit_amount'  => $amount_cents,
+						'product_data' => array(
+							'name' => $description,
+						),
+					),
+					'quantity'   => 1,
+				),
+			),
+			'metadata'   => array(
+				'source'            => 'hugh_booking_multistep',
+				'payment_amelia_id' => $payment_amelia_id > 0 ? (string) $payment_amelia_id : '',
+			),
+		);
+
+		if ( is_email( $customer_email ) ) {
+			$session_data['customer_email'] = $customer_email;
+		}
+
+		$session = $stripe_client->checkout->sessions->create( $session_data );
+
+		if ( empty( $session['url'] ) ) {
+			wp_send_json_error( array( 'message' => 'Stripe checkout URL was not returned.' ), 500 );
+		}
+
+		wp_send_json_success(
+			array(
+				'url'       => (string) $session['url'],
+				'sessionId' => ! empty( $session['id'] ) ? (string) $session['id'] : '',
+			)
+		);
+	} catch ( \Exception $e ) {
+		wp_send_json_error( array( 'message' => $e->getMessage() ), 500 );
+	}
+}
+add_action( 'wp_ajax_hughalroztatoo_create_stripe_checkout_session', 'hughalroztatoo_booking_create_stripe_checkout_session' );
+add_action( 'wp_ajax_nopriv_hughalroztatoo_create_stripe_checkout_session', 'hughalroztatoo_booking_create_stripe_checkout_session' );
+
+/**
+ * Stripe secret key from Amelia settings (same logic as checkout session AJAX).
+ *
+ * @return string Empty if unavailable.
+ */
+function hughalroztatoo_booking_amelia_stripe_secret_key() {
+	if ( ! hughalroztatoo_amelia_active() ) {
+		return '';
+	}
+	$amelia_settings = json_decode( (string) get_option( 'amelia_settings', '{}' ), true );
+	$stripe          = isset( $amelia_settings['payments']['stripe'] ) && is_array( $amelia_settings['payments']['stripe'] )
+		? $amelia_settings['payments']['stripe']
+		: array();
+	if ( empty( $stripe['enabled'] ) ) {
+		return '';
+	}
+	$test_mode = ! empty( $stripe['testMode'] );
+	$secret    = $test_mode
+		? (string) ( isset( $stripe['testSecretKey'] ) ? $stripe['testSecretKey'] : '' )
+		: (string) ( isset( $stripe['liveSecretKey'] ) ? $stripe['liveSecretKey'] : '' );
+
+	return trim( $secret );
+}
+
+/**
+ * Redirect to thank-you URL with only hat_* summary params (strip Stripe return params).
+ *
+ * @return void
+ */
+function hughalroztatoo_booking_redirect_thank_you_clean_from_request() {
+	$base = hughalroztatoo_booking_thank_you_url();
+	$params = array();
+	foreach ( array( 'hat_format', 'hat_date', 'hat_slot', 'hat_paid' ) as $k ) {
+		if ( isset( $_GET[ $k ] ) ) {
+			$params[ $k ] = sanitize_text_field( wp_unslash( $_GET[ $k ] ) );
+		}
+	}
+	$url = $params ? add_query_arg( $params, $base ) : $base;
+	wp_safe_redirect( $url, 302 );
+	exit;
+}
+
+/**
+ * Relabel a pending Amelia payment from on-site to Stripe when starting hosted Checkout.
+ *
+ * Bookings are submitted with gateway `onSite` so Amelia does not run in-app Stripe
+ * before we redirect; the admin would otherwise show "on site / cash" until the return handler runs.
+ *
+ * @param int $payment_id Amelia `amelia_payments.id`.
+ * @return bool True when the row is suitable and now shows gateway stripe (or already did).
+ */
+function hughalroztatoo_booking_payment_prepare_stripe_checkout( $payment_id ) {
+	global $wpdb;
+	$payment_id = (int) $payment_id;
+	if ( $payment_id <= 0 ) {
+		return false;
+	}
+
+	$table = $wpdb->prefix . 'amelia_payments';
+	$row   = $wpdb->get_row(
+		$wpdb->prepare( "SELECT id, status, gateway FROM {$table} WHERE id = %d LIMIT 1", $payment_id ),
+		ARRAY_A
+	);
+	if ( ! $row ) {
+		return false;
+	}
+
+	$status = isset( $row['status'] ) ? (string) $row['status'] : '';
+	$gateway = isset( $row['gateway'] ) ? (string) $row['gateway'] : '';
+
+	if ( 'paid' === $status ) {
+		return 'stripe' === $gateway;
+	}
+
+	if ( ! in_array( $status, array( 'pending', 'partiallyPaid' ), true ) ) {
+		return false;
+	}
+
+	if ( 'stripe' === $gateway ) {
+		return true;
+	}
+
+	if ( 'onSite' !== $gateway ) {
+		return false;
+	}
+
+	$result = $wpdb->update(
+		$table,
+		array(
+			'gateway'      => 'stripe',
+			'gatewayTitle' => 'Stripe',
+		),
+		array( 'id' => $payment_id ),
+		array( '%s', '%s' ),
+		array( '%d' )
+	);
+
+	return false !== $result;
+}
+
+/**
+ * Update Amelia payment row directly so the admin reflects Stripe (not "on-site") immediately.
+ *
+ * @param int    $payment_id      Amelia payment row id.
+ * @param float  $charged         Amount paid (major units).
+ * @param string $transaction_id  Stripe payment_intent id (optional).
+ * @return bool True when row was updated.
+ */
+function hughalroztatoo_booking_payment_mark_stripe_paid( $payment_id, $charged, $transaction_id = '' ) {
+	global $wpdb;
+	$table = $wpdb->prefix . 'amelia_payments';
+
+	$existing = $wpdb->get_row(
+		$wpdb->prepare( "SELECT id, status, gateway, amount FROM {$table} WHERE id = %d LIMIT 1", $payment_id ),
+		ARRAY_A
+	);
+	if ( ! $existing ) {
+		return false;
+	}
+
+	$now = gmdate( 'Y-m-d H:i:s' );
+	$data = array(
+		'amount'       => (float) $charged,
+		'gateway'      => 'stripe',
+		'gatewayTitle' => 'Stripe',
+		'status'       => 'paid',
+		'dateTime'     => $now,
+	);
+	$format = array( '%f', '%s', '%s', '%s', '%s' );
+
+	if ( '' !== (string) $transaction_id ) {
+		$data['transactionId'] = (string) $transaction_id;
+		$format[]              = '%s';
+	}
+
+	$result = $wpdb->update( $table, $data, array( 'id' => (int) $payment_id ), $format, array( '%d' ) );
+	if ( false === $result ) {
+		return false;
+	}
+
+	do_action( 'hughalroztatoo_booking_payment_marked_stripe', (int) $payment_id, (float) $charged, (string) $transaction_id, $existing );
+
+	return true;
+}
+
+/**
+ * After Stripe Checkout, mark the pending Amelia payment as paid via Stripe.
+ *
+ * Verifies the Checkout Session, updates the payment row directly so admin shows Stripe + paid amount,
+ * then redirects to a clean thank-you URL. The internal Amelia callback would otherwise try to insert
+ * a duplicate payment row when the existing one is no longer pending, so we deliberately skip it here.
+ *
+ * @return void
+ */
+function hughalroztatoo_booking_server_complete_stripe_checkout() {
+	if ( is_admin() || wp_doing_ajax() || ! hughalroztatoo_amelia_active() ) {
+		return;
+	}
+	if ( empty( $_GET['session_id'] ) ) {
+		return;
+	}
+	$session_id = sanitize_text_field( wp_unslash( $_GET['session_id'] ) );
+	if ( ! is_string( $session_id ) || strncmp( $session_id, 'cs_', 3 ) !== 0 ) {
+		return;
+	}
+
+	$status_hint = isset( $_GET['hat_stripe_status'] ) ? strtolower( (string) wp_unslash( $_GET['hat_stripe_status'] ) ) : '';
+	if ( '' !== $status_hint && 'success' !== $status_hint && 'paid' !== $status_hint ) {
+		return;
+	}
+
+	$done_key = 'hughalroztatoo_cs_done_' . md5( $session_id );
+	if ( get_transient( $done_key ) ) {
+		hughalroztatoo_booking_redirect_thank_you_clean_from_request();
+	}
+
+	$secret = hughalroztatoo_booking_amelia_stripe_secret_key();
+	if ( '' === $secret || ! class_exists( '\\AmeliaVendor\\Stripe\\StripeClient' ) ) {
+		return;
+	}
+
+	try {
+		$stripe_client = new \AmeliaVendor\Stripe\StripeClient( $secret );
+		$session       = $stripe_client->checkout->sessions->retrieve( $session_id );
+		$row           = is_array( $session ) ? $session : ( method_exists( $session, 'toArray' ) ? $session->toArray() : array() );
+	} catch ( \Exception $e ) {
+		return;
+	}
+
+	$pay_status = isset( $row['payment_status'] ) ? (string) $row['payment_status'] : '';
+	if ( 'paid' !== $pay_status ) {
+		return;
+	}
+
+	$meta_raw = isset( $row['metadata'] ) ? $row['metadata'] : array();
+	if ( is_object( $meta_raw ) && method_exists( $meta_raw, 'toArray' ) ) {
+		$meta_raw = $meta_raw->toArray();
+	}
+	if ( ! is_array( $meta_raw ) ) {
+		$meta_raw = array();
+	}
+
+	$payment_id = isset( $_GET['hat_payment_id'] ) ? absint( wp_unslash( $_GET['hat_payment_id'] ) ) : 0;
+	if ( $payment_id <= 0 && ! empty( $meta_raw['payment_amelia_id'] ) ) {
+		$payment_id = absint( $meta_raw['payment_amelia_id'] );
+	}
+	if ( $payment_id <= 0 ) {
+		return;
+	}
+
+	$meta_pid = ! empty( $meta_raw['payment_amelia_id'] ) ? absint( $meta_raw['payment_amelia_id'] ) : 0;
+	if ( $meta_pid > 0 && $meta_pid !== $payment_id ) {
+		return;
+	}
+
+	$amount_cents = isset( $row['amount_total'] ) ? (int) $row['amount_total'] : 0;
+	$charged      = $amount_cents > 0 ? round( $amount_cents / 100, 2 ) : 0.0;
+	if ( $charged <= 0 && isset( $_GET['hat_charged_amount'] ) ) {
+		$charged = (float) wp_unslash( $_GET['hat_charged_amount'] );
+	}
+	if ( $charged <= 0 ) {
+		global $wpdb;
+		$table_pay = $wpdb->prefix . 'amelia_payments';
+		$row_amt   = $wpdb->get_var( $wpdb->prepare( "SELECT amount FROM {$table_pay} WHERE id = %d LIMIT 1", $payment_id ) );
+		if ( null !== $row_amt && (float) $row_amt > 0 ) {
+			$charged = (float) $row_amt;
+		}
+	}
+	if ( $charged <= 0 ) {
+		return;
+	}
+
+	$payment_intent = '';
+	if ( ! empty( $row['payment_intent'] ) ) {
+		$payment_intent = is_string( $row['payment_intent'] ) ? $row['payment_intent'] : '';
+		if ( '' === $payment_intent && is_object( $row['payment_intent'] ) && isset( $row['payment_intent']->id ) ) {
+			$payment_intent = (string) $row['payment_intent']->id;
+		}
+	}
+
+	$updated = hughalroztatoo_booking_payment_mark_stripe_paid( $payment_id, $charged, $payment_intent );
+	if ( ! $updated ) {
+		return;
+	}
+
+	set_transient( $done_key, 1, DAY_IN_SECONDS );
+	hughalroztatoo_booking_redirect_thank_you_clean_from_request();
+}
+add_action( 'init', 'hughalroztatoo_booking_server_complete_stripe_checkout', 1 );
 
 /**
  * Shortcode callback.
